@@ -1,0 +1,6 @@
+{% extends '_appgui.html' %}
+
+{% block content %}
+<h3>Ups no encontré la página {{url}}</h3>
+<a href="{{ url_for('index') }}"><p>Click acá</a> para volver al inicio</p>
+{% endblock %}

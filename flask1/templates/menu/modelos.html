@@ -1,0 +1,17 @@
+{% extends '_appgui.html' %}
+
+{% block content %}
+<h1>Listado de modelos</h1>
+<div class="list-group">
+    {% for mod in mods %}
+    <a href="#" class="list-group-item list-group-item-action">
+        <h3>{{mod.nombre}}</h3>
+        {% for modmat in modmats %}
+            {% if mod.id == modmat.modelo_id %}
+            <p class="mb-1">{{modmat.material.nombre}} {{modmat.cantidad}}</p>
+            {% endif %}
+        {% endfor %}
+    </a>
+    {% endfor %}
+</div>
+{% endblock %}

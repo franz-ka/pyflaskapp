@@ -1,0 +1,66 @@
+{% extends '_layout.html' %}
+
+{% block head %}
+<link href="{{ url_for('static', filename='css/fontawesome5all.css' ) }}" rel="stylesheet">
+<style type="text/css">
+    .login-form {
+        width: 340px;
+        margin: 50px auto;
+    }
+    .login-form form {
+        margin-bottom: 15px;
+        background: #f7f7f7;
+        box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.3);
+        padding: 30px;
+    }
+    .login-form h2 {
+        margin: 0 0 15px;
+    }
+    .form-control, .btn {
+        min-height: 38px;
+        border-radius: 2px;
+    }
+    .btn {
+        font-size: 15px;
+        font-weight: bold;
+    }
+</style>
+{% endblock %}
+
+
+{% block body %}
+<!-- https://www.tutorialrepublic.com/codelab.php?topic=bootstrap&file=simple-login-form -->
+<!-- https://bootsnipp.com/snippets/j6r4X -->
+<div class="login-form">
+    <form action="" method="post">
+        <h2 class="text-center">Ingreso</h2>
+        <!-- USUARIO -->
+        <div class="form-group">
+            <div class="input-group">
+                <div class="input-group-prepend">
+                    <span class="input-group-text"> <i class="fa fa-user"></i> </span>
+                 </div>
+                <input type="text" class="form-control" placeholder="Usuario" required="required">
+             </div>
+        </div>
+        <!-- CONTRA -->
+        <div class="form-group">
+            <div class="input-group">
+                <div class="input-group-prepend">
+                    <span class="input-group-text"> <i class="fa fa-lock"></i> </span>
+                 </div>
+                <input type="password" class="form-control" placeholder="Contraseña" required="required">
+            </div>
+        </div>
+        <!-- BOTON -->
+        <div class="form-group">
+            <button type="submit" class="btn btn-primary btn-block">Entrar</button>
+        </div>
+        <!-- <div class="clearfix">
+            <label class="pull-left checkbox-inline"><input type="checkbox"> Remember me</label>
+            <a href="#" class="pull-right">Forgot Password?</a>
+        </div> -->
+    </form>
+    <!-- <p class="text-center"><a href="#">Create an Account</a></p> -->
+</div>
+{% endblock %}

@@ -1,0 +1,34 @@
+{% extends '_layout.html' %}
+
+{% block head %}
+<link href="{{ url_for('static', filename='css/select2.min.css' ) }}" rel="stylesheet" />
+<link href="{{ url_for('static', filename='css/simple-sidebar.css' ) }}" rel="stylesheet" />
+{% endblock %}
+
+{% block body %}
+<!-- simple-sidebar-templates https://startbootstrap.com/templates/simple-sidebar/ -->
+<div class="d-flex" id="wrapper">
+    <!-- Sidebar -->
+    <div class="bg-light border-right" id="sidebar-wrapper">
+      <div class="sidebar-heading" style="color: #c4c905;font-weight: bold;">Alto Pi System</div>
+      <div class="list-group list-group-flush">
+        <a href="{{url_for('main.menu_impresiones')}}" class="list-group-item list-group-item-action bg-light">
+            Impresiones
+        </a>
+        <a href="{{url_for('main.logout')}}" style="font-size: 0.8rem;" class="list-group-item list-group-item-action bg-light">
+            CERRAR SESIÓN
+        </a>
+      </div>
+    </div>
+    <!-- /#sidebar-wrapper -->
+    <div id="page-content-wrapper" style="padding: 10px;">
+        <div class="container">
+            <div class="row content">
+                {% block content %}{% endblock %}
+            </div>
+        </div>
+    </div>
+</div>
+<script src="{{ url_for('static', filename='js/select2.min.js' ) }}" type="text/javascript"></script>
+<!-- <script src="{{ url_for('static', filename='js/jquery.validate.min.js' ) }}" type="text/javascript"></script> -->
+{% endblock %}

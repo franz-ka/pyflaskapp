@@ -1,0 +1,18 @@
+<!-- Templating Essentials - https://code.tutsplus.com/tutorials/templating-with-jinja2-in-flask-essentials--cms-25571 -->
+<!-- Bootstrap themes, templates, and more - https://startbootstrap.com/ -->
+<!-- Bootstrap Components - https://v4-alpha.getbootstrap.com/components/alerts/ -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Sou</title>
+
+    <link href="{{ url_for('static', filename='css/bootstrap4.min.css' ) }}" rel="stylesheet">
+    {% block head %}{% endblock %}
+</head>
+<body>
+    <script src="{{ url_for('static' , filename='js/jquery3.min.js' ) }}" type="text/javascript"></script>
+    <script src="{{ url_for('static' , filename='js/bootstrap4.min.js' ) }}" type="text/javascript"></script>
+    {% block body %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,5 @@
+#ignorar
+**/venv
+**/.idea
+
+**/instance
