@@ -1,5 +1,9 @@
-#ignorar
+#py
 **/venv
+**/__pycache__
+
+#pycharm
 **/.idea
 
+#flask
 **/instance
