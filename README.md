@@ -3,7 +3,7 @@
 # pyflaskapp
 
 Para el primer uso: 
-1. en la raiz creamos un python venv `python3 -m venv /venv`
+1. en la raiz creamos un virtual env `python3 -m venv /venv`
 2. activamos el venv `source venv/bin/activate`
 3. instalamos dependencias `pip freeze > requirements.txt`
 4. setteamos la variable `export FLASK_APP=flask1`
