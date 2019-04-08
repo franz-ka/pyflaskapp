@@ -7,7 +7,7 @@ Base = declarative_base()
 
 class Pieza(Base):
     __tablename__ = 'pieza'
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
     nombre = Column(String(64), nullable=False)
     cantidad = Column(Integer)
     # Many-ImpresionPieza To One-Pieza Bidirectional
@@ -18,7 +18,7 @@ class Pieza(Base):
 
 class Impresion(Base):
     __tablename__ = 'impresion'
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
     fecha = Column(String(64))
     # One-Impresion To Many-ImpresionPieza Bidirectional
     impresionpieza = relationship("ImpresionPieza", back_populates="impresion")
@@ -27,7 +27,7 @@ class Impresion(Base):
 
 class ImpresionPieza(Base):
     __tablename__ = 'impresionpieza'
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
     # One-Impresion To Many-ImpresionPieza Bidirectional
     impresion_id = Column(Integer, ForeignKey('impresion.id'))
     impresion = relationship("Impresion", back_populates="impresionpieza")
@@ -36,17 +36,17 @@ class ImpresionPieza(Base):
     pieza = relationship("Pieza", back_populates="impresionpieza")
     cantidad = Column(Integer)
     def __repr__(self):
-        return '<ImpresionPieza {} {} {}>'.format(self.impresion.fecha, self.pieza.nombre, self.cantidad)
+        return '<ImpresionPieza impid={} piezid={} cant={}>'.format(self.impresion_id, self.pieza_id, self.cantidad)
 
 
 class Modelo(Base):
     __tablename__ = 'modelo'
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
     nombre = Column(String(64), nullable=False)
     def __repr__(self):
         return '<Modelo {} {}>'.format(self.id, self.nombre)
-'''
-class GCode(Base):
+
+'''class GCode(Base):
     __tablename__ = 'gcode'
     id = Column(Integer, primary_key=True)
     nombre = Column(String(64), nullable=False)

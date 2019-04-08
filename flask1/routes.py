@@ -53,22 +53,26 @@ def index():
 @login_required
 def menu_impresiones():
     if request.method == "POST":
-        print('post form:',request.form[0])
-        accvars = ('fecha','hora','pieza','cantidad')
-        vars = {piezs:[],cants:[]}
-        for keyval in request.form[0]:
-            k = keyval[0]
-            if k not in accvars:
-                return "error:campo " + k + " no aceptado"
-            v = keyval[1]
-            if k=='pieza':
-                piezs.append(v)
-            elif k=='cantidad':
-                cants.append(v)
-            else:
-                vars[k]=v
-        print(vars)
-        return "ok"
+        print('post form:',request.form)
+
+        db = get_db()
+
+        imp = Impresion(fecha=request.form['fecha'])
+        db.add(imp)
+        # este commit actualiza imp.id
+        db.commit()
+
+        piezs = request.form.getlist('pieza')
+        cants = request.form.getlist('cantidad')
+        ips=[]
+        for i, piezid in enumerate(piezs):
+            ips.append( ImpresionPieza(impresion_id=imp.id, pieza_id=piezid, cantidad=cants[i]) )
+        print(ips)
+        db.add_all(ips)
+        db.commit()
+
+        imp = db.query(Pieza)
+        return redirect(url_for('main.menu_impresiones'))
     else:
         db = get_db()
         imppiezs = db.query(ImpresionPieza).all()
