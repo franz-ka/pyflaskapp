@@ -9,3 +9,7 @@ Para el primer uso:
 4. `flask init-db` para inicializar y cargar la db
 
 Posteriormente solo hace falta hacer `flask run` para hostear o `python3 run.py`
+
+Una screens:
+![alt text](https://i.ibb.co/M2LJ83d/11.png)
+![alt text](https://i.ibb.co/qWxDMsM/22.png)
