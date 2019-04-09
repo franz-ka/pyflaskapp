@@ -25,7 +25,7 @@ def close_db(e=None):
 
 def recreate_db():
     from sqlalchemy.orm import sessionmaker, scoped_session
-    from .models import Base, Pieza, Impresion, ImpresionPieza
+    from .models import Base, Pieza, Impresion, ImpresionPieza, Articulo, Modelo, ModeloPieza, ModeloArticulo
     engine = init_db_engine(current_app)
     Base.metadata.drop_all(engine)
     Base.metadata.create_all(engine)
@@ -71,11 +71,28 @@ def recreate_db():
         )
     ))
     db.commit()
-    '''id = Column(Integer, primary_key=True, autoincrement=True)
-    nombre = Column(String(64), nullable=False)
-    articulos = relationship("Articulo", secondary=assocModArt)
-    piezas = relationship("Pieza", secondary=assocModPie)'''
-    db.add(Modelo(nombre='mod1'))
+
+    db.add_all((
+        Articulo(nombre='iman grande', cantidad=10),
+        Articulo(nombre='iman chico', cantidad=20),
+        Articulo(nombre='gomita 3x2', cantidad=30)
+    ))
+    db.commit()
+    arts = db.query(Articulo)
+    modbak = Modelo(nombre='baku')
+    modbak.piezas.append(ModeloPieza(pieza=piezs.filter(Pieza.nombre == 'base baku').one(), cantidad='1'))
+    modbak.piezas.append(ModeloPieza(pieza=piezs.filter(Pieza.nombre == 'tapa baku').one(), cantidad='1'))
+    modbak.piezas.append(ModeloPieza(pieza=piezs.filter(Pieza.nombre == 'ojo baku').one(), cantidad='2'))
+    modbak.articulos.append(ModeloArticulo(articulo=arts.filter(Articulo.nombre == 'iman grande').one(), cantidad='1'))
+    modbak.articulos.append(ModeloArticulo(articulo=arts.filter(Articulo.nombre == 'iman chico').one(), cantidad='2'))
+    modbak.articulos.append(ModeloArticulo(articulo=arts.filter(Articulo.nombre == 'gomita 3x2').one(), cantidad='1'))
+    '''modbak.articulos.append(arts.filter(Articulo.nombre == 'iman grande').one())
+    modbak.articulos.append(arts.filter(Articulo.nombre == 'gomita 3x2').one())
+    modbak.piezas.append(piezs.filter(Pieza.nombre == 'base baku').one())
+    modbak.piezas.append(piezs.filter(Pieza.nombre == 'tapa baku').one())
+    modbak.piezas.append(piezs.filter(Pieza.nombre == 'ojo baku').one())'''
+    db.add(modbak)
+    db.commit()
 
 @click.command('init-db')
 @with_appcontext

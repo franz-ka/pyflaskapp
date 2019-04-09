@@ -28,8 +28,7 @@ validators = {
     DateTime:validate_datetime,
 }
 
-# this event is called whenever an attribute
-# on a class is instrumented
+# this event is called whenever an attribute on a class is instrumented
 @event.listens_for(Base, 'attribute_instrument')
 def configure_listener(class_, key, inst):
     if not hasattr(inst.property, 'columns'):
@@ -45,6 +44,7 @@ def configure_listener(class_, key, inst):
             return value
 ##################################
 
+# sqlalchemy Relationship Patterns - https://docs.sqlalchemy.org/en/latest/orm/basic_relationships.html
 class Pieza(Base):
     __tablename__ = 'pieza'
     id = Column(Integer, primary_key=True, autoincrement=True)
@@ -86,20 +86,38 @@ class Articulo(Base):
     def __repr__(self):
         return '<Articulo {} {}>'.format(self.id, self.nombre)
 
-assocModArt = Table('assocModArt', Base.metadata,
+'''assocModArt = Table('assocModArt', Base.metadata,
     Column('modelo_id', Integer, ForeignKey('modelo.id')),#left
     Column('articulo_id', Integer, ForeignKey('articulo.id'))#right
 )
 assocModPie = Table('assocModPie', Base.metadata,
     Column('modelo_id', Integer, ForeignKey('modelo.id')),#left
     Column('pieza_id', Integer, ForeignKey('pieza.id'))#right
-)
+)'''
+class ModeloPieza(Base):
+    __tablename__ = 'modelopieza'
+    modelo_id = Column(Integer, ForeignKey('modelo.id'), primary_key=True)
+    pieza_id = Column(Integer, ForeignKey('pieza.id'), primary_key=True)
+    cantidad = Column(Integer)
+    pieza = relationship("Pieza")
+    def __repr__(self):
+        return '<ModeloPieza modid={} piezid={} cant={}>'.format(self.modelo_id, self.pieza_id, self.cantidad)
+class ModeloArticulo(Base):
+    __tablename__ = 'modeloarticulo'
+    modelo_id = Column(Integer, ForeignKey('modelo.id'), primary_key=True)
+    articulo_id = Column(Integer, ForeignKey('articulo.id'), primary_key=True)
+    cantidad = Column(Integer)
+    articulo = relationship("Articulo")
+    def __repr__(self):
+        return '<ModeloArticulo modid={} artid={} cant={}>'.format(self.modelo_id, self.articulo_id, self.cantidad)
 class Modelo(Base):
     __tablename__ = 'modelo'
     id = Column(Integer, primary_key=True, autoincrement=True)
     nombre = Column(String(64), nullable=False)
-    articulos = relationship("Articulo", secondary=assocModArt)
-    piezas = relationship("Pieza", secondary=assocModPie)
+    #piezas = relationship("Pieza", secondary=assocModPie)
+    #articulos = relationship("Articulo", secondary=assocModArt)
+    piezas = relationship("ModeloPieza")
+    articulos = relationship("ModeloArticulo")
     def __repr__(self):
         return '<Modelo {} {}>'.format(self.id, self.nombre)
 
