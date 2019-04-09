@@ -89,7 +89,7 @@ class Articulo(Base):
 '''assocModArt = Table('assocModArt', Base.metadata,
     Column('modelo_id', Integer, ForeignKey('modelo.id')),#left
     Column('articulo_id', Integer, ForeignKey('articulo.id'))#right
-)
+) 
 assocModPie = Table('assocModPie', Base.metadata,
     Column('modelo_id', Integer, ForeignKey('modelo.id')),#left
     Column('pieza_id', Integer, ForeignKey('pieza.id'))#right
