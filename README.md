@@ -16,8 +16,8 @@ Archivos principales:
 * `models.py` tiene la estructura de la db
 * `db.py` carga registros a la db (al usar `flask init-db`)
 * `routes.py` tiene las acciones por url
-* `templaes/` contiene los html
+* `templates/` contiene los html
 
-Una screens:
+Unas screens:
 ![alt text](https://i.ibb.co/M2LJ83d/11.png)
 ![alt text](https://i.ibb.co/qWxDMsM/22.png)
