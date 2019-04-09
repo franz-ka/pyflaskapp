@@ -1,6 +1,7 @@
 import click
 from flask import current_app, g
 from flask.cli import with_appcontext
+from datetime import datetime
 
 def init_db_engine(app):
     from sqlalchemy import create_engine
@@ -36,41 +37,45 @@ def recreate_db():
         Pieza(nombre='base baku', cantidad=20),
         Pieza(nombre='tapa baku', cantidad=20),
         Pieza(nombre='ojo coco', cantidad=20),
-        Impresion(fecha='01/04/19'),
-        Impresion(fecha='02/04/19'),
-        Impresion(fecha='03/04/19')
+        Impresion(fecha=datetime(2019, 4, 1)),
+        Impresion(fecha=datetime(2019, 4, 2)),
+        Impresion(fecha=datetime(2019, 4, 3))
     ))
     piezs = db.query(Pieza)
     imps = db.query(Impresion)
     db.add_all((
         ImpresionPieza(
-            impresion_id=imps.filter(Impresion.fecha == '01/04/19').one().id,
+            impresion_id=imps.filter(Impresion.fecha == datetime(2019, 4, 1)).one().id,
             pieza_id=piezs.filter(Pieza.nombre == 'ojo baku').one().id,
             cantidad=50
         ),
         ImpresionPieza(
-            impresion_id=imps.filter(Impresion.fecha == '02/04/19').one().id,
+            impresion_id=imps.filter(Impresion.fecha == datetime(2019, 4, 2)).one().id,
             pieza_id=piezs.filter(Pieza.nombre == 'base baku').one().id,
             cantidad=2
         ),
         ImpresionPieza(
-            impresion_id=imps.filter(Impresion.fecha == '02/04/19').one().id,
+            impresion_id=imps.filter(Impresion.fecha == datetime(2019, 4, 2)).one().id,
             pieza_id=piezs.filter(Pieza.nombre == 'tapa baku').one().id,
             cantidad=2
         ),
         ImpresionPieza(
-            impresion_id=imps.filter(Impresion.fecha == '03/04/19').one().id,
+            impresion_id=imps.filter(Impresion.fecha == datetime(2019, 4, 3)).one().id,
             pieza_id=piezs.filter(Pieza.nombre == 'ojo baku').one().id,
             cantidad=20
         ),
         ImpresionPieza(
-            impresion_id=imps.filter(Impresion.fecha == '03/04/19').one().id,
+            impresion_id=imps.filter(Impresion.fecha == datetime(2019, 4, 3)).one().id,
             pieza_id=piezs.filter(Pieza.nombre == 'ojo coco').one().id,
             cantidad=30
         )
     ))
     db.commit()
-
+    '''id = Column(Integer, primary_key=True, autoincrement=True)
+    nombre = Column(String(64), nullable=False)
+    articulos = relationship("Articulo", secondary=assocModArt)
+    piezas = relationship("Pieza", secondary=assocModPie)'''
+    db.add(Modelo(nombre='mod1'))
 
 @click.command('init-db')
 @with_appcontext

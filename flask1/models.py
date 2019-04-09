@@ -1,9 +1,49 @@
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, ForeignKey, Integer, String
+from sqlalchemy import Column, ForeignKey, Integer, String, DateTime, event, Table
 from sqlalchemy.orm import relationship
 import datetime
 
 Base = declarative_base()
+
+#######################
+# https://stackoverflow.com/questions/8980735/how-can-i-verify-column-data-types-in-the-sqlalchemy-orm
+def validate_int(value):
+    if isinstance(value, str):
+        value = int(value)
+    else:
+        assert isinstance(value, int)
+    return value
+
+def validate_string(value):
+    assert isinstance(value, str)
+    return value
+
+def validate_datetime(value):
+    assert isinstance(value, datetime.datetime)
+    return value
+
+validators = {
+    Integer:validate_int,
+    String:validate_string,
+    DateTime:validate_datetime,
+}
+
+# this event is called whenever an attribute
+# on a class is instrumented
+@event.listens_for(Base, 'attribute_instrument')
+def configure_listener(class_, key, inst):
+    if not hasattr(inst.property, 'columns'):
+        return
+    # this event is called whenever a "set"
+    # occurs on that instrumented attribute
+    @event.listens_for(inst, "set", retval=True)
+    def set_(instance, value, oldvalue, initiator):
+        validator = validators.get(inst.property.columns[0].type.__class__)
+        if validator:
+            return validator(value)
+        else:
+            return value
+##################################
 
 class Pieza(Base):
     __tablename__ = 'pieza'
@@ -19,7 +59,7 @@ class Pieza(Base):
 class Impresion(Base):
     __tablename__ = 'impresion'
     id = Column(Integer, primary_key=True, autoincrement=True)
-    fecha = Column(String(64))
+    fecha = Column(DateTime)
     # One-Impresion To Many-ImpresionPieza Bidirectional
     impresionpieza = relationship("ImpresionPieza", back_populates="impresion")
     def __repr__(self):
@@ -38,13 +78,31 @@ class ImpresionPieza(Base):
     def __repr__(self):
         return '<ImpresionPieza impid={} piezid={} cant={}>'.format(self.impresion_id, self.pieza_id, self.cantidad)
 
+class Articulo(Base):
+    __tablename__ = 'articulo'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    nombre = Column(String(64), nullable=False)
+    cantidad = Column(Integer)
+    def __repr__(self):
+        return '<Articulo {} {}>'.format(self.id, self.nombre)
 
+assocModArt = Table('assocModArt', Base.metadata,
+    Column('modelo_id', Integer, ForeignKey('modelo.id')),#left
+    Column('articulo_id', Integer, ForeignKey('articulo.id'))#right
+)
+assocModPie = Table('assocModPie', Base.metadata,
+    Column('modelo_id', Integer, ForeignKey('modelo.id')),#left
+    Column('pieza_id', Integer, ForeignKey('pieza.id'))#right
+)
 class Modelo(Base):
     __tablename__ = 'modelo'
     id = Column(Integer, primary_key=True, autoincrement=True)
     nombre = Column(String(64), nullable=False)
+    articulos = relationship("Articulo", secondary=assocModArt)
+    piezas = relationship("Pieza", secondary=assocModPie)
     def __repr__(self):
         return '<Modelo {} {}>'.format(self.id, self.nombre)
+
 
 '''class GCode(Base):
     __tablename__ = 'gcode'

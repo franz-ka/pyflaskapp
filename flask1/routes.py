@@ -55,9 +55,16 @@ def menu_impresiones():
     if request.method == "POST":
         print('post form:',request.form)
 
+        musthave = ('fecha','hora','pieza','cantidad')
+        if len(request.form) < len(musthave):
+            return 'err:too few params'
+        for v in musthave:
+            if v not in request.form:
+                return 'err:'+v+' missing'
+
         db = get_db()
 
-        imp = Impresion(fecha=request.form['fecha'])
+        imp = Impresion(fecha=datetime.datetime.strptime(request.form['fecha'] + ' ' + request.form['hora'], '%d/%m/%Y %H:%M:%S'))
         db.add(imp)
         # este commit actualiza imp.id
         db.commit()
@@ -66,19 +73,20 @@ def menu_impresiones():
         cants = request.form.getlist('cantidad')
         ips=[]
         for i, piezid in enumerate(piezs):
-            ips.append( ImpresionPieza(impresion_id=imp.id, pieza_id=piezid, cantidad=cants[i]) )
+            ips.append( ImpresionPieza(impresion_id=str(imp.id), pieza_id=str(piezid), cantidad=cants[i]) )
         print(ips)
         db.add_all(ips)
         db.commit()
+        #except ValueError as e:
+        #    return "err:bad type, " + str(e)
 
-        imp = db.query(Pieza)
         return redirect(url_for('main.menu_impresiones'))
     else:
         db = get_db()
         imppiezs = db.query(ImpresionPieza).all()
         piezs = db.query(Pieza).all()
         d = datetime.datetime.now()
-        nowfecha = d.strftime("%d/%m/%y")
+        nowfecha = d.strftime("%d/%m/%Y")
         nowtiempo = d.strftime("%X")
 
         r = make_response(render_template(
