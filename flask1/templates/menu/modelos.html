@@ -1,17 +1,252 @@
-{% extends '_appgui.html' %}
+{% extends '_maingui.html' %}
 
 {% block content %}
-<h1>Listado de modelos</h1>
-<div class="list-group">
-    {% for mod in mods %}
-    <a href="#" class="list-group-item list-group-item-action">
-        <h3>{{mod.nombre}}</h3>
-        {% for modmat in modmats %}
-            {% if mod.id == modmat.modelo_id %}
-            <p class="mb-1">{{modmat.material.nombre}} {{modmat.cantidad}}</p>
-            {% endif %}
-        {% endfor %}
-    </a>
-    {% endfor %}
+<div class="col-lg-6">
+    <div class="card card-body bg-light">
+        <h3 class="card-header">Modelos</h3>
+        <div class="card-block">
+        <div id="accordion">
+            {% for mod in mods %}
+              <div class="card">
+                  <!-- BUTTON-->
+                  <div class="card-header" id="acch{{mod.nombre}}">
+                      <h5 class="mb-0">
+                        <button class="btn btn-link collapsed"
+                            data-toggle="collapse"
+                            data-target="#coll{{mod.nombre}}"
+                            aria-expanded="false"
+                            aria-controls="coll{{mod.nombre}}">
+                            {{mod.nombre}}
+                        </button>
+                      </h5>
+                  </div>
+                  <!-- CONTENT-->
+                  <div id="coll{{mod.nombre}}"
+                       class="collapse"
+                       aria-labelledby="acch{{mod.nombre}}"
+                       data-parent="#accordion">
+                      <div class="card-body">
+                         <div class="row">
+                             <div class="col-sm-6">
+                                 Piezas:
+                                {% if mod.id in modpiezs %}
+                                    {% for mp in modpiezs[mod.id] %}
+                                        <div class="row">
+                                            <div class="col-6 col-sm-9">{{mp.pieza.nombre}}</div>
+                                            <div class="col-6 col-sm-3">{{mp.cantidad}}</div>
+                                        </div>
+                                    {% endfor %}
+                                {% endif %}
+                             </div>
+                             <div class="col-sm-6">
+                                 Artículos:
+                                {% if mod.id in modartis %}
+                                    {% for ma in modartis[mod.id] %}
+                                        <div class="row">
+                                            <div class="col-6 col-sm-9">{{ma.articulo.nombre}}</div>
+                                            <div class="col-6 col-sm-3">{{ma.cantidad}}</div>
+                                        </div>
+                                    {% endfor %}
+                                {% endif %}
+                             </div>
+                         </div>
+                      </div>
+                  </div>
+              </div>
+            {% endfor %}
+        </div>
+        <!--<table class="table table-sm table-striped table-hover">
+          <thead>
+            <tr>
+              <th>Nombre</th>
+              <th>Pieza</th>
+              <th>#</th>
+              <th>Articulo</th>
+              <th>#</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for mod in mods %}
+                <tr>
+                    <td scope="row">{{mod.nombre}}</td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                {% if mod.id in modpiezs %}
+                    {% for mp in modpiezs[mod.id] %}
+                        <tr>
+                            <td scope="row"></td>
+                            <td>{{mp.pieza.nombre}}</td>
+                            <td>{{mp.cantidad}}</td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                    {% endfor %}
+                {% endif %}
+                {% if mod.id in modartis %}
+                    {% for ma in modartis[mod.id] %}
+                        <tr>
+                            <td scope="row"></td>
+                            <td></td>
+                            <td></td>
+                            <td>{{ma.articulo.nombre}}</td>
+                            <td>{{ma.cantidad}}</td>
+                        </tr>
+                    {% endfor %}
+                {% endif %}
+            {% endfor %}
+        </table>-->
+    </div>
+    </div>
 </div>
+
+<div class="col-lg-6">
+    <div class="card card-body bg-light">
+        <h3 class="card-header">Nuevo modelo</h3>
+        <div class="card-block">
+        <form novalidate style="padding-top:10px" id="newImpForm" method="POST">
+            <!-- NOMBRE -->
+            <div class="form-group row">
+                <div class="col-sm-12">
+                    <input type="text" name="nombre" class="form-control" placeholder="Nombre" required>
+                </div>
+            </div>
+            <!-- PIEZA -->
+            <div class="form-group row">
+                <div class="col-sm-8">
+                    <select class="form-control select2-single select2-hidden-accessible" name="pieza" required>
+                        <option></option>
+                    </select>
+                    <div class="invalid-feedback">
+                        Elija una pieza
+                    </div>
+                </div>
+                <div class="col-sm-3">
+                    <input type="number" name="piezacantidad" class="form-control" placeholder="#" required min="1" max="99999" required>
+                </div>
+                <div class="col-sm-1" style="padding-left: 0px;">
+                    <button type="button" class="btn btn-danger btn-block" onclick="$(this).parent().parent().remove()">-</button>
+                </div>
+            </div>
+            <!-- ARTICULO -->
+            <div class="form-group row">
+                <div class="col-sm-8">
+                    <select class="form-control select2-single select2-hidden-accessible" name="articulo" required>
+                        <option></option>
+                    </select>
+                    <div class="invalid-feedback">
+                        Elija un articulo
+                    </div>
+                </div>
+                <div class="col-sm-3">
+                    <input type="number" name="articulocantidad" class="form-control" placeholder="#" required min="1" max="99999" required>
+                </div>
+                <div class="col-sm-1" style="padding-left: 0px;">
+                    <button type="button" class="btn btn-danger btn-block" onclick="$(this).parent().parent().remove()">-</button>
+                </div>
+            </div>
+            <!-- BOTONES -->
+            <div class="form-group row">
+                <div class="col-sm-3">
+                    <button type="button" id="btnAddPie" class="btn btn-success btn-block">+ Piezas</button>
+                </div>
+                <div class="col-sm-3">
+                    <button type="button" id="btnAddArt" class="btn btn-success btn-block">+ Artis</button>
+                </div>
+                <div class="col-sm-6">
+                    <button type="submit" class="btn btn-primary btn-block"">Guardar</button>
+                </div>
+            </div>
+        </form>
+    </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block js %}
+<script type="text/javascript">
+$(function() {
+    regFormValid();
+    //$('.collapse').collapse()
+
+    piezasdata = [
+        {% for piez in piezs %}
+            {
+                "id": {{piez.id}},
+                "text": "{{piez.nombre}}"
+            }
+            {% if not loop.last %},{% endif %}
+        {% endfor %}
+    ]
+    sel2('.select2-single[name=pieza]', 'Pieza', piezasdata);
+
+    artisdata = [
+        {% for arti in artis %}
+            {
+                "id": {{arti.id}},
+                "text": "{{arti.nombre}}"
+            }
+            {% if not loop.last %},{% endif %}
+        {% endfor %}
+    ]
+    sel2('.select2-single[name=articulo]', 'Artículo', artisdata);
+
+    $('#btnAddPie').click(function(){
+        $('.form-group.row').last().before('\
+            <div class="form-group row">\
+                <div class="col-sm-8">\
+                    <select name="pieza" class="form-control select2-single select2-hidden-accessible" required>\
+                        <option></option>\
+                    </select>\
+                    <div class="invalid-feedback">\
+                        Elija una pieza\
+                    </div>\
+                </div>\
+                <div class="col-sm-3">\
+                    <input type="number" name="piezacantidad" class="form-control" placeholder="#" required min="1" max="99999" required>\
+                </div>\
+                <div class="col-sm-1" style="padding-left: 0px;">\
+                    <button type="button" class="btn btn-danger btn-block" onclick="$(this).parent().parent().remove()">-</button>\
+                </div>\
+            </div>\
+        ');
+        $('.select2-single').last().select2({
+            allowClear: true,
+            placeholder: 'Pieza',
+            width: '100%',
+            data: piezasdata
+        });
+    });
+
+    $('#btnAddArt').click(function(){
+        $('.form-group.row').last().before('\
+            <div class="form-group row">\
+                <div class="col-sm-8">\
+                    <select name="articulo" class="form-control select2-single select2-hidden-accessible" required>\
+                        <option></option>\
+                    </select>\
+                    <div class="invalid-feedback">\
+                        Elija un artículo\
+                    </div>\
+                </div>\
+                <div class="col-sm-3">\
+                    <input type="number" name="articulocantidad" class="form-control" placeholder="#" required min="1" max="99999" required>\
+                </div>\
+                <div class="col-sm-1" style="padding-left: 0px;">\
+                    <button type="button" class="btn btn-danger btn-block" onclick="$(this).parent().parent().remove()">-</button>\
+                </div>\
+            </div>\
+        ');
+        $('.select2-single').last().select2({
+            allowClear: true,
+            placeholder: 'Artículo',
+            width: '100%',
+            data: artisdata
+        });
+    });
+
+});
+</script>
 {% endblock %}

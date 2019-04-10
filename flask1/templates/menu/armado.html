@@ -1,50 +1,79 @@
-{% extends '_appgui.html' %}
+{% extends '_maingui.html' %}
+
 {% block content %}
-<style>
-    .select2-selection__rendered {
-        line-height: 33px !important;
-    }
-    .select2-container .select2-selection--single {
-        height: 37px !important;
-    }
-    .select2-selection__arrow {
-        height: 34px !important;
-    }
-</style>
-
-<div class="card card-body bg-light">
-    <h3 class="card-header">Impresiones hechas</h3>
-    <div class="card-block">
-        <table class="table table-sm table-striped table-hover">
-          <thead>
-            <tr>
-              <th>Fecha</th>
-              <th>Pieza</th>
-              <th>Cantidad</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for imppiez in imppiezs %}
+<div class="col-lg-6">
+    <div class="card card-body bg-light">
+        <h3 class="card-header">Armados hechos</h3>
+        <div class="card-block">
+            <table class="table table-sm table-striped table-hover">
+              <thead>
                 <tr>
-                    <td scope="row">{{imppiez.impresion.fecha.strftime("%d/%m/%Y %H:%M")}}</td>
-                    <td>{{imppiez.pieza.nombre}}</td>
-                    <td>{{imppiez.cantidad}}</td>
+                  <th>Fecha</th>
+                  <th>Modelo</th>
+                  <th>Cantidad</th>
                 </tr>
-            {% endfor %}
-        </table>
+              </thead>
+              <tbody>
+                {% for imppiez in imppiezs %}
+                    <tr>
+                        <td scope="row">{{imppiez.impresion.fecha.strftime("%d/%m/%Y %H:%M")}}</td>
+                        <td>{{imppiez.pieza.nombre}}</td>
+                        <td>{{imppiez.cantidad}}</td>
+                    </tr>
+                {% endfor %}
+            </table>
+        </div>
     </div>
 </div>
 
-<div class="card card-body bg-light">
-    <h3 class="card-header">Registrar impresión</h3>
-    <div class="card-block">
+<div class="col-lg-6">
+    <div class="card card-body bg-light">
+        <h3 class="card-header">Registrar armado</h3>
+        <div class="card-block">
+            <form novalidate style="padding-top:10px" id="newImpForm" method="POST">
+                <!-- FECHA/HORA -->
+                <div class="form-group row">
+                    <div class="col-sm-6">
+                        <input type="text" name="fecha" class="form-control" placeholder="Fecha" required="required" readonly>
+                    </div>
+                    <div class="col-sm-6">
+                        <input type="text" name="hora" class="form-control" placeholder="Hora" required="required" readonly>
+                    </div>
+                </div>
+                <!-- Modelo -->
+                <div class="form-group row">
+                    <div class="col-sm-8">
+                        <select class="form-control select2-single select2-hidden-accessible" name="modelo" required>
+                            <option></option>
+                        </select>
+                        <div class="invalid-feedback">
+                            Elija un modelo
+                        </div>
+                    </div>
+                    <div class="col-sm-4">
+                        <input type="number" name="cantidad" class="form-control" placeholder="#" required min="1" max="99999">
+                    </div>
+                </div>
+                <!-- BOTONES -->
+                <div class="form-group row">
+                    <div class="col-sm-12">
+                        <button type="submit" class="btn btn-primary btn-block"">Registrar</button>
+                    </div>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
+{% endblock %}
 
+{% block js %}
 <script type="text/javascript">
 $(function() {
+    regFormValid();
+
     $('input[name=fecha]').val("{{nowfecha}}");
     $('input[name=hora]').val("{{nowtiempo}}");
+
     piezasdata = [
         {% for piez in piezs %}
             {
@@ -54,31 +83,7 @@ $(function() {
             {% if not loop.last %},{% endif %}
         {% endfor %}
     ]
-
-    $('.select2-single').select2({
-        allowClear: true,
-        placeholder: 'Pieza',
-        width: '100%',
-        data: piezasdata
-    });
-
-    // html5 constraints - https://www.w3.org/TR/html5/sec-forms.html#constraints
-    // bs4 form validation - https://getbootstrap.com/docs/4.0/components/forms/#validation
-    var formvalidtout;
-    var forms = document.forms;
-    // Loop over them and prevent submission
-    var validation = Array.prototype.filter.call(forms, function(form) {
-      form.addEventListener('submit', function(event) {
-        if (form.checkValidity() === false) {
-          event.preventDefault();
-          event.stopPropagation();
-        }
-        form.classList.add('was-validated');
-        if (formvalidtout)
-            clearTimeout(formvalidtout);
-        formvalidtout = setTimeout( function(){ form.classList.remove('was-validated'); } , 3000 );
-      }, false);
-    });
+    sel2('.select2-single[name=modelo]', 'Modelo', piezasdata);
 });
 </script>
 {% endblock %}
