@@ -3,24 +3,38 @@
 {% block head %}
 <link href="{{ url_for('static', filename='css/select2.min.css' ) }}" rel="stylesheet" />
 <link href="{{ url_for('static', filename='css/select2mod.css' ) }}" rel="stylesheet" />
-<link href="{{ url_for('static', filename='css/simple-sidebar.css' ) }}" rel="stylesheet" />
+<link href="{{ url_for('static', filename='css/sidebar.css' ) }}" rel="stylesheet" />
+<style>
+    .card-block form { padding-top: 10px; }
+</style>
 {% endblock %}
 
 {% block body %}
-<!-- simple-sidebar-templates https://startbootstrap.com/templates/simple-sidebar/ -->
-<div class="d-flex" id="wrapper">
+<!-- Bootstrap Sidebar https://bootstrapious.com/p/bootstrap-sidebar -->
+<div class="wrapper">
     <!-- Sidebar -->
-    <div class="bg-light border-right" id="sidebar-wrapper">
-      <div class="sidebar-heading" style="color: #c4c905;font-weight: bold;">Alto Pi System</div>
-      <div class="list-group list-group-flush">
-        {% include '_menu.html' %}
+    <nav id="sidebar">
+      <div class="sidebar-header" style="color: #c4c905;font-weight: bold;">
+          <h3>Alto Pi System</h3>
       </div>
-    </div>
-    <!-- Nav & Content -->
-    <div id="page-content-wrapper">
-      <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom">
-        <button class="btn btn-primary" id="menu-toggle">Menú</button>
-      </nav>
+      <ul class="list-unstyled components">
+         <!-- <p>Menú</p> -->
+        {% include '_menu.html' %}
+      </ul>
+    </nav>
+
+    <!-- Main -->
+    <div id="content">
+        <!-- Top bar -->
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <div class="container-fluid">
+                <button type="button" id="sidebarCollapse" class="btn btn-info">
+                    <i class="fas fa-align-left"></i>
+                    <span>Mostrar/ocultar menú</span>
+                </button>
+            </div>
+        </nav>
+        <!-- Content -->
         <div class="container pt-3">
             <div class="row content">
                 {% block content %}{% endblock %}
@@ -31,9 +45,14 @@
 
 <!-- Menu Toggle Script -->
 <script>
-$("#menu-toggle").click(function(e) {
-  e.preventDefault();
-  $("#wrapper").toggleClass("toggled");
+$(function() {
+    $('#sidebarCollapse').on('click', function () {
+        $('#sidebar').toggleClass('active');
+    });
+    //mio
+    $('.dropdown-toggle').click(function () {
+        $('.dropdown-toggle[aria-expanded="true"]').next().collapse('hide');
+    });
 });
 </script>
 <script src="{{ url_for('static', filename='js/select2.min.js' ) }}" type="text/javascript"></script>

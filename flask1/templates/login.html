@@ -1,4 +1,4 @@
-{% extends '_layout.html' %}
+{% extends '__base.html' %}
 
 {% block head %}
 <link href="{{ url_for('static', filename='css/fontawesome5all.css' ) }}" rel="stylesheet">
@@ -40,7 +40,7 @@
                 <div class="input-group-prepend">
                     <span class="input-group-text"> <i class="fa fa-user"></i> </span>
                  </div>
-                <input type="text" class="form-control" placeholder="Usuario" required="required">
+                <input type="text" class="form-control" name="user" placeholder="Usuario" required="required">
              </div>
         </div>
         <!-- CONTRA -->
@@ -49,7 +49,7 @@
                 <div class="input-group-prepend">
                     <span class="input-group-text"> <i class="fa fa-lock"></i> </span>
                  </div>
-                <input type="password" class="form-control" placeholder="Contraseña" required="required">
+                <input type="password" class="form-control" name="password" placeholder="Contraseña" required="required">
             </div>
         </div>
         <!-- BOTON -->

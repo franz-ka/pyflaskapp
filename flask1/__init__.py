@@ -40,7 +40,14 @@ def create_app(test_config=None):
     @login_manager.user_loader
     def load_user(userid):
         from .loginuser import User
-        return User(userid)
+        from flask1.db import get_db
+        from .models import Usuario
+        db = get_db()
+        usu = db.query(Usuario).get(userid)
+        if usu:
+            return User(usu.id, usu.nombre, usu.esadmin)
+        else:
+            return User(None, None, None)
 
     ###### ROUTES (y TEMPLATES)
     from . import routes

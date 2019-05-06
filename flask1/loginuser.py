@@ -3,15 +3,15 @@ from flask_login import UserMixin
 # silly user model
 #??????????
 class User(UserMixin):
-    def __init__(self, id):
+    def __init__(self, id, name, isadmin):
         self.id = id
-        self.name = "user" + str(id)
-        self.password = self.name + "_secret"
+        self.name = name
+        self.isadmin = isadmin
         return None
     def __repr__(self):
-        return "%d/%s/%s" % (self.id, self.name, self.password)
+        return "%d/%s/%s" % (self.id, self.name, str(self.isadmin))
 
 
 #??????????
 # create some users with ids 1 to 20
-users = [User(id) for id in range(1, 21)]
+# users = [User(id) for id in range(1, 21)]

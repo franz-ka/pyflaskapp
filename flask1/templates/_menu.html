@@ -1,15 +1,68 @@
-<a href="{{url_for('main.menu_piezas')}}" class="list-group-item list-group-item-action bg-light">
-    Piezas
-</a>
-<a href="{{url_for('main.menu_modelos')}}" class="list-group-item list-group-item-action bg-light">
-    Modelos
-</a>
-<a href="{{url_for('main.menu_impresiones')}}" class="list-group-item list-group-item-action bg-light">
-    Impresiones
-</a>
-<a href="{{url_for('main.menu_armado')}}" class="list-group-item list-group-item-action bg-light">
-    Armado
-</a>
-<a href="{{url_for('main.logout')}}" style="font-size: 0.8rem;" class="list-group-item list-group-item-action bg-light">
+<li>
+    <a href="#pikasSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">Pikas</a>
+    <ul class="collapse list-unstyled" id="pikasSubmenu">
+        <li>
+            <a href="{{url_for('main.menu_armadopika')}}">Ingresar armado</a>
+        </li>
+        <li>
+            <a href="{{url_for('main.menu_stockpikas')}}">Stock</a>
+        </li>
+        {% if current_user.isadmin %}
+        <li>
+            <a href="#">Agregar/elim. pika</a>
+        </li>
+        {% endif %}
+        {% if current_user.isadmin %}
+        <li>
+            <a href="#">Asociar insumos</a>
+        </li>
+        {% endif %}
+    </ul>
+</li>
+<li>
+    <a href="#insumosSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">Insumos</a>
+    <ul class="collapse list-unstyled" id="insumosSubmenu">
+        <li>
+            <a href="#">Ingresar insumos</a>
+        </li>
+        <li>
+            <a href="#">Rollo PLA abierto</a>
+        </li>
+        <li>
+            <a href="{{url_for('main.menu_stockinsumos')}}">Stock</a>
+        </li>
+        {% if current_user.isadmin %}
+        <li>
+            <a href="#">Agregar/elim. insumo</a>
+        </li>
+        {% endif %}
+    </ul>
+</li>
+<li>
+    <a href="#ventasSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">Ventas</a>
+    <ul class="collapse list-unstyled" id="ventasSubmenu">
+        <li>
+            <a href="{{url_for('main.menu_ingresarventa')}}">Ingresar venta</a>
+        </li>
+        <li>
+            <a href="{{url_for('main.menu_listadoventas')}}">Listado</a>
+        </li>
+    </ul>
+</li>
+<li><a href="{{url_for('main.logout')}}" style="font-size: 0.8rem;">
     CERRAR SESIÓN
-</a>
+</a></li>
+
+
+<li><a href="{{url_for('main.menu_piezas')}}">
+    Piezas
+</a></li>
+<li><a href="{{url_for('main.menu_modelos')}}">
+    Modelos
+</a></li>
+<li><a href="{{url_for('main.menu_impresiones')}}">
+    Impresiones
+</a></li>
+<li><a href="">
+    Armado
+</a></li>

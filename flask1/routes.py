@@ -9,6 +9,13 @@ import datetime
 
 bp = Blueprint('main', __name__, url_prefix='')
 
+def checkparams(form, musthave):
+    if len(form) < len(musthave):
+        raise Exception('Pocos parámetros enviados ({}<{})'.format(len(form), len(musthave)))
+    for v in musthave:
+        if v not in form:
+            raise Exception('Falta el parámetro "{}"'.format(v))
+
 ################################################
 ######################## ERRORES
 ################################################
@@ -24,9 +31,21 @@ def not_found(e):
 @bp.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == 'POST':
-        user = User(3)
-        login_user(user)
-        return redirect(request.args.get('next') or url_for('main.index'))
+        print('post form:', request.form)
+
+        try: checkparams(request.form, ('user', 'password'))
+        except Exception as e: return str(e), 400
+
+        db = get_db()
+        usu = db.query(Usuario).filter(Usuario.nombre==request.form['user']).first()
+        print('uu', usu)
+        import hashlib
+        if usu and hashlib.sha256( request.form['password'].encode('utf-8') ).hexdigest() == usu.passhash:
+            user = User(usu.id, usu.nombre, usu.esadmin)
+            login_user(user)
+            return redirect(request.args.get('next') or url_for('main.index'))
+        else:
+            return "Credenciales incorrectas", 400
     else:
         return render_template('login.html')
 
@@ -57,7 +76,7 @@ def index():
 def menu_piezas():
     if request.method == "GET":
         r = make_response(render_template(
-            'menu/piezas.html',
+            'menu/??piezas.html',
             piezs = get_db().query(Pieza).all()
         ))
         return r
@@ -93,7 +112,7 @@ def menu_impresiones():
         nowtiempo = d.strftime("%X")
 
         r = make_response(render_template(
-            'menu/impresiones.html',
+            'menu/??impresiones.html',
             imppiezs=imppiezs,
             piezs=piezs,
             nowfecha=nowfecha,
@@ -132,22 +151,6 @@ def menu_impresiones():
 
 
 ################################################
-######################## ARMADO
-################################################
-@bp.route("/menu/armado", methods = ['GET', 'POST'])
-@login_required
-def menu_armado():
-    if request.method == "GET":
-        r = make_response(render_template(
-            'menu/armado.html'
-        ))
-        return r
-    else: #request.method == "POST":
-        print('post form:',request.form)
-
-        return redirect(url_for('main.menu_armado'))
-
-################################################
 ######################## MODELOS
 ################################################
 @bp.route("/menu/modelos", methods = ['GET', 'POST'])
@@ -173,7 +176,7 @@ def menu_modelos():
             modartis[ma.modelo_id].append(ma)
 
         r = make_response(render_template(
-            'menu/modelos.html',
+            'menu/??modelos.html',
             mods = db.query(Modelo).all(),
             modpiezs = modpiezs,
             modartis = modartis,
@@ -238,6 +241,204 @@ def menu_modelos():
     imps = db.query(Impresion).all()
     #mods = db.query(Modelo).all()
     #modmats = db.query(ModeloMaterial).all()
-    return render_template('menu/modelos.html', mods=mods, modmats=modmats)
+    return render_template('menu/??modelos.html', mods=mods, modmats=modmats)
 
 '''
+
+
+@bp.route("/menu/armadopika", methods = ['GET', 'POST'])
+@login_required
+def menu_armadopika():
+    if request.method == "GET":
+        db = get_db()
+        pikas = db.query(Pika).all()
+
+        r = make_response(render_template(
+            'menu/armadopika.html',
+            pikas=pikas
+        ))
+        return r
+    else: #request.method == "POST":
+        print('post form:',request.form)
+
+        try: checkparams(request.form, ('pika', 'cantidad'))
+        except Exception as e: return str(e), 400
+
+        db = get_db()
+
+        pikas = request.form.getlist('pika')
+        cants = request.form.getlist('cantidad')
+        dtnow = datetime.datetime.now()
+        for i, pikaid in enumerate(pikas):
+            if i<len(cants) and cants[i] and pikaid:
+                pika = db.query(Pika).get(pikaid)
+                pikacant = int(cants[i])
+                stockpika = db.query(StockPika).get(pikaid)
+                pikainsus = db.query(PikaInsumo).filter(PikaInsumo.pika==pika)
+
+                #restamos stock de insumos
+                for pikainsu in pikainsus:
+                    stockinsu = db.query(StockInsumo).get(pikainsu.insumo_id)
+                    if stockinsu.cantidad < pikainsu.cantidad*pikacant:
+                        return 'No hay suficiente stock de "{}" para el pika "{}" ({} < {})'.format(pikainsu.insumo.nombre, pika.nombre, stockinsu.cantidad, pikainsu.cantidad*pikacant), 400
+
+                    movinsu = MovStockInsumo(insumo=pikainsu.insumo, cantidad=pikainsu.cantidad, fecha=dtnow)
+                    db.add(movinsu)
+                    stockinsu.cantidad -= movinsu.cantidad*pikacant
+                    stockinsu.fecha = movinsu.fecha
+
+                #sumamos stock de pika
+                mov = MovStockPika(pika=pika, cantidad=int(cants[i]), fecha=dtnow)
+                db.add(mov)
+                stockpika.cantidad += pikacant
+                stockpika.fecha = mov.fecha
+
+        db.commit()
+
+        return ''
+
+@bp.route("/menu/stockpikas", methods=['GET', 'POST'])
+@login_required
+def menu_stockpikas():
+    if request.method == "GET":
+        db = get_db()
+        DATA = db.query(StockPika).all()
+
+        r = make_response(render_template(
+            'menu/stockpikas.html',
+            DATA=DATA
+        ))
+        return r
+    else:  # request.method == "POST":
+        print('post form:', request.form)
+
+        try:
+            checkparams(request.form, ('PARAM1', 'PARAMN'))
+        except Exception as e:
+            return str(e), 400
+
+        return redirect(url_for('main.menu_stockpikas'))
+
+
+@bp.route("/menu/ingresarinsumo", methods=['GET', 'POST'])
+@login_required
+def menu_ingresarinsumo():
+    if request.method == "GET":
+        db = get_db()
+        DATA = db.query(TABLE).all()
+
+        r = make_response(render_template(
+            'menu/ingresarinsumo.html',
+            DATA=DATA
+        ))
+        return r
+    else:  # request.method == "POST":
+        print('post form:', request.form)
+
+        try:
+            checkparams(request.form, ('PARAM1', 'PARAMN'))
+        except Exception as e:
+            return str(e), 400
+
+        return redirect(url_for('main.menu_ingresarinsumo'))
+
+
+@bp.route("/menu/stockinsumos", methods=['GET', 'POST'])
+@login_required
+def menu_stockinsumos():
+    if request.method == "GET":
+        db = get_db()
+        DATA = db.query(StockInsumo).all()
+
+        r = make_response(render_template(
+            'menu/stockinsumos.html',
+            DATA=DATA
+        ))
+        return r
+    else:  # request.method == "POST":
+        print('post form:', request.form)
+
+        try:
+            checkparams(request.form, ('PARAM1', 'PARAMN'))
+        except Exception as e:
+            return str(e), 400
+
+        return redirect(url_for('main.menu_stockinsumos'))
+
+
+@bp.route("/menu/listadoventas", methods=['GET', 'POST'])
+@login_required
+def menu_listadoventas():
+    if request.method == "GET":
+        db = get_db()
+        ventas = db.query(Venta).all()
+
+        r = make_response(render_template(
+            'menu/listadoventas.html',
+            ventas=ventas
+        ))
+        return r
+    else:  # request.method == "POST":
+        print('post form:', request.form)
+
+        try:
+            checkparams(request.form, ('PARAM1', 'PARAMN'))
+        except Exception as e:
+            return str(e), 400
+
+        return redirect(url_for('main.menu_listadoventas'))
+
+@bp.route("/menu/ingresarventa", methods=['GET', 'POST'])
+@login_required
+def menu_ingresarventa():
+    if request.method == "GET":
+        db = get_db()
+        ventatipos = db.query(VentaTipo).all()
+        pikas = db.query(Pika).all()
+
+        r = make_response(render_template(
+            'menu/ingresarventa.html',
+            ventatipos=ventatipos,
+            pikas=pikas
+        ))
+        return r
+    else:  # request.method == "POST":
+        print('post form:', request.form)
+
+        try:
+            checkparams(request.form, ('tipo', 'pika', 'cantidad'))
+        except Exception as e:
+            return str(e), 400
+
+        db = get_db()
+        pikas = request.form.getlist('pika')
+        cants = request.form.getlist('cantidad')
+        dtnow = datetime.datetime.now()
+        vent = Venta(
+            ventatipo=db.query(VentaTipo).filter(VentaTipo.id == request.form['tipo']).one(),
+            fecha=dtnow,
+            comentario=request.form['comentario'] if 'comentario' in request.form else None
+        )
+        db.add(vent)
+        for i, pikaid in enumerate(pikas):
+            if i<len(cants) and cants[i] and pikaid:
+                pika = db.query(Pika).get(pikaid)
+                pikacant = int(cants[i])
+                stockpika = db.query(StockPika).get(pikaid)
+
+                if stockpika.cantidad < pikacant:
+                    return 'No hay suficiente stock del pika "{}" ({} < {})'.format(pika.nombre, stockpika.cantidad, pikacant), 400
+
+                #agregamos entrada de venta
+                db.add(VentaPika(venta=vent, pika=pika, cantidad=pikacant))
+
+                #restamos stock de pika
+                mov = MovStockPika(pika=pika, cantidad=-int(cants[i]), fecha=dtnow)
+                db.add(mov)
+                stockpika.cantidad -= pikacant
+                stockpika.fecha = mov.fecha
+
+        db.commit()
+
+        return ''
+
