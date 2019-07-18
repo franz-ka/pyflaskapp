@@ -1,0 +1,14 @@
+{% extends '_maingui.html' %}
+
+{% block content %}
+<div class="col-lg-10">
+    <div class="alert alert-danger" role="alert">
+        <h4 class="alert-heading">Ups hubo un error en el sistema</h4>
+        <hr>
+        <p>La operación que acaba de intentar hacer no pudo realizarse.</p>
+        <p>Si intentó cambiar algún dato compruebe cuál es su estado actual.</p>
+        <p>Se ha reportado el error al administrador del sistema.</p>
+        Click <a href="{{ url_for('main.index') }}">acá</a> para volver al inicio
+    </div>
+</div>
+{% endblock %}

@@ -1,10 +1,18 @@
 {% extends '__base.html' %}
+{% import '_form.html' as forms %}
 
 {% block head %}
 <link href="{{ url_for('static', filename='css/select2.min.css' ) }}" rel="stylesheet" />
 <link href="{{ url_for('static', filename='css/select2mod.css' ) }}" rel="stylesheet" />
 <link href="{{ url_for('static', filename='css/sidebar.css' ) }}" rel="stylesheet" />
+<link href="{{ url_for('static', filename='css/bootstrap-datepicker3.min.css' ) }}" rel="stylesheet" />
 <style>
+    .wrapper{
+        background-image: url('{{ url_for('static', filename='cogobgform'+ range(1, 4) | random | string +'.jpg' ) }}');
+        background-repeat: repeat-y;
+        background-size: cover;
+        background-color: #9007dd;
+    }
     .card-block form { padding-top: 10px; }
 </style>
 {% endblock %}
@@ -14,8 +22,10 @@
 <div class="wrapper">
     <!-- Sidebar -->
     <nav id="sidebar">
-      <div class="sidebar-header" style="color: #c4c905;font-weight: bold;">
-          <h3>Alto Pi System</h3>
+      <div class="sidebar-header" style="color: #ffff01;font-weight: bold;">
+        <a href="/">
+          <h3>Cogonauts Sys</h3>
+        </a>
       </div>
       <ul class="list-unstyled components">
          <!-- <p>Menú</p> -->
@@ -26,14 +36,14 @@
     <!-- Main -->
     <div id="content">
         <!-- Top bar -->
-        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+       <!--  <nav class="navbar navbar-expand-lg navbar-light bg-light">
             <div class="container-fluid">
                 <button type="button" id="sidebarCollapse" class="btn btn-info">
                     <i class="fas fa-align-left"></i>
                     <span>Mostrar/ocultar menú</span>
                 </button>
             </div>
-        </nav>
+        </nav> -->
         <!-- Content -->
         <div class="container pt-3">
             <div class="row content">
@@ -56,6 +66,8 @@ $(function() {
 });
 </script>
 <script src="{{ url_for('static', filename='js/select2.min.js' ) }}" type="text/javascript"></script>
+<script src="{{ url_for('static', filename='js/bootstrap-datepicker.min.js' ) }}" type="text/javascript"></script>
+<script src="{{ url_for('static', filename='js/bootstrap-datepicker.es.min.js' ) }}" type="text/javascript"></script>
 <script src="{{ url_for('static', filename='js/common_forms.js' ) }}" type="text/javascript"></script>
 <!-- <script src="{{ url_for('static', filename='js/jquery.validate.min.js' ) }}" type="text/javascript"></script> -->
 {% block js %}{% endblock %}

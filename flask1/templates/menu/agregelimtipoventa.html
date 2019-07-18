@@ -1,0 +1,49 @@
+{% extends '_maingui.html' %}
+
+{% block content %}
+{% call forms.card('Agregar tipo de venta', size=6)  %}
+<input type="hidden" name="operation" value="add">
+<!-- BOTONES -->
+<div class="form-group row">
+    <div class="col-sm-6">
+        <input type="text" name="nombretipoven" class="form-control" placeholder="Nombre" required>
+    </div>
+    <div class="col-sm-6">
+        <button type="submit" class="btn btn-primary btn-block"">Agregar</button>
+    </div>
+</div>
+{% endcall %}
+{% call forms.card('Eliminar tipo de venta', size=6)  %}
+<input type="hidden" name="operation" value="delete">
+<div class="alert alert-warning fade show">
+    <p class="mb-0">Advertencia: esta operación eliminará el tipo de venta y todos sus datos asociados (ventas con este tipo de venta)</p>
+</div>
+<!-- Insumo -->
+<div class="form-group row">
+    <div class="col-sm-6">
+        <select class="form-control select2-single select2-hidden-accessible" name="tipo" required>
+            <option></option>
+        </select>
+        <div class="invalid-feedback">
+            Elija un tipo de venta
+        </div>
+    </div>
+    <div class="col-sm-6">
+        <button type="submit" class="btn btn-primary btn-block">Eliminar</button>
+    </div>
+</div>
+{% endcall %}
+{% endblock %}
+
+{% block js %}
+<script type="text/javascript">
+$(function() {
+
+    regFormValid();
+
+    tiposdata = {{ forms.dataToJsArr(ventatipos) }};
+    sel2('.select2-single[name=tipo]', 'Tipo', tiposdata);
+    
+});
+</script>
+{% endblock %}

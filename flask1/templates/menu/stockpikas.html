@@ -1,0 +1,32 @@
+{% extends '_maingui.html' %}
+
+{% block content %}
+{% call forms.card('Stock de pikas')  %}
+<table class="table table-sm table-striped table-hover">
+  <thead>
+    <tr>
+      <th>Pika</th>
+      <th>Cantidad</th>
+      <th>Actualizado</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for spika in DATA %}
+        <tr>
+            <td>{{spika.pika.nombre}}</td>
+            <td>{{spika.cantidad}}</td>
+            <td scope="row">{{spika.fecha.strftime("%d/%m/%Y %H:%M")}}</td>
+        </tr>
+    {% endfor %}
+</table>
+<a class="btn btn-primary btn-block" href="{{url_for('main.exportar_stockpikas')}}">Exportar a CSV</a>
+{% endcall %}
+{% endblock %}
+
+{% block js %}
+<script type="text/javascript">
+$(function() {
+    
+});
+</script>
+{% endblock %}

@@ -13,10 +13,21 @@ Para el primer uso:
 Posteriormente solo hace falta hacer `flask run` para hostear o `python3 run.py`
 
 Archivos principales:
-* `models.py` tiene la estructura de la db
-* `db.py` carga registros a la db (al usar `flask init-db`)
-* `routes.py` tiene las acciones por url
-* `templates/` contiene los html
+* `routes.py` : Mapeo de urls a funciones y lógicas de get/post
+* `models.py` : Clases de la base de datos
+* `templates/__maingui.html` : Esqueleto html
+* `templates/_menu.html` : Menu html
+* `templates/menu/*.html` : Pantallas html
+* `templates/_form.html` : Macros html de forms
+
+Otros archivos:
+* `__init__.py` : Creador de aplicación Flask
+* `utils/modelcreator.py` : Crea las clases para models.py
+* `utils/menuitemcreator.py` : Utilidad para crear nuevos items en el menú
+* `db.py` : Definición de comandos db (como init-db)
+* `login.py` : Modelos y lógica de login
+* `csvexport.py` : Clase usada para exportar a .csv
+* `instance/flask1.db` : Base de datos sqlite3
 
 Unas screens:
 ![alt text](https://i.ibb.co/M2LJ83d/11.png)

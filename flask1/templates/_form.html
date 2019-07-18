@@ -1,0 +1,53 @@
+{% macro card(title, size=10, method='POST') -%}
+<div class="col-lg-{{size}}">
+    <div class="card card-body bg-light">
+        <h3 class="card-header">{{title}}</h3>
+        <div class="card-block">
+            <form novalidate method="{{method}}">
+                <div class="alert alert-danger fade show" style="display: none;">
+                    <p class="mb-0"></p>
+                </div>
+                <div class="alert alert-success fade show" style="display: none;">
+                    <p class="mb-0">Operación realizada</p>
+                </div>
+                {{ caller() }}
+            </form>
+        </div>
+    </div>
+</div>
+{%- endmacro %}
+
+{% macro cardNoForm(title, size=10) -%}
+<div class="col-lg-{{size}}">
+    <div class="card card-body bg-light">
+        <h3 class="card-header">{{title}}</h3>
+        <div class="card-block">
+            {{ caller() }}
+        </div>
+    </div>
+</div>
+{%- endmacro %}
+
+{% macro dataToJsArr(arr, idattr='id', txtattr='nombre') -%}
+[
+    {% for i in arr %}
+        {
+            "id": {{i[idattr]}},
+            "text": "{{i[txtattr]}}"
+        }
+        {% if not loop.last %},{% endif %}
+    {% endfor %}
+]
+{%- endmacro %}
+
+{% macro dataToJsArrMulti(arr, txtattr1, txtattr2, idattr='id') -%}
+[
+    {% for i in arr %}
+        {
+            "id": {{i[idattr]}},
+            "text": "{{i[txtattr1]}} - {{i[txtattr2]}}"
+        }
+        {% if not loop.last %},{% endif %}
+    {% endfor %}
+]
+{%- endmacro %}

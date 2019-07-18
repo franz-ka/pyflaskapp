@@ -9,12 +9,10 @@
         </li>
         {% if current_user.isadmin %}
         <li>
-            <a href="#">Agregar/elim. pika</a>
+            <a href="{{url_for('main.menu_agregelimpika')}}">(Agregar/elim. pika)</a>
         </li>
-        {% endif %}
-        {% if current_user.isadmin %}
         <li>
-            <a href="#">Asociar insumos</a>
+            <a href="{{url_for('main.menu_modificarstockpika')}}">(Modificar stock)</a>
         </li>
         {% endif %}
     </ul>
@@ -23,17 +21,26 @@
     <a href="#insumosSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">Insumos</a>
     <ul class="collapse list-unstyled" id="insumosSubmenu">
         <li>
-            <a href="#">Ingresar insumos</a>
+            <a href="{{url_for('main.menu_ingresarinsumo')}}">Ingresar insumos</a>
         </li>
         <li>
-            <a href="#">Rollo PLA abierto</a>
+            <a href="{{url_for('main.menu_rolloplaabierto')}}">Rollo PLA abierto</a>
         </li>
         <li>
             <a href="{{url_for('main.menu_stockinsumos')}}">Stock</a>
         </li>
         {% if current_user.isadmin %}
         <li>
-            <a href="#">Agregar/elim. insumo</a>
+            <a href="{{url_for('main.menu_agregeliminsu')}}">(Agregar/elim. insumo)</a>
+        </li>
+        <li>
+            <a href="{{url_for('main.menu_asociarinsumospika')}}">(Asociar insumos a pika)</a>
+        </li>
+        <li>
+            <a href="{{url_for('main.menu_listadoinsumospikas')}}">(Listado asociaciones)</a>
+        </li>
+        <li>
+            <a href="{{url_for('main.menu_modificarstockinsu')}}">(Modificar stock)</a>
         </li>
         {% endif %}
     </ul>
@@ -47,22 +54,35 @@
         <li>
             <a href="{{url_for('main.menu_listadoventas')}}">Listado</a>
         </li>
+        {% if current_user.isadmin %}
+        <li>
+            <a href="{{url_for('main.menu_agregelimtipoventa')}}">(Agregar/elim. tipo venta)</a>
+        </li>
+        <li>
+            <a href="{{url_for('main.menu_eliminarventa')}}">(Eliminar venta)</a>
+        </li>
+        {% endif %}
     </ul>
 </li>
-<li><a href="{{url_for('main.logout')}}" style="font-size: 0.8rem;">
+<li>
+    <a href="#fallasSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">Fallas</a>
+    <ul class="collapse list-unstyled" id="fallasSubmenu">
+        <li>
+            <a href="{{url_for('main.menu_ingresarfalla')}}">Ingresar falla</a>
+        </li>
+        <li>
+            <a href="{{url_for('main.menu_listadofallas')}}">Listado</a>
+        </li>
+        {% if current_user.isadmin %}
+        <li>
+            <a href="{{url_for('main.menu_agregelimgcode')}}">(Agregar/elim. g-code)</a>
+        </li>
+        <li>
+            <a href="{{url_for('main.menu_agregelimmaquina')}}">(Agregar/elim. máquina)</a>
+        </li>
+        {% endif %}
+    </ul>
+</li>
+<li onclick="if (confirm('¿Está seguro que desea salir?')) window.location.href = '{{url_for('main.logout')}}';"><a href="#" style="font-size: 0.8rem;">
     CERRAR SESIÓN
-</a></li>
-
-
-<li><a href="{{url_for('main.menu_piezas')}}">
-    Piezas
-</a></li>
-<li><a href="{{url_for('main.menu_modelos')}}">
-    Modelos
-</a></li>
-<li><a href="{{url_for('main.menu_impresiones')}}">
-    Impresiones
-</a></li>
-<li><a href="">
-    Armado
 </a></li>

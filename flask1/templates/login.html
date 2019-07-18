@@ -3,6 +3,13 @@
 {% block head %}
 <link href="{{ url_for('static', filename='css/fontawesome5all.css' ) }}" rel="stylesheet">
 <style type="text/css">
+    body{
+        background-image: url('{{ url_for('static', filename='cogobg.jpg' ) }}');
+        background-repeat: repeat-y;
+        background-size: cover;
+        background-color: #9007dd;
+    }
+
     .login-form {
         width: 340px;
         margin: 50px auto;
@@ -32,8 +39,11 @@
 <!-- https://www.tutorialrepublic.com/codelab.php?topic=bootstrap&file=simple-login-form -->
 <!-- https://bootsnipp.com/snippets/j6r4X -->
 <div class="login-form">
-    <form action="" method="post">
+    <form novalidate action="" method="post">
         <h2 class="text-center">Ingreso</h2>
+        <div class="alert alert-danger fade show" style="display: none;">
+            <p class="mb-0"></p>
+        </div>
         <!-- USUARIO -->
         <div class="form-group">
             <div class="input-group">
@@ -49,7 +59,7 @@
                 <div class="input-group-prepend">
                     <span class="input-group-text"> <i class="fa fa-lock"></i> </span>
                  </div>
-                <input type="password" class="form-control" name="password" placeholder="Contraseña" required="required">
+                <input type="password" class="form-control" name="password" placeholder="Contraseña" required="required" \>
             </div>
         </div>
         <!-- BOTON -->
@@ -63,4 +73,25 @@
     </form>
     <!-- <p class="text-center"><a href="#">Create an Account</a></p> -->
 </div>
+
+<script src="{{ url_for('static', filename='js/common_forms.js' ) }}" type="text/javascript"></script>
+<script type="text/javascript">
+$(function() {
+    $('.login-form input').keypress(function(e){
+        if (e.keyCode == 13) $('.login-form button').click()
+    })
+
+    regFormValid(true, function(){
+        params = window.location.href.split('next=');
+        window.location.href = window.location.origin + decodeURIComponent(params[1] || '')
+    });
+
+    //si submiteo bien borrar validaciones
+    document.forms[0].addEventListener('submit', function(event) {
+        console.log(event, this)
+        if (!event.cancelBubble)
+            this.classList.remove('was-validated');
+    })
+});
+</script>
 {% endblock %}

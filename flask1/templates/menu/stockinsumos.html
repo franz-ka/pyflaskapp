@@ -1,0 +1,32 @@
+{% extends '_maingui.html' %}
+
+{% block content %}
+{% call forms.card('Stock de insumos')  %}
+<table class="table table-sm table-striped table-hover">
+  <thead>
+    <tr>
+      <th>Insumo</th>
+      <th>Cantidad</th>
+      <th>Actualizado</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for sinsu in DATA %}
+        <tr>
+            <td>{{sinsu.insumo.nombre}}</td>
+            <td>{{sinsu.cantidad}}</td>
+            <td scope="row">{{sinsu.fecha.strftime("%d/%m/%Y %H:%M")}}</td>
+        </tr>
+    {% endfor %}
+</table>
+<a class="btn btn-primary btn-block" href="{{url_for('main.exportar_stockinsumos')}}">Exportar a CSV</a>
+{% endcall %}
+{% endblock %}
+
+{% block js %}
+<script type="text/javascript">
+$(function() {
+    
+});
+</script>
+{% endblock %}

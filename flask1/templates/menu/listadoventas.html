@@ -1,0 +1,98 @@
+{% extends '_maingui.html' %}
+
+{% block content %}
+{% call forms.cardNoForm('Listado de ventas')  %}
+{% if filtrado %}
+<div class="alert alert-info fade show">
+    <p class="mb-0">(La lista está filtrada. Para eliminar filtro, filtrar con todos los campos vacíos)</p>
+</div>
+{% endif %}
+<table class="table table-sm table-striped table-hover">
+  <thead>
+    <tr>
+      <th>Fecha</th>
+      <th>Tipo</th>
+      <th>Comentario</th>
+      <th>Pika</th>
+      <th>Cantidad</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% set vars = {'last_ventid': 0} %}
+    {% for ventapi in ventapikas %}
+        <tr>
+            {% if vars.last_ventid != ventapi.venta.id %}
+                <td>{{ventapi.venta.fecha.strftime("%d/%m/%Y %H:%M")}}</td>
+                <td>{{ventapi.venta.ventatipo.nombre}}</td>
+                <td>{{ventapi.venta.comentario}}</td>
+                {% if vars.update({'last_ventid': ventapi.venta.id}) %}{% endif %}
+            {% else %}
+                <td></td>
+                <td></td>
+                <td></td>
+            {% endif %}
+            <td>{{ventapi.pika.nombre}}</td>
+            <td>{{ventapi.cantidad}}</td>
+        </tr>
+    {% endfor %}
+</table>
+<form novalidate method="GET" class="pt-0">
+    <a id="exportar-btn" class="btn btn-primary btn-block" href="{{url_for('main.exportar_ventas')}}">Exportar a CSV</a>
+</form>
+<form novalidate method="GET" class="mt-2">
+    <h5>Filtrar listado</h5>
+    <!-- Tipo y Comentario-->
+    <div class="form-group row">
+        <div class="col-sm-4">
+            <select class="form-control select2-single select2-hidden-accessible" name="tipo">
+                <option></option>
+            </select>
+        </div>
+        <div class="col-sm-8">
+            <input type="text" name="comentario" class="form-control" placeholder="Comentario">
+        </div>
+    </div>
+    <!-- Fechas d-h -->
+    <div class="form-group row">
+        <div class="col-sm-6">
+            <input type="text" class="form-control" name="fechadesde" placeholder="Fecha desde">
+        </div>
+        <div class="col-sm-6">
+            <input type="text" class="form-control" name="fechahasta" placeholder="Fecha hasta">
+        </div>
+    </div>
+    <!-- Pika y BOTON-->
+    <div class="form-group row">
+        <div class="col-sm-4">
+            <select class="form-control select2-single select2-hidden-accessible" name="pika">
+                <option></option>
+            </select>
+            <div class="invalid-feedback">
+                Elija un pika
+            </div>
+        </div>
+        <div class="col-sm-8">
+            <button type="submit" class="btn btn-primary btn-block"">Filtrar</button>
+        </div>
+    </div>
+</form>
+{% endcall %}
+{% endblock %}
+
+{% block js %}
+<script type="text/javascript">
+$(function() {
+    querystr = window.location.href.split('?')[1]
+    if (querystr)
+        $('#exportar-btn').attr('href', $('#exportar-btn').attr('href')+'?'+querystr)
+
+    $('input[name="fechadesde"]').add('input[name="fechahasta"]').datepicker()
+
+    tiposdata = {{ forms.dataToJsArr(ventatipos) }};
+    sel2('.select2-single[name=tipo]', 'Tipo', tiposdata);
+
+    pikasdata = {{ forms.dataToJsArr(pikas) }};
+    sel2('.select2-single[name=pika]', 'Pika', pikasdata);
+});
+</script>
+{% endblock %}

@@ -1,0 +1,61 @@
+{% extends '_maingui.html' %}
+
+{% block content %}
+{% call forms.card('Agregar g-code', size=6)  %}
+<input type="hidden" name="operation" value="add">
+<!-- BOTONES -->
+<div class="form-group row">
+    <div class="col-sm-4">
+        <select class="form-control select2-single select2-hidden-accessible no-form-clear" name="pika">
+            <option></option>
+        </select>
+        <div class="invalid-feedback">
+            Elija un pika
+        </div>
+    </div>
+    <div class="col-sm-8">
+        <input type="text" name="nombregcode" class="form-control" placeholder="Nombre" required>
+    </div>
+</div>
+<div class="form-group row">
+    <div class="col-sm-12">
+        <button type="submit" class="btn btn-primary btn-block"">Agregar</button>
+    </div>
+</div>
+{% endcall %}
+{% call forms.card('Eliminar g-code', size=6)  %}
+<input type="hidden" name="operation" value="delete">
+<div class="alert alert-warning fade show">
+    <p class="mb-0">Advertencia: esta operación eliminará el g-code y todos sus datos asociados (fallas)</p>
+</div>
+<!-- Insumo -->
+<div class="form-group row">
+    <div class="col-sm-6">
+        <select class="form-control select2-single select2-hidden-accessible" name="gcode" required>
+            <option></option>
+        </select>
+        <div class="invalid-feedback">
+            Elija una g-code
+        </div>
+    </div>
+    <div class="col-sm-6">
+        <button type="submit" class="btn btn-primary btn-block">Eliminar</button>
+    </div>
+</div>
+{% endcall %}
+{% endblock %}
+
+{% block js %}
+<script type="text/javascript">
+$(function() {
+
+    regFormValid();
+
+    gcodsdata = {{ forms.dataToJsArr(gcods) }};
+    sel2('.select2-single[name=gcode]', 'G-code', gcodsdata);
+
+    pikasdata = {{ forms.dataToJsArr(pikas) }};
+    sel2('.select2-single[name=pika]', 'Pika', pikasdata);
+});
+</script>
+{% endblock %}

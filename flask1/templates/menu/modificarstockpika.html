@@ -1,0 +1,55 @@
+{% extends '_maingui.html' %}
+
+{% block content %}
+{% call forms.card('Modificar stock de pika')  %}
+<!-- Pika -->
+<div class="form-group row">
+    <div class="col-sm-6">
+        <select class="form-control select2-single select2-hidden-accessible" name="pika" required>
+            <option></option>
+        </select>
+        <div class="invalid-feedback">
+            Elija un pika
+        </div>
+    </div>
+    <div class="col-sm-3">
+        <input type="number" name="cantidadanterior" class="form-control" placeholder="#" min="1" max="9999" readonly>
+    </div>
+    <div class="col-sm-3">
+        <input type="number" name="cantidadnueva" class="form-control" placeholder="#" required min="1" max="9999">
+    </div>
+</div>
+<!-- BOTONES -->
+<div class="form-group row">
+    <div class="col-sm-12">
+        <button type="submit" class="btn btn-primary btn-block"">Modificar</button>
+    </div>
+</div>
+{% endcall %}
+{% endblock %}
+
+{% block js %}
+<script type="text/javascript">
+$(function() {
+    regFormValid(false, function(){ setTimeout('location.reload();', 2000) });
+
+    stocks = {{ forms.dataToJsArr(stocks, idattr='pika_id', txtattr='cantidad') }};
+
+    pikasdata = {{ forms.dataToJsArr(pikas) }};
+    sel2('.select2-single[name=pika]', 'Pika', pikasdata);
+    $('.select2-single[name=pika]').on('select2:select', function (e) {
+        var data = e.params.data;
+        pikaid=e.params.data.id
+        console.log(data, stocks);
+        for (st in stocks){
+            if (stocks[st].id==pikaid){
+                $('input[type=number]').val(stocks[st].text);
+                break;
+            }
+        }
+    }).on('select2:unselect', function(e){
+        $('input[name=cantidadanterior]').val('')
+    });
+});
+</script>
+{% endblock %}

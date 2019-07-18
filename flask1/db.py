@@ -5,7 +5,7 @@ from datetime import datetime
 
 def init_db_engine(app):
     from sqlalchemy import create_engine
-    return create_engine('sqlite:///' + app.config['DATABASE'], echo=True);
+    return create_engine('sqlite:///' + app.config['DATABASE'], echo=app.config['DEBUG_SQL']);
 
 
 # Define and Access the Database - http://flask.pocoo.org/docs/1.0/tutorial/database/
@@ -25,72 +25,30 @@ def close_db(e=None):
 
 def recreate_db():
     from sqlalchemy.orm import sessionmaker, scoped_session
-    from .models import Base, Pieza, Impresion, ImpresionPieza, Articulo, Modelo, ModeloPieza, ModeloArticulo
-    from .models import Pika, Insumo, PikaInsumo, StockPika, StockInsumo, MovStockPika, MovStockInsumo, Usuario, VentaTipo, Venta, VentaPika
+    from .models import Base, \
+        Usuario, \
+        Pika, Insumo, PikaInsumo, \
+        StockPika, StockInsumo, MovStockPika, MovStockInsumo, \
+        VentaTipo, Venta, VentaPika, \
+        Maquina, Gcode, Falla
     engine = init_db_engine(current_app)
     Base.metadata.drop_all(engine)
     Base.metadata.create_all(engine)
     Base.metadata.bind = engine
     DBSession = sessionmaker(bind=engine)
+
     db = DBSession()
-    '''db.add_all((
-        Pieza(nombre='ojo baku', cantidad=10),
-        Pieza(nombre='base baku', cantidad=20),
-        Pieza(nombre='tapa baku', cantidad=20),
-        Pieza(nombre='ojo coco', cantidad=20),
-        Impresion(fecha=datetime(2019, 4, 1)),
-        Impresion(fecha=datetime(2019, 4, 2)),
-        Impresion(fecha=datetime(2019, 4, 3))
-    ))
-    piezs = db.query(Pieza)
-    imps = db.query(Impresion)
+
+    # Usuarios
+    import hashlib
+    hash123 = hashlib.sha256(b"123").hexdigest()
     db.add_all((
-        ImpresionPieza(
-            impresion_id=imps.filter(Impresion.fecha == datetime(2019, 4, 1)).one().id,
-            pieza_id=piezs.filter(Pieza.nombre == 'ojo baku').one().id,
-            cantidad=50
-        ),
-        ImpresionPieza(
-            impresion_id=imps.filter(Impresion.fecha == datetime(2019, 4, 2)).one().id,
-            pieza_id=piezs.filter(Pieza.nombre == 'base baku').one().id,
-            cantidad=2
-        ),
-        ImpresionPieza(
-            impresion_id=imps.filter(Impresion.fecha == datetime(2019, 4, 2)).one().id,
-            pieza_id=piezs.filter(Pieza.nombre == 'tapa baku').one().id,
-            cantidad=2
-        ),
-        ImpresionPieza(
-            impresion_id=imps.filter(Impresion.fecha == datetime(2019, 4, 3)).one().id,
-            pieza_id=piezs.filter(Pieza.nombre == 'ojo baku').one().id,
-            cantidad=20
-        ),
-        ImpresionPieza(
-            impresion_id=imps.filter(Impresion.fecha == datetime(2019, 4, 3)).one().id,
-            pieza_id=piezs.filter(Pieza.nombre == 'ojo coco').one().id,
-            cantidad=30
-        )
+        Usuario(nombre='master', passhash=hash123, esadmin=True),
+        Usuario(nombre='usu', passhash=hash123, esadmin=False)
     ))
-    db.commit()
 
-    db.add_all((
-        Articulo(nombre='iman grande', cantidad=10),
-        Articulo(nombre='iman chico', cantidad=20),
-        Articulo(nombre='gomita 3x2', cantidad=30)
-    ))
-    db.commit()
-    arts = db.query(Articulo)
-    modbak = Modelo(nombre='baku')
-    modbak.piezas.append(ModeloPieza(pieza=piezs.filter(Pieza.nombre == 'base baku').one(), cantidad='1'))
-    modbak.piezas.append(ModeloPieza(pieza=piezs.filter(Pieza.nombre == 'tapa baku').one(), cantidad='1'))
-    modbak.piezas.append(ModeloPieza(pieza=piezs.filter(Pieza.nombre == 'ojo baku').one(), cantidad='2'))
-    modbak.articulos.append(ModeloArticulo(articulo=arts.filter(Articulo.nombre == 'iman grande').one(), cantidad='1'))
-    modbak.articulos.append(ModeloArticulo(articulo=arts.filter(Articulo.nombre == 'iman chico').one(), cantidad='2'))
-    modbak.articulos.append(ModeloArticulo(articulo=arts.filter(Articulo.nombre == 'gomita 3x2').one(), cantidad='1'))
-    db.add(modbak)
-    db.commit()'''
-
-
+    ######################
+    ##### Pikas e Insumos
     db.add_all((
         Pika(nombre='Baku'),
         Pika(nombre='Donn'),
@@ -110,52 +68,49 @@ def recreate_db():
         Insumo(nombre='PLA Blanco'),
         Insumo(nombre='PLA Negro')
     ))
-    db.commit()
+
+    ######################
+    ##### Pikas <> Insumos
     pikas = db.query(Pika)
     insus = db.query(Insumo)
     db.add_all((
         PikaInsumo(
-            pika_id=pikas.filter(Pika.nombre == 'Baku').one().id,
-            insumo_id=insus.filter(Insumo.nombre == 'ORing Pika').one().id,
+            pika=pikas.filter(Pika.nombre == 'Baku').one(),
+            insumo=insus.filter(Insumo.nombre == 'ORing Pika').one(),
             cantidad=1
         ),
         PikaInsumo(
-            pika_id=pikas.filter(Pika.nombre == 'Baku').one().id,
-            insumo_id=insus.filter(Insumo.nombre == 'Iman Pika').one().id,
+            pika=pikas.filter(Pika.nombre == 'Baku').one(),
+            insumo=insus.filter(Insumo.nombre == 'Iman Pika').one(),
             cantidad=2
         ),
         PikaInsumo(
-            pika_id=pikas.filter(Pika.nombre == 'Donn').one().id,
-            insumo_id=insus.filter(Insumo.nombre == 'ORing Pika').one().id,
+            pika=pikas.filter(Pika.nombre == 'Donn').one(),
+            insumo=insus.filter(Insumo.nombre == 'ORing Pika').one(),
             cantidad=1
         ),
         PikaInsumo(
-            pika_id=pikas.filter(Pika.nombre == 'Donn').one().id,
-            insumo_id=insus.filter(Insumo.nombre == 'Iman Pika').one().id,
+            pika=pikas.filter(Pika.nombre == 'Donn').one(),
+            insumo=insus.filter(Insumo.nombre == 'Iman Pika').one(),
             cantidad=2
         )
     ))
-    db.commit()
+
+    ######################
+    ##### Stocks
     for pika in pikas:
         db.add(StockPika(pika=pika, cantidad=10, fecha=datetime(2019, 5, 3)))
     for insu in insus:
         db.add(StockInsumo(insumo=insu, cantidad=20, fecha=datetime(2019, 5, 3)))
-    db.commit()
-    import hashlib
-    hash123 = hashlib.sha256(b"123").hexdigest()
-    db.add_all((
-        Usuario(nombre='master', passhash=hash123, esadmin=True),
-        Usuario(nombre='usu', passhash=hash123, esadmin=False)
-    ))
-    db.commit()
 
-    #VentaTipo, Venta, VentaPika
+    ######################
+    ##### Ventas
     db.add_all((
         VentaTipo(nombre='Mayorista'),
         VentaTipo(nombre='Tienda'),
         VentaTipo(nombre='Otros')
     ))
-    db.commit()
+
     ventips = db.query(VentaTipo)
     vents = [
         Venta(
@@ -176,6 +131,39 @@ def recreate_db():
         VentaPika(venta=vents[1], pika=pikas.filter(Pika.nombre == 'Koko').one(), cantidad=6),
         VentaPika(venta=vents[1], pika=pikas.filter(Pika.nombre == 'Skup').one(), cantidad=2)
     ))
+
+    ######################
+    ##### Fallas
+    # Maquina, Gcode, Falla
+    db.add_all((
+        Maquina(nombre='MK2A'),
+        Maquina(nombre='MK2B'),
+        Maquina(nombre='MK3A'),
+        Maquina(nombre='MK3B')
+    ))
+    db.add_all((
+        Gcode(nombre='Piezas blancas x23', pika=pikas.filter(Pika.nombre == 'Baku').one()),
+        Gcode(nombre='Piezas rojas x11', pika=pikas.filter(Pika.nombre == 'Donn').one()),
+        Gcode(nombre='Piezas negras x54') #pika=None
+    ))
+    maqs = db.query(Maquina)
+    gcods = db.query(Gcode)
+    db.add_all((
+        Falla(
+            maquina=maqs.filter(Maquina.nombre == 'MK2A').one(),
+            gcode=gcods.filter(Gcode.nombre == 'Piezas blancas x23').one(),
+            descripcion='MinTemp', fecha=datetime(2019, 5, 3)),
+        Falla(
+            maquina=maqs.filter(Maquina.nombre == 'MK2B').one(),
+            gcode=gcods.filter(Gcode.nombre == 'Piezas negras x54').one(),
+            descripcion='MaxTemp', fecha=datetime(2019, 5, 3)),
+        Falla(
+            maquina=maqs.filter(Maquina.nombre == 'MK2A').one(),
+            #gcode=None,
+            descripcion='ExploTo', fecha=datetime(2019, 5, 3))
+    ))
+
+    ## END
     db.commit()
 
 @click.command('init-db')

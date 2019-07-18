@@ -1,6 +1,8 @@
 import os
 from flask import Flask
 from sqlalchemy.orm import sessionmaker
+import logging
+from logging.handlers import SMTPHandler, RotatingFileHandler
 
 DBSession = sessionmaker()
 
@@ -28,26 +30,32 @@ def create_app(test_config=None):
     except OSError:
         pass
 
+    # Error Handling in Flask - https://blog.miguelgrinberg.com/post/the-flask-mega-tutorial-part-vii-error-handling
+    if not app.debug:
+        auth = (app.config['MAIL_FROM'], "wer987sdf654")
+        secure = ()
+        mail_handler = SMTPHandler(
+            mailhost=(app.config['MAIL_SERVER'], app.config['MAIL_PORT']),
+            fromaddr=app.config['MAIL_FROM'],
+            toaddrs=app.config['MAIL_TO'], subject='Microblog Failure',
+            credentials=auth, secure=secure)
+        mail_handler.setLevel(logging.ERROR)
+        app.logger.addHandler(mail_handler)
+
+        if not os.path.exists('logs'):
+            os.mkdir('logs')
+        file_handler = RotatingFileHandler('logs/cogosys.log', maxBytes=10240, backupCount=5)
+        file_handler.setFormatter(logging.Formatter('%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]'))
+        file_handler.setLevel(logging.WARNING)
+        app.logger.addHandler(file_handler)
+
     ###### DB
     from . import db
     db.init_app(app)
 
     ###### LOGIN
-    from flask_login import LoginManager
-    login_manager = LoginManager()
-    login_manager.init_app(app)
-    login_manager.login_view = "/login"
-    @login_manager.user_loader
-    def load_user(userid):
-        from .loginuser import User
-        from flask1.db import get_db
-        from .models import Usuario
-        db = get_db()
-        usu = db.query(Usuario).get(userid)
-        if usu:
-            return User(usu.id, usu.nombre, usu.esadmin)
-        else:
-            return User(None, None, None)
+    from . import login
+    login.init_app(app)
 
     ###### ROUTES (y TEMPLATES)
     from . import routes

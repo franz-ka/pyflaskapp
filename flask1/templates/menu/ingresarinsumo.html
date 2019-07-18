@@ -1,0 +1,46 @@
+{% extends '_maingui.html' %}
+
+{% block content %}
+{% call forms.card('Ingresar insumo')  %}
+<!-- Insumo y Cantidad -->
+<div class="form-group row addable">
+    <div class="col-sm-8">
+        <select class="form-control select2-single select2-hidden-accessible" name="insumo" required>
+            <option></option>
+        </select>
+        <div class="invalid-feedback">
+            Elija un insumo
+        </div>
+    </div>
+    <div class="col-sm-4">
+        <input type="number" name="cantidad" class="form-control" placeholder="#" required min="1" max="9999">
+    </div>
+</div>
+<!-- BOTONES -->
+<div class="form-group row">
+    <div class="col-sm-4">
+        <button type="button" id="btnAdd" class="btn btn-success btn-block"> + </button>
+    </div>
+    <div class="col-sm-8">
+        <button type="submit" class="btn btn-primary btn-block"">Ingresar</button>
+    </div>
+</div>
+{% endcall %}
+{% endblock %}
+
+{% block js %}
+<script type="text/javascript">
+$(function() {
+
+    regFormValid();
+
+    insusdata = {{ forms.dataToJsArr(insus) }};
+    insurowhtml = $('.addable.form-group.row')[0].outerHTML.replace(/ required/g, '');
+    sel2('.select2-single[name=insumo]', 'Insumo', insusdata);
+    $('#btnAdd').click(function(){
+        $('.form-group.row').last().before(insurowhtml);
+        sel2('.select2-single[name=insumo]', 'Insumo', insusdata);
+    });
+});
+</script>
+{% endblock %}

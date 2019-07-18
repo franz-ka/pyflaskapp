@@ -1,0 +1,130 @@
+{% extends '_maingui.html' %}
+
+{% block content %}
+{% call forms.cardNoForm('Listado de fallas')  %}
+{% if filtrado %}
+<div class="alert alert-info fade show">
+    <p class="mb-0">(La lista está filtrada. Para eliminar filtro, filtrar con todos los campos vacíos)</p>
+</div>
+{% endif %}
+<table class="table table-sm table-striped table-hover">
+  <thead>
+    <tr>
+      <th>Máquina</th>
+      <th>G-code</th>
+      <th>Fecha</th>
+      <th>Descripción</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for fa in fallas %}
+        <tr>
+            <td>{{fa.maquina.nombre}}</td>
+            {% if fa.gcode.pika %}
+            <td>({{fa.gcode.pika.nombre}}) {{fa.gcode.nombre}}</td>
+            {% else %}
+            <td>{{fa.gcode.nombre}}</td>
+            {% endif %}
+            <td>{{fa.fecha.strftime("%d/%m/%Y %H:%M")}}</td>
+            <td>{{fa.descripcion}}</td>
+        </tr>
+    {% endfor %}
+</table>
+<form novalidate method="GET" class="pt-0">
+    <a id="exportar-btn" class="btn btn-primary btn-block" href="{{url_for('main.exportar_fallas')}}">Exportar a CSV</a>
+</form>
+<form novalidate method="GET" class="mt-2">
+    <h5>Filtrar listado</h5>
+    <!-- Maquina y Descripcion -->
+    <div class="form-group row">
+        <div class="col-sm-4">
+            <select class="form-control select2-single select2-hidden-accessible" name="maquina">
+                <option></option>
+            </select>
+        </div>
+        <div class="col-sm-8">
+            <input type="text" name="descripcion" class="form-control" placeholder="Descripción">
+        </div>
+    </div>
+    <!-- Pika y Gcode-->
+    <div class="form-group row">
+        <div class="col-sm-4">
+            <select class="form-control select2-single select2-hidden-accessible" name="pika">
+                <option></option>
+            </select>
+            <div class="invalid-feedback">
+                Elija un pika
+            </div>
+        </div>
+        <div class="col-sm-8">
+            <select class="form-control select2-single select2-hidden-accessible" name="gcode">
+                <option></option>
+            </select>
+            <div class="invalid-feedback">
+                Elija un g-code
+            </div>
+        </div>
+    </div>
+    <!-- Fechas d-h -->
+    <div class="form-group row">
+        <div class="col-sm-6">
+            <input type="text" class="form-control" name="fechadesde" placeholder="Fecha desde">
+        </div>
+        <div class="col-sm-6">
+            <input type="text" class="form-control" name="fechahasta" placeholder="Fecha hasta">
+        </div>
+    </div>
+    <!-- BOTONES -->
+    <div class="form-group row">
+        <div class="col-sm-12">
+            <button type="submit" class="btn btn-primary btn-block"">Filtrar</button>
+        </div>
+    </div>
+</form>
+{% endcall %}
+{% endblock %}
+
+{% block js %}
+<script type="text/javascript">
+$(function() {
+    querystr = window.location.href.split('?')[1]
+    if (querystr)
+        $('#exportar-btn').attr('href', $('#exportar-btn').attr('href')+'?'+querystr)
+
+    $('input[name="fechadesde"]').add('input[name="fechahasta"]').datepicker()
+
+    maqsdata = {{ forms.dataToJsArr(maqs) }};
+    sel2('.select2-single[name=maquina]', 'Máquina', maqsdata);
+
+    pikasgcods = {0:[],
+        {% for pika in pikas %}
+            {{pika.id}} : [] {% if not loop.last %},{% endif %}
+        {% endfor %}
+    };
+    {% for g in gcods %}
+        {% if g.pika %}
+        pikasgcods[{{g.pika_id}}].push({
+        {% else %}
+        pikasgcods[0].push({
+        {% endif %}
+            "id": {{g.id}},
+            "text": "{{g.nombre}}"
+        });
+    {% endfor %}
+
+    pikasdata = {{ forms.dataToJsArr(pikas) }};
+
+    gcodsel = sel2('.select2-single[name=gcode]', 'G-code', pikasgcods[0]);
+    sel2('.select2-single[name=pika]', 'Pika', pikasdata).on('select2:select', function(e){
+        var data = e.params.data;
+        gcodsel.empty();
+        sel2('.select2-single[name=gcode]', 'G-code', pikasgcods[data.id]);
+        gcodsel.attr("required","required")
+    }).on('select2:unselect', function(e){
+        gcodsel.empty();
+        sel2('.select2-single[name=gcode]', 'G-code', pikasgcods[0]);
+        gcodsel.removeAttr("required")
+    });
+});
+</script>
+{% endblock %}

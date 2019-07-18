@@ -1,12 +1,25 @@
 {% extends '_maingui.html' %}
 
 {% block content %}
-{% call forms.card('Ingresar pika armado')  %}
-<!-- Pika -->
-{% for i in range(4) %}
+{% call forms.card('Ingresar venta')  %}
+<!-- Tipo y Comentario -->
+<div class="form-group row">
+    <div class="col-sm-5">
+        <select class="form-control select2-single select2-hidden-accessible" name="tipo" required>
+            <option></option>
+        </select>
+        <div class="invalid-feedback">
+            Elija un tipo
+        </div>
+    </div>
+    <div class="col-sm-7">
+        <input type="text" name="comentario" class="form-control" placeholder="Comentario">
+    </div>
+</div>
+<!-- Pikas -->
 <div class="form-group row addable">
     <div class="col-sm-8">
-        <select class="form-control select2-single select2-hidden-accessible" name="pika" {% if i==0 %}required{% endif %}>
+        <select class="form-control select2-single select2-hidden-accessible" name="pika" required>
             <option></option>
         </select>
         <div class="invalid-feedback">
@@ -14,10 +27,9 @@
         </div>
     </div>
     <div class="col-sm-4">
-        <input type="number" name="cantidad" class="form-control" placeholder="#" {% if i==0 %}required{% endif %} min="1" max="9999">
+        <input type="number" name="cantidad" class="form-control" placeholder="#" required min="1" max="9999">
     </div>
 </div>
-{% endfor %}
 <!-- BOTONES -->
 <div class="form-group row">
     <div class="col-sm-4">
@@ -34,10 +46,10 @@
 <script type="text/javascript">
 $(function() {
 
-    regFormValid(false, function(){ for(i=0;i<3;i++) $('#btnAdd').click(); });
+    regFormValid();
 
-    //$('input[name=fecha]').val("{{nowfecha}}");
-    //$('input[name=hora]').val("{{nowtiempo}}");
+    tiposdata = {{ forms.dataToJsArr(ventatipos) }};
+    sel2('.select2-single[name=tipo]', 'Tipo', tiposdata);
 
     pikasdata = {{ forms.dataToJsArr(pikas) }};
     pikarowhtml = $('.addable.form-group.row')[0].outerHTML.replace(/ required/g, '');
