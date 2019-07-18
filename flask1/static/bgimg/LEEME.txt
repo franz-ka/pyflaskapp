@@ -1,0 +1,9 @@
+NO se le pueden cambiar los nombres a las imágenes que residen en esta carpeta
+NO se le pueden cambiar la extensión (es .jpg, siempre)
+NO se pueden borrar
+
+SÍ se pueden sobreescribir con imágenes a su antojo
+De ser así intenten mantener las mismas dimensiones de cada imagen
+SÍ se puede agregar otros archivos a la carpeta aunque el sistema no los detecte
+
+Besis, wen
