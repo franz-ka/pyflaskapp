@@ -5,7 +5,7 @@ from datetime import datetime
 
 def init_db_engine(app):
     from sqlalchemy import create_engine
-    return create_engine('sqlite:///' + app.config['DATABASE'], echo=app.config['DEBUG_SQL']);
+    return create_engine('sqlite:///' + app.config['DATABASE'], echo=app.config['DEBUG_SQL'])
 
 
 # Define and Access the Database - http://flask.pocoo.org/docs/1.0/tutorial/database/
@@ -30,7 +30,7 @@ def recreate_db():
         Pika, Insumo, PikaInsumo, \
         StockPika, StockInsumo, MovStockPika, MovStockInsumo, \
         VentaTipo, Venta, VentaPika, \
-        Maquina, Gcode, Falla
+        Maquina, Gcode, Falla, Alarma
     engine = init_db_engine(current_app)
     Base.metadata.drop_all(engine)
     Base.metadata.create_all(engine)

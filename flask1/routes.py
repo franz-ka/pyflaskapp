@@ -1,3 +1,4 @@
+# coding=utf-8
 from flask import current_app, Blueprint, request, make_response, render_template, redirect, url_for
 from flask_login import login_required, login_user, logout_user
 import datetime
@@ -6,6 +7,7 @@ from flask1.db import get_db
 from flask1.login import User, loginUserPass, logoutUser
 from .models import *
 from .csvexport import CsvExporter
+from .alarmas import check_alarma, check_alarmas
 
 bp = Blueprint('main', __name__, url_prefix='')
 
@@ -107,6 +109,8 @@ def menu_armadopika():
                 stockpika.fecha = mov.fecha
 
         db.commit()
+
+        check_alarmas()
 
         return ''
 
@@ -399,6 +403,8 @@ def menu_rolloplaabierto():
 
         db.commit()
 
+        check_alarmas()
+
         return ''
 
 @bp.route("/menu/agregeliminsu", methods=['GET', 'POST'])
@@ -437,11 +443,14 @@ def menu_agregeliminsu():
             insu = Insumo(nombre=request.form['nombreinsu'])
             db.add(insu)
             db.add(StockInsumo(insumo=insu, cantidad=0, fecha=datetime.datetime.now()))
+            if request.form['alarmacantidad']:
+                db.add(Alarma(insumo=insu, cantidad=int(request.form['alarmacantidad'])))
         elif request.form['operation'] == 'delete':
             insu = db.query(Insumo).get(int(request.form['insumo']))
             db.query(PikaInsumo).filter(PikaInsumo.insumo==insu).delete()
             db.query(MovStockInsumo).filter(MovStockInsumo.insumo==insu).delete()
             db.query(StockInsumo).filter(StockInsumo.insumo==insu).delete()
+            db.query(Alarma).filter(Alarma.insumo==insu).delete()
             db.query(Insumo).filter(Insumo.id==insu.id).delete()
 
         db.commit()
@@ -485,6 +494,8 @@ def menu_modificarstockinsu():
         stockinsu.fecha = mov.fecha
 
         db.commit()
+
+        check_alarma(insu)
 
         return ''
 
@@ -978,6 +989,36 @@ def menu_agregelimgcode():
             gcod = db.query(Gcode).get(int(request.form['gcode']))
             db.query(Falla).filter(Falla.gcode==gcod).delete()
             db.query(Gcode).filter(Gcode.id==gcod.id).delete()
+
+        db.commit()
+
+        return ''
+
+
+########################### ALARMAS
+@bp.route("/menu/agregelimalarma", methods=['GET', 'POST'])
+@login_required
+def menu_agregelimalarma():
+    if request.method == "GET":
+        db = get_db()
+        DATA = db.query(TABLE).all()
+
+        r = make_response(render_template(
+            'menu/agregelimalarma.html',
+            DATA=DATA
+        ))
+        return r
+    else:  # request.method == "POST":
+        print('post form:', request.form)
+
+        try:
+            checkparams(request.form, ('PARAM1', 'PARAMN'))
+        except Exception as e:
+            return str(e), 400
+
+        db = get_db()
+
+        pass
 
         db.commit()
 

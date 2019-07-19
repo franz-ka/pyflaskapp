@@ -5,18 +5,28 @@
 <input type="hidden" name="operation" value="add">
 <!-- BOTONES -->
 <div class="form-group row">
-    <div class="col-sm-6">
+    <div class="col">
         <input type="text" name="nombreinsu" class="form-control" placeholder="Nombre" required>
     </div>
+</div>
+<div class="form-group row">
     <div class="col-sm-6">
-        <button type="submit" class="btn btn-primary btn-block"">Agregar</button>
+        <p class="my-2 ml-2">Alarma a partir de:</p>
+    </div>
+    <div class="col-sm-6">
+        <input type="number" name="alarmacantidad" class="form-control" placeholder="#" min="1" max="9999">
+    </div>
+</div>
+<div class="form-group row">
+    <div class="col">
+        <button type="submit" class="btn btn-primary btn-block">Agregar</button>
     </div>
 </div>
 {% endcall %}
 {% call forms.card('Eliminar insumo', size=6)  %}
 <input type="hidden" name="operation" value="delete">
 <div class="alert alert-warning fade show">
-    <p class="mb-0">Advertencia: esta operación eliminará el insumo y todos sus datos asociados (stock y asociación a pikas)</p>
+    <p class="mb-0">Advertencia: esta operación eliminará el insumo y todos sus datos asociados (stock, asociación a pikas y alarma)</p>
 </div>
 <!-- Insumo -->
 <div class="form-group row">

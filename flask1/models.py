@@ -176,3 +176,13 @@ class Falla(Base):
     fecha = Column(DateTime)
 
     def __repr__(self): return '<Falla {}>'.format(self.id)
+
+class Alarma(Base):
+    __tablename__ = 'alarma'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    insumo_id = Column(Integer, ForeignKey('insumo.id'))
+    insumo = relationship('Insumo')
+    cantidad = Column(Integer, nullable=False)
+    fecha_avisado = Column(DateTime)
+
+    def __repr__(self): return '<Alarma {}>'.format(self.id)

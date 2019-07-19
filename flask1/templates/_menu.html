@@ -83,6 +83,16 @@
         {% endif %}
     </ul>
 </li>
+<li>
+    <a href="#alarmasSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">Alarmas</a>
+    <ul class="collapse list-unstyled" id="alarmasSubmenu">
+        {% if current_user.isadmin %}
+        <li>
+            <a href="{{url_for('main.menu_agregelimalarma')}}">(Agregar/elim. alarma)</a>
+        </li>
+        {% endif %}
+    </ul>
+</li>
 <li onclick="if (confirm('¿Está seguro que desea salir?')) window.location.href = '{{url_for('main.logout')}}';"><a href="#" style="font-size: 0.8rem;">
     CERRAR SESIÓN
 </a></li>

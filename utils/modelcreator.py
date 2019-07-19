@@ -13,6 +13,7 @@ tables = {
     #'Maquina': ['id', 'nombre,str64,nonull'],
     #'Gcode': ['id', 'Pika', 'nombre,str128,nonull'],
     #'Falla': ['id', 'Maquina', 'Gcode', 'descripcion,str128,nonull', 'fecha,datetime']
+    #'Alarma': ['id', 'Insumo', 'cantidad,int,nonull', 'fecha_avisado,datetime']
 }
 
 txt=[]

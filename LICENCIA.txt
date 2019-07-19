@@ -1,0 +1,11 @@
+Haga lo que quiera con el código.
+Es suyo, es mío, es de todxs; es, de dominio público.
+Usted lo puede estudiar, modificar, copiar y/o vender, y es invitadx a hacerlo.
+
+Yo, el desarrollador, no me hago cargo si usted deposita información sensible en este
+sistema y después la pierde o el sistema se rompe y se pierde la información.
+Es de su responsabilidad mantener los datos aquí depositados en otro lugar más seguro.
+
+Este sistema fue diseñado para ser simplemente un control de stock y ventas.
+Si alguien lo utiliza para hackear, romper, espiar, o dañar algún derecho de algún tercerx
+no es mi responsabilidad.

@@ -1,5 +1,6 @@
-import os
+import os, sys
 from flask import Flask
+from flask import __version__ as flask__version__
 from sqlalchemy.orm import sessionmaker
 import logging
 from logging.handlers import SMTPHandler, RotatingFileHandler
@@ -9,8 +10,10 @@ DBSession = sessionmaker()
 # Flask Mega Tutorial - https://blog.miguelgrinberg.com/post/the-flask-mega-tutorial-part-xv-a-better-application-structure
 # The Application Factory - http://flask.pocoo.org/docs/1.0/tutorial/factory/
 # Application Factories - http://flask.pocoo.org/docs/1.0/patterns/appfactories/
-# Flask – Application Factory - https://excellencetechnologies.in/blog/flask-application-factory/
+# Flask - Application Factory - https://excellencetechnologies.in/blog/flask-application-factory/
 def create_app(test_config=None):
+    print('Py version {}.{}'.format(*sys.version_info[:2]))
+    print('Flask version', flask__version__)
     # create and configure the app
     app = Flask(__name__, instance_relative_config=True)
     app.config.from_mapping(
