@@ -1,0 +1,38 @@
+{% extends '_maingui.html' %}
+
+{% block content %}
+{% call forms.card('Listado de alarmas')  %}
+<table class="table table-sm table-striped table-hover">
+  <thead>
+    <tr>
+      <th>Insumo</th>
+      <th>Stock</th>
+      <th>Alarma</th>
+      <th>Última alarma enviada</th>
+    </tr>
+  </thead>
+  <tbody>
+    {# en el indice [0] está la alarma, en el [1] el stock #}
+    {% for al, st in alarmas_stocks %}
+        <tr>
+            <td>{{al.insumo.nombre}}</td>
+            <td>{{st.cantidad}}</td>
+            <td>{{al.cantidad}}</td>
+            {% if al.fecha_avisado %}
+            <td>{{al.fecha_avisado.strftime("%d/%m/%Y %H:%M")}}</td>
+            {% else %}
+            <td></td>
+            {% endif %}
+        </tr>
+    {% endfor %}
+</table>
+{% endcall %}
+{% endblock %}
+
+{% block js %}
+<script type="text/javascript">
+$(function() {
+    
+});
+</script>
+{% endblock %}

@@ -3,9 +3,13 @@ from flask import current_app, g
 from flask.cli import with_appcontext
 from datetime import datetime
 
+__dbconnstr = None
+
 def init_db_engine(app):
+    global __dbconnstr
     from sqlalchemy import create_engine
-    return create_engine('sqlite:///' + app.config['DATABASE'], echo=app.config['DEBUG_SQL'])
+    __dbconnstr = 'sqlite:///' + app.config['DATABASE']
+    return create_engine(__dbconnstr, echo=app.config['DEBUG_SQL'])
 
 
 # Define and Access the Database - http://flask.pocoo.org/docs/1.0/tutorial/database/

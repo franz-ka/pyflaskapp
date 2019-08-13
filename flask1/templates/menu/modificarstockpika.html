@@ -41,6 +41,7 @@ $(function() {
         var data = e.params.data;
         pikaid=e.params.data.id
         console.log(data, stocks);
+        $('input[name=cantidadanterior]').val('')
         for (st in stocks){
             if (stocks[st].id==pikaid){
                 $('input[type=number]').val(stocks[st].text);
