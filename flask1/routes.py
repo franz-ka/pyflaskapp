@@ -8,6 +8,7 @@ from flask1.login import User, loginUserPass, logoutUser
 from .models import *
 from .csvexport import CsvExporter
 from .alarmas import check_alarma, check_alarmas
+from sqlalchemy import or_
 
 bp = Blueprint('main', __name__, url_prefix='')
 
@@ -497,6 +498,52 @@ def menu_modificarstockinsu():
         db.commit()
 
         check_alarma(insu)
+
+        return ''
+
+@bp.route("/menu/insumoabierto", methods=['GET', 'POST'])
+@login_required
+def menu_insumoabierto():
+    if request.method == "GET":
+        db = get_db()
+        insuscons = db.query(Insumo).join(StockInsumo).filter(or_(Insumo.nombre.ilike("x -%"), Insumo.nombre.ilike("y -%"), Insumo.nombre.ilike("z -%")), StockInsumo.cantidad > 0).order_by(Insumo.nombre).all()
+
+        r = make_response(render_template(
+            'menu/insumoabierto.html',
+            insuscons=insuscons
+        ))
+        return r
+    else:  # request.method == "POST":
+        print('post form:', request.form)
+
+        try:
+            checkparams(request.form, ('insumo_consumible', 'cantidad'))
+        except Exception as e:
+            return str(e), 400
+
+        db = get_db()
+
+        insuscons = request.form.getlist('insumo_consumible')
+        cants = request.form.getlist('cantidad')
+        dtnow = datetime.datetime.now()
+        for i, insuconsid in enumerate(insuscons):
+            if i<len(cants) and cants[i] and insuconsid:
+                insucons = db.query(Insumo).get(insuconsid)
+                insuconscant = int(cants[i])
+                stockinsucons = db.query(StockInsumo).get(insuconsid)
+
+                if stockinsucons.cantidad < insuconscant:
+                    return 'No hay suficiente stock del insumo consumible "{}" (hay {}, requiere {})'.format(insucons.nombre, stockinsucons.cantidad, insuconscant), 400
+
+                #restamos stock de insumo consumible
+                mov = MovStockInsumo(insumo=insucons, cantidad=-insuconscant, fecha=dtnow)
+                db.add(mov)
+                stockinsucons.cantidad -= insuconscant
+                stockinsucons.fecha = mov.fecha
+
+        db.commit()
+
+        check_alarmas()
 
         return ''
 
