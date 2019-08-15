@@ -3,6 +3,25 @@ $(function(){
     $.fn.datepicker.defaults.language = "es";
 })
 
+function lockForm(form){
+    $(form).find('input,select,button').each(function(){
+        var prePostDis = $(this).prop('disabled') || false
+        $(this).data('pre-post-disabled', prePostDis);
+        $(this).prop('disabled', true)
+    })
+    $(form).parents('.card').attr('style', 'background-color: #d7dde3 !important')
+    $(document.body).css('cursor', 'progress')
+}
+function unlockForm(form){
+    $(form).find('input,select,button').each(function(){
+        var prePostDis = $(this).data('pre-post-disabled') || false
+        $(this).prop('disabled', prePostDis)
+        $(this).data('pre-post-disabled', null);
+    })
+    $(form).parents('.card').attr('style', null)
+    $(document.body).css('cursor', 'inherit')
+}
+
 function regFormValid(hideErr, successcb){
     // html5 constraints - https://www.w3.org/TR/html5/sec-forms.html#constraints
     // bs4 form validation - https://getbootstrap.com/docs/4.0/components/forms/#validation
@@ -17,9 +36,11 @@ function regFormValid(hideErr, successcb){
               event.stopPropagation();
             }else{
                 event.preventDefault();
+                formData = $(form).serialize()
+                lockForm(form)
                 $.ajax({
                      type: "POST",
-                     data: $(form).serialize(),
+                     data: formData,
                      success: function(){
                         form.classList.remove('was-validated');
                         $(form).find('.alert-danger').hide();
@@ -41,6 +62,9 @@ function regFormValid(hideErr, successcb){
                                 clearTimeout(hideerrtout);
                             hideerrtout = setTimeout( function(){ $(form).find('.alert-danger').hide(); } , 5000 );
                         }
+                     },
+                     complete: function(){
+                        unlockForm(form);
                      }
                 });
             }
