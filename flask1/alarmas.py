@@ -64,5 +64,5 @@ def mandar_alarma(nombre_insu, stock_insu, alarma_cant):
             'Hay {1} de stock para el insumo {0}.\n\n'+
             '(alarma configurada para stock igual o menor a {2})'
         ).format(nombre_insu, stock_insu, alarma_cant)
-    s.sendmail("stockcogonauts@gmail.com", "cogonauts@gmail.com", message)
+    s.sendmail("stockcogonauts@gmail.com", "cogonauts@gmail.com", message.encode('utf8'))
     s.quit()
