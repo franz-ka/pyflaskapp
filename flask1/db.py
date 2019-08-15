@@ -28,6 +28,7 @@ def close_db(e=None):
 
 
 def recreate_db():
+    return
     from sqlalchemy.orm import sessionmaker, scoped_session
     from .models import Base, \
         Usuario, \
@@ -45,10 +46,16 @@ def recreate_db():
 
     # Usuarios
     import hashlib
-    hash123 = hashlib.sha256(b"123").hexdigest()
+    hashMark = hashlib.sha256(b"markdijono").hexdigest()
+    hash123 = hashlib.sha256(b"4321").hexdigest()
     db.add_all((
-        Usuario(nombre='master', passhash=hash123, esadmin=True),
-        Usuario(nombre='usu', passhash=hash123, esadmin=False)
+        Usuario(nombre='admin', passhash=hashMark, esadmin=True),
+        Usuario(nombre='nacho', passhash=hash123, esadmin=False),
+        Usuario(nombre='rama', passhash=hash123, esadmin=False),
+        Usuario(nombre='sosa', passhash=hash123, esadmin=False),
+        Usuario(nombre='tomi', passhash=hash123, esadmin=False),
+        Usuario(nombre='dani', passhash=hash123, esadmin=False),
+        Usuario(nombre='augusto', passhash=hash123, esadmin=False)
     ))
 
     ######################
@@ -61,22 +68,26 @@ def recreate_db():
         Pika(nombre='XL Baku'),
         Pika(nombre='XL Donn'),
         Pika(nombre='XL Koko'),
-        Pika(nombre='XL Skup'),
-        Insumo(nombre='ORing Pika'),
-        Insumo(nombre='ORing XL'),
-        Insumo(nombre='ORing Llav.'),
-        Insumo(nombre='Iman Pika'),
-        Insumo(nombre='Iman XL'),
-        Insumo(nombre='Iman Llav.'),
-        Insumo(nombre='PLA Rojo'),
-        Insumo(nombre='PLA Blanco'),
-        Insumo(nombre='PLA Negro')
+        Pika(nombre='XL Skup')
+        #Insumo(nombre='ORing Pika'),
+        #Insumo(nombre='ORing XL'),
+        #Insumo(nombre='ORing Llav.'),
+        #Insumo(nombre='Iman Pika'),
+        #Insumo(nombre='Iman XL'),
+        #Insumo(nombre='Iman Llav.'),
+        #Insumo(nombre='PLA Rojo'),
+        #Insumo(nombre='PLA Blanco'),
+        #Insumo(nombre='PLA Negro')
     ))
 
     ######################
     ##### Pikas <> Insumos
     pikas = db.query(Pika)
-    insus = db.query(Insumo)
+
+    ## END
+    db.commit()
+    return
+    #insus = db.query(Insumo)
     db.add_all((
         PikaInsumo(
             pika=pikas.filter(Pika.nombre == 'Baku').one(),
