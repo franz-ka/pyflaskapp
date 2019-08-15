@@ -9,6 +9,9 @@ class CsvExporter:
         self.buffer = io.BytesIO()
         self.fname = filename
 
+        # explicitar separador para el windows excel
+        self.buffer.write('sep=,'.encode('utf-8') + self._nl)
+
     def writeHeaders(self,str):
         self.buffer.write(str.encode('utf-8') + self._nl)
 
