@@ -35,12 +35,12 @@ def create_app(test_config=None):
 
     # Error Handling in Flask - https://blog.miguelgrinberg.com/post/the-flask-mega-tutorial-part-vii-error-handling
     if not app.debug:
-        auth = (app.config['MAIL_FROM'], "wer987sdf654")
+        auth = ("stockcogonauts@gmail.com", "Markdijono1375$")
         secure = ()
         mail_handler = SMTPHandler(
             mailhost=(app.config['MAIL_SERVER'], app.config['MAIL_PORT']),
             fromaddr=app.config['MAIL_FROM'],
-            toaddrs=app.config['MAIL_TO'], subject='Microblog Failure',
+            toaddrs=app.config['MAIL_TO'], subject='Cogosys error',
             credentials=auth, secure=secure)
         mail_handler.setLevel(logging.ERROR)
         app.logger.addHandler(mail_handler)

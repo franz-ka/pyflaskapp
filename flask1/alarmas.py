@@ -3,7 +3,7 @@ from flask1.models import Alarma, Insumo, StockInsumo
 from datetime import datetime
 import smtplib
 
-_alarma_dias_intervalo = 0
+_alarma_dias_intervalo = 1
 
 
 def days_between(d1, d2):
@@ -55,12 +55,14 @@ def check_insumo_stock(alarma, stock):
 
 def mandar_alarma(nombre_insu, stock_insu, alarma_cant):
     s = smtplib.SMTP('smtp.gmail.com', 587)
+    s.ehlo()
     s.starttls()
-    s.login("bungew@gmail.com", "PASSWORD")
+    s.ehlo()
+    s.login("stockcogonauts@gmail.com", "Markdijono1375$")
     message = (
             'Subject: Alarma stock bajo ({1}) de {0}\n'+
             'Hay {1} de stock para el insumo {0}.\n\n'+
             '(alarma configurada para stock igual o menor a {2})'
         ).format(nombre_insu, stock_insu, alarma_cant)
-    s.sendmail("sistema@cogonauts.sys", "bungew@gmail.com", message)
+    s.sendmail("stockcogonauts@gmail.com", "cogonauts@gmail.com", message)
     s.quit()
