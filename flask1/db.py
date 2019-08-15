@@ -60,6 +60,7 @@ def recreate_db():
 
     ######################
     ##### Pikas e Insumos
+    ## CUIDADO QUE SI AGREGAS PIKA ASÍ SÍ O SÍ TENÉS QUE AGREGARLE STOCK SINO ERROR
     db.add_all((
         Pika(nombre='Baku'),
         Pika(nombre='Donn'),

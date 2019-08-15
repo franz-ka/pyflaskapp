@@ -182,6 +182,7 @@ def menu_agregelimpika():
         if request.form['operation'] == 'add':
             if db.query(Pika).filter(Pika.nombre==request.form['nombrepika']).first():
                 return str('Ya existe un pika con ese nombre'), 400
+            # siempre al agregar un pika se debe agregar su StockPika en 0 sino después hay errores
             pika = Pika(nombre=request.form['nombrepika'])
             db.add(pika)
             db.add(StockPika(pika=pika, cantidad=0, fecha=datetime.datetime.now()))
