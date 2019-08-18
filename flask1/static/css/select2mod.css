@@ -7,3 +7,8 @@
 .select2-selection__arrow {
     height: 34px !important;
 }
+
+/* lista de resultados más grande! */
+.select2-container--default .select2-results > .select2-results__options {
+    max-height: 400px;
+}
