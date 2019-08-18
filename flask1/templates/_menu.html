@@ -1,35 +1,35 @@
 {% set menus = [
 	{'name': 'pikas', 'tit': 'Pikas', 'submenus': [
-        {'endp': 'main.menu_armadopika', 'tit': 'Ingresar armado'},
-        {'endp': 'main.menu_stockpikas', 'tit': 'Stock'},
-        {'endp': 'main.menu_agregelimpika', 'tit': 'Agregar/elim. pika', 'admin': 1},
-        {'endp': 'main.menu_modificarstockpika', 'tit': 'Modificar stock', 'admin': 1},
+        {'endp': 'menu_armadopika', 'tit': 'Ingresar armado'},
+        {'endp': 'menu_stockpikas', 'tit': 'Stock'},
+        {'endp': 'menu_agregelimpika', 'tit': 'Agregar/elim. pika', 'admin': 1},
+        {'endp': 'menu_modificarstockpika', 'tit': 'Modificar stock', 'admin': 1},
 	]},
 	{'name': 'insumos', 'tit': 'Insumos', 'submenus': [
-        {'endp': 'main.menu_ingresarinsumo', 'tit': 'Ingresar insumos'},
-        {'endp': 'main.menu_rolloplaabierto', 'tit': 'Rollo PLA abierto'},
-        {'endp': 'main.menu_insumoabierto', 'tit': 'Insumo abierto'},
-        {'endp': 'main.menu_stockinsumos', 'tit': 'Stock'},
-        {'endp': 'main.menu_agregeliminsu', 'tit': 'Agregar/elim. insumo', 'admin': 1},
-        {'endp': 'main.menu_asociarinsumospika', 'tit': 'Asociar insumos a pika', 'admin': 1},
-        {'endp': 'main.menu_listadoinsumospikas', 'tit': 'Listado asociaciones', 'admin': 1},
-        {'endp': 'main.menu_modificarstockinsu', 'tit': 'Modificar stock', 'admin': 1},
+        {'endp': 'menu_ingresarinsumo', 'tit': 'Ingresar insumos'},
+        {'endp': 'menu_rolloplaabierto', 'tit': 'Rollo PLA abierto'},
+        {'endp': 'menu_insumoabierto', 'tit': 'Insumo abierto'},
+        {'endp': 'menu_stockinsumos', 'tit': 'Stock'},
+        {'endp': 'menu_agregeliminsu', 'tit': 'Agregar/elim. insumo', 'admin': 1},
+        {'endp': 'menu_asociarinsumospika', 'tit': 'Asociar insumos a pika', 'admin': 1},
+        {'endp': 'menu_listadoinsumospikas', 'tit': 'Listado asociaciones', 'admin': 1},
+        {'endp': 'menu_modificarstockinsu', 'tit': 'Modificar stock', 'admin': 1},
 	]},
 	{'name': 'ventas', 'tit': 'Ventas', 'submenus': [
-        {'endp': 'main.menu_ingresarventa', 'tit': 'Ingresar venta'},
-        {'endp': 'main.menu_listadoventas', 'tit': 'Listado'},
-        {'endp': 'main.menu_agregelimtipoventa', 'tit': 'Agregar/elim. tipo venta', 'admin': 1},
-        {'endp': 'main.menu_eliminarventa', 'tit': 'Eliminar venta', 'admin': 1},
+        {'endp': 'menu_ingresarventa', 'tit': 'Ingresar venta'},
+        {'endp': 'menu_listadoventas', 'tit': 'Listado'},
+        {'endp': 'menu_agregelimtipoventa', 'tit': 'Agregar/elim. tipo venta', 'admin': 1},
+        {'endp': 'menu_eliminarventa', 'tit': 'Eliminar venta', 'admin': 1},
 	]},
 	{'name': 'fallas', 'tit': 'Fallas', 'submenus': [
-        {'endp': 'main.menu_ingresarfalla', 'tit': 'Ingresar falla'},
-        {'endp': 'main.menu_listadofallas', 'tit': 'Listado'},
-        {'endp': 'main.menu_agregelimgcode', 'tit': 'Agregar/elim. g-code', 'admin': 1},
-        {'endp': 'main.menu_agregelimmaquina', 'tit': 'Agregar/elim. máquina', 'admin': 1},
+        {'endp': 'menu_ingresarfalla', 'tit': 'Ingresar falla'},
+        {'endp': 'menu_listadofallas', 'tit': 'Listado'},
+        {'endp': 'menu_agregelimgcode', 'tit': 'Agregar/elim. g-code', 'admin': 1},
+        {'endp': 'menu_agregelimmaquina', 'tit': 'Agregar/elim. máquina', 'admin': 1},
 	]},
 	{'name': 'alarmas', 'tit': 'Alarmas', 'submenus': [
-        {'endp': 'main.menu_listadoalarmas', 'tit': 'Listado alarmas'},
-        {'endp': 'main.menu_agregelimalarma', 'tit': 'Agregar/elim. alarma', 'admin': 1},
+        {'endp': 'menu_listadoalarmas', 'tit': 'Listado alarmas'},
+        {'endp': 'menu_agregelimalarma', 'tit': 'Agregar/elim. alarma', 'admin': 1},
 	]}
 ] %}
 {% for menu in menus %}
@@ -37,12 +37,13 @@
     <a href="#{{menu.name}}Submenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">{{menu.tit}}</a>
 	<ul class="collapse list-unstyled" id="{{menu.name}}Submenu">
 	{% for submenu in menu.submenus %}
+		{% set endp_url = url_for(menu.name + '.' + submenu.endp) %}
 		{% if submenu.get('admin') %}
 			{% if current_user.isadmin %}
-	        <li><a href="{{url_for(submenu.endp)}}">[{{submenu.tit}}]</a></li>
+	        <li><a href="{{endp_url}}">[{{submenu.tit}}]</a></li>
 			{% endif %}
 		{% else %}
-        <li><a href="{{url_for(submenu.endp)}}">{{submenu.tit}}</a></li>
+        <li><a href="{{endp_url}}">{{submenu.tit}}</a></li>
 		{% endif %}		
 	{% endfor %}
 	</ul>
