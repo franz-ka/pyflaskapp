@@ -13,9 +13,7 @@
             Elija un pika
         </div>
     </div>
-    <div class="col-sm-4">
-        <input type="number" name="cantidad" class="form-control" placeholder="#" {% if i==0 %}required{% endif %} min="1" max="9999">
-    </div>
+	{{ forms.input_number(4, 'cantidad', min=1, required=(i==0), readonly=0) }}
 </div>
 {% endfor %}
 <!-- BOTONES -->

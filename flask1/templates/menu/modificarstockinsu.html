@@ -12,12 +12,8 @@
             Elija un insumo
         </div>
     </div>
-    <div class="col-sm-3">
-        <input type="number" name="cantidadanterior" class="form-control" placeholder="#" min="0" max="9999" readonly>
-    </div>
-    <div class="col-sm-3">
-        <input type="number" name="cantidadnueva" class="form-control" placeholder="#" required min="0" max="9999">
-    </div>
+	{{ forms.input_number(3, 'cantidadanterior', min=0, required=0, readonly=1) }}
+	{{ forms.input_number(3, 'cantidadnueva', min=0, required=1, readonly=0) }}
 </div>
 <!-- BOTONES -->
 <div class="form-group row">

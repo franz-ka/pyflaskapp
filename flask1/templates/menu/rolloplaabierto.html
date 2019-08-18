@@ -12,9 +12,7 @@
             Elija un rollo PLA
         </div>
     </div>
-    <div class="col-sm-4">
-        <input type="number" name="cantidad" class="form-control" placeholder="#" required min="1" max="9999" value="1">
-    </div>
+	{{ forms.input_number(4, 'cantidad', min=1, required=1, readonly=0, value=1) }}
 </div>
 <!-- BOTONES -->
 <div class="form-group row">
