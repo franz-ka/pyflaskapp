@@ -62,4 +62,15 @@
 </div>
 {%- endmacro %} 
 
+{% macro input_select(col, name, errmsg, required=0, class='') -%}
+{% set requiredTag = 'required ' if required else '' %}
+{% set classTag = ' '+class if class else '' %}
+<div class="col-sm-{{col}}">
+    <select class="form-control select2-single select2-hidden-accessible{{classTag}}" name="{{name}}"{{requiredTag}}>
+        <option></option>
+    </select>
+    <div class="invalid-feedback">{{errmsg}}</div>
+</div>
+{%- endmacro %} 
+
 
