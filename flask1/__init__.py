@@ -63,5 +63,8 @@ def create_app(test_config=None):
     ###### ROUTES (y TEMPLATES)
     from . import routes
     app.register_blueprint(routes.bp)
+    from .views import menu_bps
+    for menu_bp in menu_bps:
+        app.register_blueprint(menu_bp)
 
     return app
