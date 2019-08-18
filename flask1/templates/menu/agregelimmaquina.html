@@ -20,14 +20,7 @@
 </div>
 <!-- Insumo -->
 <div class="form-group row">
-    <div class="col-sm-6">
-        <select class="form-control select2-single select2-hidden-accessible" name="maquina" required>
-            <option></option>
-        </select>
-        <div class="invalid-feedback">
-            Elija una máquina
-        </div>
-    </div>
+    {{ forms.input_select(6, "maquina", "Elija una máquina", required=1) }}
     <div class="col-sm-6">
         <button type="submit" class="btn btn-primary btn-block">Eliminar</button>
     </div>

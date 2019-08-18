@@ -4,36 +4,15 @@
 {% call forms.card('Ingresar falla')  %}
 <!-- Maquina y Descripcion -->
 <div class="form-group row">
-    <div class="col-sm-4">
-        <select class="form-control select2-single select2-hidden-accessible" name="maquina" required>
-            <option></option>
-        </select>
-        <div class="invalid-feedback">
-            Elija una máquina
-        </div>
-    </div>
+    {{ forms.input_select(4, "maquina", "Elija una máquina", required=1) }}
     <div class="col-sm-8">
         <input type="text" name="descripcion" class="form-control" placeholder="Descripción" required>
     </div>
 </div>
 <!-- Pika y Gcode-->
 <div class="form-group row">
-    <div class="col-sm-4">
-        <select class="form-control select2-single select2-hidden-accessible" name="pika">
-            <option></option>
-        </select>
-        <div class="invalid-feedback">
-            Elija un pika
-        </div>
-    </div>
-    <div class="col-sm-8">
-        <select class="form-control select2-single select2-hidden-accessible" name="gcode">
-            <option></option>
-        </select>
-        <div class="invalid-feedback">
-            Elija un g-code
-        </div>
-    </div>
+    {{ forms.input_select(4, "pika", "Elija un pika", required=0) }}
+    {{ forms.input_select(8, "gcode", "Elija un g-code", required=0) }}
 </div>
 <!-- BOTONES -->
 <div class="form-group row">

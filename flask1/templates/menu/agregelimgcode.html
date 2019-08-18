@@ -5,14 +5,7 @@
 <input type="hidden" name="operation" value="add">
 <!-- BOTONES -->
 <div class="form-group row">
-    <div class="col-sm-4">
-        <select class="form-control select2-single select2-hidden-accessible no-form-clear" name="pika">
-            <option></option>
-        </select>
-        <div class="invalid-feedback">
-            Elija un pika
-        </div>
-    </div>
+    {{ forms.input_select(4, "pika", "Elija un pika", required=0, class='no-form-clear') }}
     <div class="col-sm-8">
         <input type="text" name="nombregcode" class="form-control" placeholder="Nombre" required>
     </div>
@@ -30,14 +23,7 @@
 </div>
 <!-- Insumo -->
 <div class="form-group row">
-    <div class="col-sm-6">
-        <select class="form-control select2-single select2-hidden-accessible" name="gcode" required>
-            <option></option>
-        </select>
-        <div class="invalid-feedback">
-            Elija una g-code
-        </div>
-    </div>
+    {{ forms.input_select(6, "gcode", "Elija una g-code", required=1) }}
     <div class="col-sm-6">
         <button type="submit" class="btn btn-primary btn-block">Eliminar</button>
     </div>

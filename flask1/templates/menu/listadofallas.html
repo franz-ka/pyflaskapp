@@ -37,33 +37,15 @@
     <h5>Filtrar listado</h5>
     <!-- Maquina y Descripcion -->
     <div class="form-group row">
-        <div class="col-sm-4">
-            <select class="form-control select2-single select2-hidden-accessible" name="maquina">
-                <option></option>
-            </select>
-        </div>
+    {{ forms.input_select(4, "maquina", "", required=0) }}
         <div class="col-sm-8">
             <input type="text" name="descripcion" class="form-control" placeholder="Descripción">
         </div>
     </div>
     <!-- Pika y Gcode-->
     <div class="form-group row">
-        <div class="col-sm-4">
-            <select class="form-control select2-single select2-hidden-accessible" name="pika">
-                <option></option>
-            </select>
-            <div class="invalid-feedback">
-                Elija un pika
-            </div>
-        </div>
-        <div class="col-sm-8">
-            <select class="form-control select2-single select2-hidden-accessible" name="gcode">
-                <option></option>
-            </select>
-            <div class="invalid-feedback">
-                Elija un g-code
-            </div>
-        </div>
+    {{ forms.input_select(4, "pika", "Elija un pika", required=0) }}
+    {{ forms.input_select(8, "gcode", "Elija un g-code", required=0) }}
     </div>
     <!-- Fechas d-h -->
     <div class="form-group row">

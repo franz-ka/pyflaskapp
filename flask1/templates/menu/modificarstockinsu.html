@@ -4,14 +4,7 @@
 {% call forms.card('Modificar stock de insumo')  %}
 <!-- Pika -->
 <div class="form-group row">
-    <div class="col-sm-6">
-        <select class="form-control select2-single select2-hidden-accessible" name="insumo" required>
-            <option></option>
-        </select>
-        <div class="invalid-feedback">
-            Elija un insumo
-        </div>
-    </div>
+    {{ forms.input_select(6, "insumo", "Elija un insumo", required=1) }}
 	{{ forms.input_number(3, 'cantidadanterior', min=0, required=0, readonly=1) }}
 	{{ forms.input_number(3, 'cantidadnueva', min=0, required=1, readonly=0) }}
 </div>
