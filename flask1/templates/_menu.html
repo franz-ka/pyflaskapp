@@ -1,104 +1,54 @@
+{% set menus = [
+	{'name': 'pikas', 'tit': 'Pikas', 'submenus': [
+        {'endp': 'main.menu_armadopika', 'tit': 'Ingresar armado'},
+        {'endp': 'main.menu_stockpikas', 'tit': 'Stock'},
+        {'endp': 'main.menu_agregelimpika', 'tit': 'Agregar/elim. pika', 'admin': 1},
+        {'endp': 'main.menu_modificarstockpika', 'tit': 'Modificar stock', 'admin': 1},
+	]},
+	{'name': 'insumos', 'tit': 'Insumos', 'submenus': [
+        {'endp': 'main.menu_ingresarinsumo', 'tit': 'Ingresar insumos'},
+        {'endp': 'main.menu_rolloplaabierto', 'tit': 'Rollo PLA abierto'},
+        {'endp': 'main.menu_insumoabierto', 'tit': 'Insumo abierto'},
+        {'endp': 'main.menu_stockinsumos', 'tit': 'Stock'},
+        {'endp': 'main.menu_agregeliminsu', 'tit': 'Agregar/elim. insumo', 'admin': 1},
+        {'endp': 'main.menu_asociarinsumospika', 'tit': 'Asociar insumos a pika', 'admin': 1},
+        {'endp': 'main.menu_listadoinsumospikas', 'tit': 'Listado asociaciones', 'admin': 1},
+        {'endp': 'main.menu_modificarstockinsu', 'tit': 'Modificar stock', 'admin': 1},
+	]},
+	{'name': 'ventas', 'tit': 'Ventas', 'submenus': [
+        {'endp': 'main.menu_ingresarventa', 'tit': 'Ingresar venta'},
+        {'endp': 'main.menu_listadoventas', 'tit': 'Listado'},
+        {'endp': 'main.menu_agregelimtipoventa', 'tit': 'Agregar/elim. tipo venta', 'admin': 1},
+        {'endp': 'main.menu_eliminarventa', 'tit': 'Eliminar venta', 'admin': 1},
+	]},
+	{'name': 'fallas', 'tit': 'Fallas', 'submenus': [
+        {'endp': 'main.menu_ingresarfalla', 'tit': 'Ingresar falla'},
+        {'endp': 'main.menu_listadofallas', 'tit': 'Listado'},
+        {'endp': 'main.menu_agregelimgcode', 'tit': 'Agregar/elim. g-code', 'admin': 1},
+        {'endp': 'main.menu_agregelimmaquina', 'tit': 'Agregar/elim. máquina', 'admin': 1},
+	]},
+	{'name': 'alarmas', 'tit': 'Alarmas', 'submenus': [
+        {'endp': 'main.menu_listadoalarmas', 'tit': 'Listado alarmas'},
+        {'endp': 'main.menu_agregelimalarma', 'tit': 'Agregar/elim. alarma', 'admin': 1},
+	]}
+] %}
+{% for menu in menus %}
 <li>
-    <a href="#pikasSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">Pikas</a>
-    <ul class="collapse list-unstyled" id="pikasSubmenu">
-        <li>
-            <a href="{{url_for('main.menu_armadopika')}}">Ingresar armado</a>
-        </li>
-        <li>
-            <a href="{{url_for('main.menu_stockpikas')}}">Stock</a>
-        </li>
-        {% if current_user.isadmin %}
-        <li>
-            <a href="{{url_for('main.menu_agregelimpika')}}">(Agregar/elim. pika)</a>
-        </li>
-        <li>
-            <a href="{{url_for('main.menu_modificarstockpika')}}">(Modificar stock)</a>
-        </li>
-        {% endif %}
-    </ul>
+    <a href="#{{menu.name}}Submenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">{{menu.tit}}</a>
+	<ul class="collapse list-unstyled" id="{{menu.name}}Submenu">
+	{% for submenu in menu.submenus %}
+		{% if submenu.get('admin') %}
+			{% if current_user.isadmin %}
+	        <li><a href="{{url_for(submenu.endp)}}">[{{submenu.tit}}]</a></li>
+			{% endif %}
+		{% else %}
+        <li><a href="{{url_for(submenu.endp)}}">{{submenu.tit}}</a></li>
+		{% endif %}		
+	{% endfor %}
+	</ul>
 </li>
-<li>
-    <a href="#insumosSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">Insumos</a>
-    <ul class="collapse list-unstyled" id="insumosSubmenu">
-        <li>
-            <a href="{{url_for('main.menu_ingresarinsumo')}}">Ingresar insumos</a>
-        </li>
-        <li>
-            <a href="{{url_for('main.menu_rolloplaabierto')}}">Rollo PLA abierto</a>
-        </li>
-        <li>
-            <a href="{{url_for('main.menu_insumoabierto')}}">Insumo abierto</a>
-        </li>
-        <li>
-            <a href="{{url_for('main.menu_stockinsumos')}}">Stock</a>
-        </li>
-        {% if current_user.isadmin %}
-        <li>
-            <a href="{{url_for('main.menu_agregeliminsu')}}">(Agregar/elim. insumo)</a>
-        </li>
-        <li>
-            <a href="{{url_for('main.menu_asociarinsumospika')}}">(Asociar insumos a pika)</a>
-        </li>
-        <li>
-            <a href="{{url_for('main.menu_listadoinsumospikas')}}">(Listado asociaciones)</a>
-        </li>
-        <li>
-            <a href="{{url_for('main.menu_modificarstockinsu')}}">(Modificar stock)</a>
-        </li>
-        {% endif %}
-    </ul>
-</li>
-<li>
-    <a href="#ventasSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">Ventas</a>
-    <ul class="collapse list-unstyled" id="ventasSubmenu">
-        <li>
-            <a href="{{url_for('main.menu_ingresarventa')}}">Ingresar venta</a>
-        </li>
-        <li>
-            <a href="{{url_for('main.menu_listadoventas')}}">Listado</a>
-        </li>
-        {% if current_user.isadmin %}
-        <li>
-            <a href="{{url_for('main.menu_agregelimtipoventa')}}">(Agregar/elim. tipo venta)</a>
-        </li>
-        <li>
-            <a href="{{url_for('main.menu_eliminarventa')}}">(Eliminar venta)</a>
-        </li>
-        {% endif %}
-    </ul>
-</li>
-<li>
-    <a href="#fallasSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">Fallas</a>
-    <ul class="collapse list-unstyled" id="fallasSubmenu">
-        <li>
-            <a href="{{url_for('main.menu_ingresarfalla')}}">Ingresar falla</a>
-        </li>
-        <li>
-            <a href="{{url_for('main.menu_listadofallas')}}">Listado</a>
-        </li>
-        {% if current_user.isadmin %}
-        <li>
-            <a href="{{url_for('main.menu_agregelimgcode')}}">(Agregar/elim. g-code)</a>
-        </li>
-        <li>
-            <a href="{{url_for('main.menu_agregelimmaquina')}}">(Agregar/elim. máquina)</a>
-        </li>
-        {% endif %}
-    </ul>
-</li>
-<li>
-    <a href="#alarmasSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">Alarmas</a>
-    <ul class="collapse list-unstyled" id="alarmasSubmenu">
-        <li>
-            <a href="{{url_for('main.menu_listadoalarmas')}}">Listado alarmas</a>
-        </li>
-        {% if current_user.isadmin %}
-        <li>
-            <a href="{{url_for('main.menu_agregelimalarma')}}">(Agregar/elim. alarma)</a>
-        </li>
-        {% endif %}
-    </ul>
-</li>
+{% endfor %}
+
 <li onclick="if (confirm('¿Está seguro que desea salir?')) window.location.href = '{{url_for('main.logout')}}';"><a href="#" style="font-size: 0.8rem;">
     CERRAR SESIÓN
 </a></li>
