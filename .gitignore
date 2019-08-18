@@ -7,4 +7,8 @@
 **/.idea
 
 #flask
+**/logs
 **/instance
+.project
+.pydevproject
+.settings/
