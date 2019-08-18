@@ -51,3 +51,15 @@
     {% endfor %}
 ]
 {%- endmacro %}
+
+
+{% macro input_number(col, name, min=0, required=False, readonly=False, value='') -%}
+{% set requiredTag = 'required ' if required else '' %}
+{% set readOnlyTag = 'readonly ' if readonly else '' %}
+{% set valueTag = 'value='+value|string+' ' if value else '' %}
+<div class="col-sm-{{col}}">
+	<input type="number" name="{{name}}" class="form-control" placeholder="#" min="{{min}}" max="9999"{{requiredTag}}{{readOnlyTag}}{{valueTag}}>
+</div>
+{%- endmacro %} 
+
+
