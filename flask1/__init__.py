@@ -47,7 +47,7 @@ def create_app(test_config=None):
 
         if not os.path.exists('logs'):
             os.mkdir('logs')
-        file_handler = RotatingFileHandler('logs/cogosys.log', maxBytes=10240, backupCount=5)
+        file_handler = RotatingFileHandler('logs/errors.log', maxBytes=51200, backupCount=5)
         file_handler.setFormatter(logging.Formatter('%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]'))
         file_handler.setLevel(logging.WARNING)
         app.logger.addHandler(file_handler)
@@ -66,5 +66,35 @@ def create_app(test_config=None):
     from .views import menu_bps
     for menu_bp in menu_bps:
         app.register_blueprint(menu_bp)
-
+        
+    ###### REQUESTS LOGGER
+    if not os.path.exists('logs'):
+        os.mkdir('logs')
+    app._request_logger = logging.getLogger("requests")
+    app._request_logger.setLevel(logging.DEBUG)
+    req_file_handler = RotatingFileHandler('logs/requests.log', maxBytes=102400, backupCount=5)
+    req_file_handler.setFormatter(logging.Formatter('[%(asctime)s] %(message)s'))     
+    req_file_handler.setLevel(logging.DEBUG)
+    app._request_logger.addHandler(req_file_handler)
+    @app.before_request
+    def log_request_info():
+        from flask import request
+        r = request
+        if r.endpoint != None and r.endpoint != 'static':
+            log_vals = []
+            if len(r.values):
+                for key,val in r.values.items():
+                    if key == 'password':
+                        sanit_val = '*' * len(val)
+                    else:
+                        sanit_val = val.replace('"',r'\"')
+                    log_vals.append(f'{key}="{sanit_val}"')
+            app._request_logger.debug('%s, %s, %s, (%s), %s, %s',
+                     r.method,
+                     r.path,
+                     r.endpoint,
+                     ';'.join(log_vals),
+                     r.remote_addr,
+                     r.headers.get('USER_AGENT','--Sin USER_AGENT--'))
+        
     return app
