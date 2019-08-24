@@ -36,8 +36,6 @@ def login():
     if request.method == 'GET':
         return render_template('login.html')
     else:
-        print('post form:', request.form)
-
         try: checkparams(request.form, ('user', 'password'))
         except Exception as e: return str(e), 400
 
