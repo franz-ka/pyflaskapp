@@ -1,15 +1,16 @@
 # git + GitHub - https://lifehacker.com/how-the-heck-do-i-use-github-5983680
-#py
+#python
 **/venv
 **/__pycache__
+
+#flask
+**/logs
+**/instance
 
 #pycharm
 **/.idea
 
-#flask
-**/logs
-logs
-**/instance
+#eclipse + pydev
 .project
 .pydevproject
 .settings/
