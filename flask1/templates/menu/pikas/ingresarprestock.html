@@ -1,0 +1,42 @@
+{% extends '_maingui.html' %}
+
+{% block content %}
+{% call forms.card('Ingresar prestock')  %}
+<!-- Pika -->
+{% for i in range(4) %}
+<div class="form-group row addable">
+    {{ forms.input_select(8, "pika", "Elija un pika", required=(i==0)) }}
+	{{ forms.input_number(4, 'cantidad', min=1, required=(i==0), readonly=0) }}
+</div>
+{% endfor %}
+<!-- BOTONES -->
+<div class="form-group row">
+    <div class="col-sm-4">
+        <button type="button" id="btnAdd" class="btn btn-success btn-block"> + </button>
+    </div>
+    <div class="col-sm-8">
+        <button type="submit" class="btn btn-primary btn-block">Ingresar</button>
+    </div>
+</div>
+{% endcall %}
+{% endblock %}
+
+{% block js %}
+<script type="text/javascript">
+$(function() {
+
+    regFormValid(false, function(){ for(i=0;i<3;i++) $('#btnAdd').click(); });
+
+    //$('input[name=fecha]').val("{{nowfecha}}");
+    //$('input[name=hora]').val("{{nowtiempo}}");
+
+    pikasdata = {{ forms.dataToJsArr(pikas) }};
+    pikarowhtml = $('.addable.form-group.row')[0].outerHTML.replace(/ required/g, '');
+    sel2('.select2-single[name=pika]', 'Pika', pikasdata);
+    $('#btnAdd').click(function(){
+        $('.form-group.row').last().before(pikarowhtml);
+        sel2('.select2-single[name=pika]', 'Pika', pikasdata);
+    });
+});
+</script>
+{% endblock %}

@@ -81,6 +81,15 @@ class PikaInsumo(Base):
     cantidad = Column(Integer, nullable=False)
 
     def __repr__(self): return '<PikaInsumo {}>'.format(self.pika_id)
+    
+class PrestockPika(Base):
+    __tablename__ = 'prestockpika'
+    pika_id = Column(Integer, ForeignKey('pika.id'), primary_key=True)
+    pika = relationship('Pika')
+    cantidad = Column(Integer, nullable=False)
+    fecha = Column(DateTime)
+    def __repr__(self): return '<PrestockPika {}>'.format(self.pika_id)
+
 
 class StockPika(Base):
     __tablename__ = 'stockpika'
