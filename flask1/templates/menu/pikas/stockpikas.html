@@ -6,16 +6,21 @@
   <thead>
     <tr>
       <th>Pika</th>
-      <th>Cantidad</th>
+      <th>Prestock</th>
+      <th>Stock</th>
       <th>Actualizado</th>
     </tr>
   </thead>
   <tbody>
-    {% for spika in DATA %}
+    {% for pika_spika_pspika in DATA %}
         <tr>
-            <td>{{spika.pika.nombre}}</td>
-            <td>{{spika.cantidad}}</td>
-            <td scope="row">{{spika.fecha.strftime("%d/%m/%Y %H:%M")}}</td>
+            <td>{{pika_spika_pspika[0].nombre}}</td>
+            <td>{{pika_spika_pspika[1].cantidad}}</td>
+            <td>{{pika_spika_pspika[2].cantidad}}</td>
+            <td scope="row">
+				{% set fecha_mayor = pika_spika_pspika[1].fecha if pika_spika_pspika[1].fecha > pika_spika_pspika[2].fecha else pika_spika_pspika[2].fecha %}
+				{{fecha_mayor.strftime("%d/%m/%Y %H:%M")}}
+			</td>
         </tr>
     {% endfor %}
 </table>

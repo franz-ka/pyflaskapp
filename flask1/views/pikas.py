@@ -62,8 +62,8 @@ def menu_armadopika():
 def menu_stockpikas():
     if request.method == "GET":
         db = get_db()
-        DATA = db.query(StockPika).join(Pika).order_by(Pika.nombre).all()
-
+        # esto devuelve un array de listas de 3 elementos [0]=Pika [1]=PrestockPika [2]=StockPika
+        DATA = db.query(Pika, PrestockPika, StockPika).filter(Pika.id==PrestockPika.pika_id).filter(Pika.id==StockPika.pika_id).order_by(Pika.nombre).all()
         r = make_response(render_template(
             'menu/pikas/stockpikas.html',
             DATA=DATA
@@ -83,13 +83,19 @@ def menu_stockpikas():
 @login_required
 def exportar_stockpikas():
     db = get_db()
-    stopik = db.query(StockPika).join(Pika).order_by(Pika.nombre).all()
+    stopiks = db.query(Pika, PrestockPika, StockPika).filter(Pika.id==PrestockPika.pika_id).filter(Pika.id==StockPika.pika_id).order_by(Pika.nombre).all()
 
     ex = CsvExporter('stockpikas.csv')
-    ex.writeHeaders('Id,Nombre,Cantidad,Actualizado')
-    for s in stopik:
-        print(s)
-        ex.writeVals([s.pika_id, s.pika.nombre, s.cantidad, s.fecha])
+    ex.writeHeaders('Id,Nombre,Prestock,Stock,Actualizado')
+    for pika_spika_pspika in stopiks:
+        print(pika_spika_pspika)
+        fecha_mayor = pika_spika_pspika[1].fecha if pika_spika_pspika[1].fecha > pika_spika_pspika[2].fecha else pika_spika_pspika[2].fecha
+        ex.writeVals([
+            pika_spika_pspika[0].id,
+            pika_spika_pspika[0].nombre,
+            pika_spika_pspika[1].cantidad,
+            pika_spika_pspika[2].cantidad,
+            fecha_mayor])
     return ex.send()
 
 @bp_pikas.route("/agregelimpika", methods=['GET', 'POST'])
