@@ -3,6 +3,60 @@ from ._common import *
 
 bp_pikas = Blueprint('pikas', __name__, url_prefix='/pikas')
 
+@bp_pikas.route("/ingresarprestock", methods = ['GET', 'POST'])
+@login_required
+def menu_ingresarprestock():
+    if request.method == "GET":
+        db = get_db()
+        pikas = db.query(Pika).order_by(Pika.nombre).all()
+
+        r = make_response(render_template(
+            'menu/pikas/ingresarprestock.html',
+            pikas=pikas
+        ))
+
+        return r
+    else: #request.method == "POST":
+        print('post form:',request.form)
+
+        try: checkparams(request.form, ('pika', 'cantidad'))
+        except Exception as e: return str(e), 400
+
+        db = get_db()
+
+        pikas = request.form.getlist('pika')
+        cants = request.form.getlist('cantidad')
+        dtnow = datetime.datetime.now()
+        for i, pikaid in enumerate(pikas):
+            if i<len(cants) and cants[i] and pikaid:
+                pika = db.query(Pika).get(pikaid)
+                pikacant = int(cants[i])
+                prestock = db.query(PrestockPika).get(pikaid)
+                #pikainsus = db.query(PikaInsumo).filter(PikaInsumo.pika==pika)
+
+                #restamos stock de insumos
+                '''for pikainsu in pikainsus:
+                    stockinsu = db.query(StockInsumo).get(pikainsu.insumo_id)
+                    if stockinsu.cantidad < pikainsu.cantidad*pikacant:
+                        return 'No hay suficiente stock de "{}" para el pika "{}" (hay {}, requiere {})'.format(pikainsu.insumo.nombre, pika.nombre, stockinsu.cantidad, pikainsu.cantidad*pikacant), 400
+
+                    movinsu = MovStockInsumo(insumo=pikainsu.insumo, cantidad=pikainsu.cantidad, fecha=dtnow)
+                    db.add(movinsu)
+                    stockinsu.cantidad -= movinsu.cantidad*pikacant
+                    stockinsu.fecha = movinsu.fecha'''
+
+                #sumamos stock de pika
+                #mov = MovPrestockPika(pika=pika, cantidad=int(cants[i]), fecha=dtnow)
+                #db.add(mov)
+                prestock.cantidad += pikacant
+                prestock.fecha = dtnow
+
+        db.commit()
+
+        check_alarmas()
+
+        return ''
+
 @bp_pikas.route("/armadopika", methods = ['GET', 'POST'])
 @login_required
 def menu_armadopika():
@@ -30,9 +84,18 @@ def menu_armadopika():
             if i<len(cants) and cants[i] and pikaid:
                 pika = db.query(Pika).get(pikaid)
                 pikacant = int(cants[i])
+                prestockpika = db.query(PrestockPika).get(pikaid)
                 stockpika = db.query(StockPika).get(pikaid)
                 pikainsus = db.query(PikaInsumo).filter(PikaInsumo.pika==pika)
 
+                if pikacant > prestockpika.cantidad:
+                    return 'No hay suficiente prestock para el pika "{}" (hay {}, requiere {})'.format(
+                        pika.nombre, prestockpika.cantidad, pikacant), 400
+
+                #restamos prestock
+                prestockpika.cantidad -= pikacant
+                prestockpika.fecha = dtnow
+                
                 #restamos stock de insumos
                 for pikainsu in pikainsus:
                     stockinsu = db.query(StockInsumo).get(pikainsu.insumo_id)
@@ -48,15 +111,14 @@ def menu_armadopika():
                 mov = MovStockPika(pika=pika, cantidad=int(cants[i]), fecha=dtnow)
                 db.add(mov)
                 stockpika.cantidad += pikacant
-                stockpika.fecha = mov.fecha
+                stockpika.fecha = dtnow
 
         db.commit()
 
         check_alarmas()
 
         return ''
-    
-    
+
 @bp_pikas.route("/stockpikas", methods=['GET', 'POST'])
 @login_required
 def menu_stockpikas():
@@ -177,60 +239,6 @@ def menu_modificarstockpika():
         stockpika.fecha = mov.fecha
 
         db.commit()
-
-        return ''
-
-@bp_pikas.route("/ingresarprestock", methods = ['GET', 'POST'])
-@login_required
-def menu_ingresarprestock():
-    if request.method == "GET":
-        db = get_db()
-        pikas = db.query(Pika).order_by(Pika.nombre).all()
-
-        r = make_response(render_template(
-            'menu/pikas/ingresarprestock.html',
-            pikas=pikas
-        ))
-
-        return r
-    else: #request.method == "POST":
-        print('post form:',request.form)
-
-        try: checkparams(request.form, ('pika', 'cantidad'))
-        except Exception as e: return str(e), 400
-
-        db = get_db()
-
-        pikas = request.form.getlist('pika')
-        cants = request.form.getlist('cantidad')
-        dtnow = datetime.datetime.now()
-        for i, pikaid in enumerate(pikas):
-            if i<len(cants) and cants[i] and pikaid:
-                pika = db.query(Pika).get(pikaid)
-                pikacant = int(cants[i])
-                prestock = db.query(PrestockPika).get(pikaid)
-                #pikainsus = db.query(PikaInsumo).filter(PikaInsumo.pika==pika)
-
-                #restamos stock de insumos
-                '''for pikainsu in pikainsus:
-                    stockinsu = db.query(StockInsumo).get(pikainsu.insumo_id)
-                    if stockinsu.cantidad < pikainsu.cantidad*pikacant:
-                        return 'No hay suficiente stock de "{}" para el pika "{}" (hay {}, requiere {})'.format(pikainsu.insumo.nombre, pika.nombre, stockinsu.cantidad, pikainsu.cantidad*pikacant), 400
-
-                    movinsu = MovStockInsumo(insumo=pikainsu.insumo, cantidad=pikainsu.cantidad, fecha=dtnow)
-                    db.add(movinsu)
-                    stockinsu.cantidad -= movinsu.cantidad*pikacant
-                    stockinsu.fecha = movinsu.fecha'''
-
-                #sumamos stock de pika
-                #mov = MovPrestockPika(pika=pika, cantidad=int(cants[i]), fecha=dtnow)
-                #db.add(mov)
-                prestock.cantidad += pikacant
-                prestock.fecha = dtnow
-
-        db.commit()
-
-        check_alarmas()
 
         return ''
 
