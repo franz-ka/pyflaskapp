@@ -208,11 +208,13 @@ def menu_modificarstockpika():
     if request.method == "GET":
         db = get_db()
         pikas = db.query(Pika).order_by(Pika.nombre).all()
+        prestocks = db.query(PrestockPika).all()
         stocks = db.query(StockPika).all()
 
         r = make_response(render_template(
             'menu/pikas/modificarstockpika.html',
             pikas=pikas,
+            prestocks=prestocks,
             stocks=stocks
         ))
         return r
@@ -220,23 +222,40 @@ def menu_modificarstockpika():
         print('post form:', request.form)
 
         try:
-            checkparams(request.form, ('pika', 'cantidadnueva'))
+            checkparams(request.form, ('pika', ))
         except Exception as e:
             return str(e), 400
+        
+        if not (request.form['precantidadnueva'] or request.form['cantidadnueva']):
+            return str('Debe proporcionar algún número de stock nuevo'), 400
+
 
         db = get_db()
 
         pika = db.query(Pika).get(request.form['pika'])
-        pikacant = int(request.form['cantidadnueva'])
         dtnow = datetime.datetime.now()
-
-        # modificamos stock de pika
-        mov = MovStockPika(pika=pika, cantidad=pikacant, fecha=dtnow)
-        db.add(mov)
-
-        stockpika = db.query(StockPika).get(request.form['pika'])
-        stockpika.cantidad = pikacant
-        stockpika.fecha = mov.fecha
+        
+        if request.form['precantidadnueva']:
+            pikacant = int(request.form['precantidadnueva'])
+    
+            # modificamos stock de pika
+            #mov = MovStockPika(pika=pika, cantidad=pikacant, fecha=dtnow)
+            #db.add(mov)
+    
+            stockpika = db.query(PrestockPika).get(request.form['pika'])
+            stockpika.cantidad = pikacant
+            stockpika.fecha = dtnow
+        
+        if request.form['cantidadnueva']:
+            pikacant = int(request.form['cantidadnueva'])
+    
+            # modificamos stock de pika
+            mov = MovStockPika(pika=pika, cantidad=pikacant, fecha=dtnow)
+            db.add(mov)
+    
+            stockpika = db.query(StockPika).get(request.form['pika'])
+            stockpika.cantidad = pikacant
+            stockpika.fecha = dtnow
 
         db.commit()
 

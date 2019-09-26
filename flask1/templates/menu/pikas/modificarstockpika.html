@@ -1,12 +1,20 @@
 {% extends '_maingui.html' %}
 
 {% block content %}
-{% call forms.card('Modificar stock de pika')  %}
+{% call forms.card('Modificar stock de pika', size=6)  %}
 <!-- Pika -->
 <div class="form-group row">
-    {{ forms.input_select(6, "pika", "Elija un pika", required=1) }}
-	{{ forms.input_number(3, 'cantidadanterior', min=0, required=0, readonly=1) }}
-	{{ forms.input_number(3, 'cantidadnueva', min=0, required=1, readonly=0) }}
+    {{ forms.input_select(12, "pika", "Elija un pika", required=1) }}
+</div>
+<div class="form-group row">
+	{{ forms.input_msg(4, 'Prestock:') }}
+	{{ forms.input_number(4, 'precantidadanterior', min=0, required=0, readonly=1) }}
+	{{ forms.input_number(4, 'precantidadnueva', min=0, required=0, readonly=0) }}
+</div>
+<div class="form-group row">
+	{{ forms.input_msg(4, 'Stock:') }}
+	{{ forms.input_number(4, 'cantidadanterior', min=0, required=0, readonly=1) }}
+	{{ forms.input_number(4, 'cantidadnueva', min=0, required=0, readonly=0) }}
 </div>
 <!-- BOTONES -->
 <div class="form-group row">
@@ -22,6 +30,7 @@
 $(function() {
     regFormValid(false, function(){ setTimeout('location.reload();', 2000) });
 
+    prestocks = {{ forms.dataToJsArr(prestocks, idattr='pika_id', txtattr='cantidad') }};
     stocks = {{ forms.dataToJsArr(stocks, idattr='pika_id', txtattr='cantidad') }};
 
     pikasdata = {{ forms.dataToJsArr(pikas) }};
@@ -29,15 +38,26 @@ $(function() {
     $('.select2-single[name=pika]').on('select2:select', function (e) {
         var data = e.params.data;
         pikaid=e.params.data.id
-        console.log(data, stocks);
+
+        $('input[name=precantidadanterior]').val('')
+        for (pst in prestocks){
+            if (prestocks[pst].id==pikaid){
+                $('input[name=precantidadanterior]').val(prestocks[pst].text);
+                $('input[name=precantidadnueva]').val(prestocks[pst].text);
+                break;
+            }
+        }
+
         $('input[name=cantidadanterior]').val('')
         for (st in stocks){
             if (stocks[st].id==pikaid){
-                $('input[type=number]').val(stocks[st].text);
+                $('input[name=cantidadanterior]').val(stocks[st].text);
+                $('input[name=cantidadnueva]').val(stocks[st].text);
                 break;
             }
         }
     }).on('select2:unselect', function(e){
+        $('input[name=precantidadanterior]').val('')
         $('input[name=cantidadanterior]').val('')
     });
 });
