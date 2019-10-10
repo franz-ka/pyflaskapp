@@ -1,5 +1,5 @@
-{% macro card(title, size=10, method='POST') -%}
-<div class="col-lg-{{size}}">
+{% macro card(title, size=10, method='POST', css_class='') -%}
+<div class="col-lg-{{size}} {{css_class}}">
     <div class="card card-body bg-light">
         <h3 class="card-header">{{title}}</h3>
         <div class="card-block">
