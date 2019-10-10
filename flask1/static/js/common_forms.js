@@ -41,10 +41,10 @@ function regFormValid(hideErr, successcb){
                 $.ajax({
                      type: "POST",
                      data: formData,
-                     success: function(){
+                     success: function(r){
                         form.classList.remove('was-validated');
+                        $(form).find('.alert-warning').hide();
                         $(form).find('.alert-danger').hide();
-                        $(form).find('.alert-success').show();
                         $(form).find('input[type!=hidden]').val('');
                         $(form).find('select').not('.no-form-clear').val(null).trigger('change');
                         $(form).find('.addable.form-group.row').slice(1).remove();
@@ -52,10 +52,17 @@ function regFormValid(hideErr, successcb){
                             successcb()
                         if (formoktout)
                             clearTimeout(formoktout);
-                        formoktout = setTimeout( function(){ $(form).find('.alert-success').hide(); } , 5000 );
+						if (!r){
+	                        $(form).find('.alert-success').show();
+							formoktout = setTimeout( function(){ $(form).find('.alert-success').hide(); } , 5000 );
+						}else{
+                        	$(form).find('.alert-warning').show().find('p').html(r);
+							formoktout = setTimeout( function(){ $(form).find('.alert-warning').hide(); } , 10000 );
+						}
                      },
                      error: function(r){
                         $(form).find('.alert-success').hide();
+                        $(form).find('.alert-warning').hide();
                         $(form).find('.alert-danger').show().find('p').html(r.responseText);
                         if (hideErr){
                             if (hideerrtout)
