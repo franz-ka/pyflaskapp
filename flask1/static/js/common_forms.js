@@ -46,6 +46,7 @@ function regFormValid(hideErr, successcb){
                         $(form).find('.alert-warning').hide();
                         $(form).find('.alert-danger').hide();
                         $(form).find('input[type!=hidden]').val('');
+						$(form).find('input[type=checkbox]').prop('checked', false)
                         $(form).find('select').not('.no-form-clear').val(null).trigger('change');
                         $(form).find('.addable.form-group.row').slice(1).remove();
                         if (successcb)
