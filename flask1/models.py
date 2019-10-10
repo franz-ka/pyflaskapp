@@ -142,6 +142,7 @@ class Venta(Base):
     ventatipo_id = Column(Integer, ForeignKey('ventatipo.id'))
     ventatipo = relationship('VentaTipo')
     fecha = Column(DateTime)
+    fecha_pedido = Column(DateTime)
     comentario = Column(String(128))
     ventapikas = relationship('VentaPika')
 

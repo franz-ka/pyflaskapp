@@ -242,3 +242,58 @@ def menu_eliminarventa():
         db.commit()
 
         return ''
+
+@bp_ventas.route("/ingresarpedido", methods = ['GET', 'POST'])
+@login_required
+def menu_ingresarpedido():
+    if request.method == "GET":
+        db = get_db()
+        ventatipos = db.query(VentaTipo).order_by(VentaTipo.nombre).all()
+        pikas = db.query(Pika).order_by(Pika.nombre).all()
+
+        r = make_response(render_template(
+            'menu/ventas/ingresarpedido.html',
+            ventatipos=ventatipos,
+            pikas=pikas
+        ))
+        return r
+    else:  # request.method == "POST":
+        print('post form:', request.form)
+
+        try:
+            checkparams(request.form, ('tipo', 'pika', 'cantidad'))
+        except Exception as e:
+            return str(e), 400
+        
+        warns = []
+
+        db = get_db()
+        pikas = request.form.getlist('pika')
+        cants = request.form.getlist('cantidad')
+        dtnow = datetime.datetime.now()
+        vent = Venta(
+            ventatipo=db.query(VentaTipo).filter(VentaTipo.id == request.form['tipo']).one(),
+            fecha_pedido=dtnow,
+            comentario=request.form['comentario'] if 'comentario' in request.form else None
+        )
+        db.add(vent)
+        for i, pikaid in enumerate(pikas):
+            if i<len(cants) and cants[i] and pikaid:
+                pika = db.query(Pika).get(pikaid)
+                pikacant = int(cants[i])
+                stockpika = db.query(StockPika).get(pikaid)
+
+                if stockpika.cantidad < pikacant:
+                    warns.append('Pika "{}" (hay {}, requiere {})'.format(pika.nombre, stockpika.cantidad, pikacant))
+
+                #agregamos entrada de venta
+                db.add(VentaPika(venta=vent, pika=pika, cantidad=pikacant))
+
+        #db.commit()
+
+        if warns:
+            return 'La operación se realizó pero algunos pikas no van a tener stock para la venta:<br>- ' + '<br>- '.join(warns)
+        else:
+            return ''
+
+
