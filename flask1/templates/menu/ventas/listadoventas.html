@@ -7,35 +7,40 @@
     <p class="mb-0">(La lista está filtrada. Para eliminar filtro, filtrar con todos los campos vacíos)</p>
 </div>
 {% endif %}
-<table class="table table-sm table-striped table-hover">
-  <thead>
-    <tr>
-      <th>Fecha</th>
-      <th>Tipo</th>
-      <th>Comentario</th>
-      <th>Pika</th>
-      <th>Cantidad</th>
-    </tr>
-  </thead>
-  <tbody>
-    {% set vars = {'last_ventid': 0} %}
-    {% for ventapi in ventapikas %}
-        <tr>
-            {% if vars.last_ventid != ventapi.venta.id %}
-                <td>{{ventapi.venta.fecha.strftime("%d/%m/%Y %H:%M")}}</td>
-                <td>{{ventapi.venta.ventatipo.nombre}}</td>
-                <td>{{ventapi.venta.comentario}}</td>
-                {% if vars.update({'last_ventid': ventapi.venta.id}) %}{% endif %}
-            {% else %}
-                <td></td>
-                <td></td>
-                <td></td>
-            {% endif %}
-            <td>{{ventapi.pika.nombre}}</td>
-            <td>{{ventapi.cantidad}}</td>
-        </tr>
-    {% endfor %}
-</table>
+<div class="table-wrapper" style="overflow-x: scroll;">
+	<table class="table table-sm table-striped table-hover">
+	  <thead>
+	    <tr>
+	      <th class="col-2">Fecha venta</th>
+	      <th class="col-2">Fecha pedido</th>
+	      <th>Tipo</th>
+	      <th>Comentario</th>
+	      <th class="col-2">Pika</th>
+	      <th>Cantidad</th>
+	    </tr>
+	  </thead>
+	  <tbody>
+	    {% set vars = {'last_ventid': 0} %}
+	    {% for ventapi in ventapikas %}
+	        <tr>
+	            {% if vars.last_ventid != ventapi.venta.id %}
+	                <td>{{ventapi.venta.fecha.strftime("%d/%m/%Y %H:%M")}}</td>
+	                <td>{{ventapi.venta.fecha_pedido.strftime("%d/%m/%Y %H:%M") if ventapi.venta.fecha_pedido else 'Sin dato'}}</td>
+	                <td>{{ventapi.venta.ventatipo.nombre}}</td>
+	                <td>{{ventapi.venta.comentario}}</td>
+	                {% if vars.update({'last_ventid': ventapi.venta.id}) %}{% endif %}
+	            {% else %}
+	                <td></td>
+	                <td></td>
+	                <td></td>
+	                <td></td>
+	            {% endif %}
+	            <td>{{ventapi.pika.nombre}}</td>
+	            <td>{{ventapi.cantidad}}</td>
+	        </tr>
+	    {% endfor %}
+	</table>
+</div>
 <form novalidate method="GET" class="pt-0">
     <a id="exportar-btn" class="btn btn-primary btn-block" href="{{url_for('ventas.exportar_ventas')}}">Exportar a CSV</a>
 </form>
