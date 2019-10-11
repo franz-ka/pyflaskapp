@@ -9,7 +9,7 @@ def menu_listadoventas():
     if request.method == "GET":
         db = get_db()
 
-        ventapikas = db.query(VentaPika).join(Venta).order_by(Venta.fecha.desc(), Venta.id.desc())
+        ventapikas = db.query(VentaPika).join(Venta).filter(Venta.fecha != None).order_by(Venta.fecha.desc(), Venta.id.desc())
         filtrado = False
         if len(request.args):
             query = []
