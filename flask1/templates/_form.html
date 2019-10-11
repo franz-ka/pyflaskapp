@@ -1,4 +1,4 @@
-{% macro card(title, size=10, method='POST', css_class='') -%}
+{% macro card(title, size=12, method='POST', css_class='') -%}
 <div class="col-lg-{{size}} {{css_class}}">
     <div class="card card-body bg-light">
         <h3 class="card-header">{{title}}</h3>
@@ -20,7 +20,7 @@
 </div>
 {%- endmacro %}
 
-{% macro cardNoForm(title, size=10) -%}
+{% macro cardNoForm(title, size=12) -%}
 <div class="col-lg-{{size}}">
     <div class="card card-body bg-light">
         <h3 class="card-header">{{title}}</h3>
