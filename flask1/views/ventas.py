@@ -92,60 +92,6 @@ def exportar_ventas():
             ex.writeVals(vals)
     return ex.send()
 
-@bp_ventas.route("/ingresarventa", methods=['GET', 'POST'])
-@login_required
-def menu_ingresarventa():
-    if request.method == "GET":
-        db = get_db()
-        ventatipos = db.query(VentaTipo).order_by(VentaTipo.nombre).all()
-        pikas = db.query(Pika).order_by(Pika.nombre).all()
-
-        r = make_response(render_template(
-            'menu/ventas/ingresarventa.html',
-            ventatipos=ventatipos,
-            pikas=pikas
-        ))
-        return r
-    else:  # request.method == "POST":
-        print('post form:', request.form)
-
-        try:
-            checkparams(request.form, ('tipo', 'pika', 'cantidad'))
-        except Exception as e:
-            return str(e), 400
-
-        db = get_db()
-        pikas = request.form.getlist('pika')
-        cants = request.form.getlist('cantidad')
-        dtnow = datetime.datetime.now()
-        vent = Venta(
-            ventatipo=db.query(VentaTipo).filter(VentaTipo.id == request.form['tipo']).one(),
-            fecha=dtnow,
-            comentario=request.form['comentario'] if 'comentario' in request.form else None
-        )
-        db.add(vent)
-        for i, pikaid in enumerate(pikas):
-            if i<len(cants) and cants[i] and pikaid:
-                pika = db.query(Pika).get(pikaid)
-                pikacant = int(cants[i])
-                stockpika = db.query(StockPika).get(pikaid)
-
-                if stockpika.cantidad < pikacant:
-                    return 'No hay suficiente stock del pika "{}" (hay {}, requiere {})'.format(pika.nombre, stockpika.cantidad, pikacant), 400
-
-                #agregamos entrada de venta
-                db.add(VentaPika(venta=vent, pika=pika, cantidad=pikacant))
-
-                #restamos stock de pika
-                mov = MovStockPika(pika=pika, cantidad=-int(cants[i]), fecha=dtnow)
-                db.add(mov)
-                stockpika.cantidad -= pikacant
-                stockpika.fecha = mov.fecha
-
-        db.commit()
-
-        return ''
-
 @bp_ventas.route("/agregelimtipoventa", methods = ['GET', 'POST'])
 @login_required
 def menu_agregelimtipoventa():
