@@ -1,5 +1,18 @@
 {% extends '_maingui.html' %}
 
+{% block styles %}
+<style>
+.listado_pedidos .btnVender{
+	width: 30px;
+	height: 30px;
+}
+.listado_pedidos .btnVender:hover{
+	background-color: white;	
+	color: black;
+}
+</style>
+{% endblock %}
+
 {% block content %}
 {% call forms.card('Ingresar pedido')  %}
 <!-- Tipo y Comentario -->
@@ -23,10 +36,52 @@
         <button type="submit" class="btn btn-primary btn-block">Ingresar</button>
     </div>
     <div class="col-sm-4 my-auto pl-5 pt-3 pt-sm-0">
-	    <input type="checkbox" class="form-check-input" id="vendido">
+	    <input type="checkbox" class="form-check-input" id="vendido" name="vendido">
 	    <label class="form-check-label ml-2 align-middle" for="vendido">Vendido</label>
     </div>
 </div>
+{% endcall %}
+
+{% call forms.card('Listado pedidos', css_class='listado_pedidos mt-3')  %}
+<table class="table table-sm table-striped table-hover">
+  <thead>
+    <tr>
+      <th>Fecha pedido</th>
+      <th>Tipo</th>
+      <th>Comentario</th>
+      <th>Pika</th>
+      <th>Cantidad</th>
+      <th>Vender</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% set vars = {'last_ventid': 0} %}
+    {% for ventapi in ventapikas %}
+        <tr>
+			<input type="hidden" class="venta_id" value="{{ventapi.venta_id}}">
+            {% if vars.last_ventid != ventapi.venta_id %}
+                <td>{{ventapi.venta.fecha_pedido.strftime("%d/%m/%Y %H:%M")}}</td>
+                <td>{{ventapi.venta.ventatipo.nombre}}</td>
+                <td>{{ventapi.venta.comentario}}</td>
+				{# actualizamos last_ventid en el prox if #}
+            {% else %}
+                <td></td>
+                <td></td>
+                <td></td>
+            {% endif %}
+            <td>{{ventapi.pika.nombre}}</td>
+            <td>{{ventapi.cantidad}}</td>
+            {% if vars.last_ventid != ventapi.venta_id %}
+	            <td class="pt-2">
+					<button type="button" class="btnVender btn btn-secondary btn-block p-0">✓</button>
+				</td>
+                {% if vars.update({'last_ventid': ventapi.venta_id}) %}{% endif %}
+            {% else %}
+                <td></td>
+            {% endif %}
+        </tr>
+    {% endfor %}
+</table>
 {% endcall %}
 {% endblock %}
 
@@ -34,7 +89,7 @@
 <script type="text/javascript">
 $(function() {
 
-    regFormValid();
+    regFormValid(true, function(){ setTimeout('location.reload();', 3000) });
 
     tiposdata = {{ forms.dataToJsArr(ventatipos) }};
     sel2('.select2-single[name=tipo]', 'Tipo', tiposdata);
@@ -42,10 +97,45 @@ $(function() {
     pikasdata = {{ forms.dataToJsArr(pikas) }};
     pikarowhtml = $('.addable.form-group.row')[0].outerHTML.replace(/ required/g, '');
     sel2('.select2-single[name=pika]', 'Pika', pikasdata);
+
     $('#btnAdd').click(function(){
         $('.form-group.row').last().before(pikarowhtml);
         sel2('.select2-single[name=pika]', 'Pika', pikasdata);
     });
+
+    $('.btnVender').click(function(){
+		if (!confirm('¿Está seguro que desea vender este pedido?'))
+			return;
+			
+		var table = $(this).parents('table');
+		var parent_row = $(this).parents('tr')
+		var venta_id = parent_row.children('.venta_id').val();
+		console.log(venta_id)	
+        var ventaspikas = table.find('.venta_id[value='+venta_id+']')
+		var ventaspikas_rows = ventaspikas.parents('tr');
+		
+		lockForm(table)
+        $.ajax({
+             type: "POST",
+             url: 'vender_pedido',
+             data: { venta_id: venta_id },
+             success: function(r){
+                unlockForm(table);
+				console.log(ventaspikas, table.find('.venta_id[value='+venta_id+']'), table.find('.venta_id'))	
+
+				ventaspikas_rows.addClass('table-success')
+				ventaspikas_rows.fadeOut(500, function() {
+					$(this).remove();
+				});
+             },
+             error: function(r){
+                unlockForm(table);
+				ventaspikas_rows.addClass('table-danger')
+				alert(r.responseText)
+				setTimeout(function(){ ventaspikas_rows.removeClass('table-danger'); }, 700)
+             }
+        });
+	});
 });
 </script>
 {% endblock %}

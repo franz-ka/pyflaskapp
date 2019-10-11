@@ -196,11 +196,13 @@ def menu_ingresarpedido():
         db = get_db()
         ventatipos = db.query(VentaTipo).order_by(VentaTipo.nombre).all()
         pikas = db.query(Pika).order_by(Pika.nombre).all()
+        ventapikas = db.query(VentaPika).join(Venta).filter(Venta.fecha_pedido != None).filter(Venta.fecha == None).order_by(Venta.fecha_pedido.desc())
 
         r = make_response(render_template(
             'menu/ventas/ingresarpedido.html',
             ventatipos=ventatipos,
-            pikas=pikas
+            pikas=pikas,
+            ventapikas=ventapikas
         ))
         return r
     else:  # request.method == "POST":
@@ -216,12 +218,15 @@ def menu_ingresarpedido():
         db = get_db()
         pikas = request.form.getlist('pika')
         cants = request.form.getlist('cantidad')
+        vendido = 'vendido' in request.form
         dtnow = datetime.datetime.now()
         vent = Venta(
             ventatipo=db.query(VentaTipo).filter(VentaTipo.id == request.form['tipo']).one(),
             fecha_pedido=dtnow,
             comentario=request.form['comentario'] if 'comentario' in request.form else None
         )
+        if vendido:
+            vent.fecha = dtnow
         db.add(vent)
         for i, pikaid in enumerate(pikas):
             if i<len(cants) and cants[i] and pikaid:
@@ -230,16 +235,66 @@ def menu_ingresarpedido():
                 stockpika = db.query(StockPika).get(pikaid)
 
                 if stockpika.cantidad < pikacant:
-                    warns.append('Pika "{}" (hay {}, requiere {})'.format(pika.nombre, stockpika.cantidad, pikacant))
+                    if vendido:
+                        return 'No hay suficiente stock del pika "{}" (hay {}, requiere {})'.format(pika.nombre, stockpika.cantidad, pikacant), 400
+                    else:
+                        warns.append('Pika "{}" (hay {}, requiere {})'.format(pika.nombre, stockpika.cantidad, pikacant))
 
                 #agregamos entrada de venta
                 db.add(VentaPika(venta=vent, pika=pika, cantidad=pikacant))
+                
+                if vendido:
+                    #restamos stock de pika
+                    mov = MovStockPika(pika=pika, cantidad=-int(cants[i]), fecha=dtnow)
+                    db.add(mov)
+                    stockpika.cantidad -= pikacant
+                    stockpika.fecha = mov.fecha
 
-        #db.commit()
+        db.commit()
 
         if warns:
             return 'La operación se realizó pero algunos pikas no van a tener stock para la venta:<br>- ' + '<br>- '.join(warns)
         else:
             return ''
 
+@bp_ventas.route("/vender_pedido", methods = ['POST'])
+@login_required
+def vender_pedido():
+    print('post form:', request.form)
 
+    try:
+        checkparams(request.form, ('venta_id',))
+    except Exception as e:
+        return str(e), 400
+    
+    errors = []
+    
+    db = get_db()
+
+    dtnow = datetime.datetime.now()
+    venta = db.query(Venta).get(int(request.form['venta_id']))
+    venta.fecha=dtnow
+    print(venta.id, venta.fecha, f'"{venta.comentario}"')
+    
+    ventapikas = db.query(VentaPika).filter(VentaPika.venta_id==venta.id).all()
+    for vpi in ventapikas:
+        stockpika = db.query(StockPika).get(vpi.pika_id)
+        print(vpi.cantidad, vpi.pika.nombre, stockpika.cantidad)
+        if stockpika.cantidad < vpi.cantidad:
+            errors.append('Requiere {} "{}", pero hay {}'.format(vpi.cantidad, vpi.pika.nombre, stockpika.cantidad))
+        
+        #restamos stock de pika
+        mov = MovStockPika(pika=vpi.pika, cantidad=-vpi.cantidad, fecha=dtnow)
+        db.add(mov)
+        stockpika.cantidad -= vpi.cantidad
+        stockpika.fecha = mov.fecha
+    
+
+    if errors:
+        # No commiteamos
+        return 'No hay suficiente stock:\n' + '\n'.join(errors), 400
+    else:
+        db.commit()
+        return ''
+
+    
