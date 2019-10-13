@@ -124,11 +124,22 @@ def menu_armadopika():
 def menu_stockpikas():
     if request.method == "GET":
         db = get_db()
-        # esto devuelve un array de listas de 3 elementos [0]=Pika [1]=PrestockPika [2]=StockPika
-        DATA = db.query(Pika, PrestockPika, StockPika).filter(Pika.id==PrestockPika.pika_id).filter(Pika.id==StockPika.pika_id).order_by(Pika.nombre).all()
+        # esto devuelve un array de listas de 4 elementos [0]=Pika [1]=PrestockPika [2]=StockPika
+        DATA = db.query(Pika, PrestockPika, StockPika) \
+            .filter(Pika.id==PrestockPika.pika_id) \
+            .filter(Pika.id==StockPika.pika_id) \
+            .order_by(Pika.nombre).all()
+            
+        pikascolores = db.query(StockPikaColor).all()
+        pikascolores_modif = {}
+        for pc in pikascolores:
+            pikascolores_modif[pc.pika_id] = [pc.cantidad_bajo, pc.cantidad_medio]
+        print(pikascolores_modif)
+        
         r = make_response(render_template(
             'menu/pikas/stockpikas.html',
-            DATA=DATA
+            DATA=DATA,
+            pikascolores=pikascolores_modif
         ))
         return r
     else:  # request.method == "POST":
@@ -301,7 +312,7 @@ def menu_modificarcolorpikas():
         
         if request.form['cantidad_medio_nueva']:
             colorcant = int(request.form['cantidad_medio_nueva'])
-            stockpikacolor.cantidad_bajo = colorcant
+            stockpikacolor.cantidad_medio = colorcant
 
         db.commit()
 
