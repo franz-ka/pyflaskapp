@@ -28,7 +28,7 @@
 {% block js %}
 <script type="text/javascript">
 $(function() {    
-    regFormValid(false, function(){ setTimeout('location.reload();', 2000) });
+    regFormValid(false, function(){ setTimeout('location.reload();', 1000) });
 
     cantidades_bajo = {{ forms.dataToJsArr(pikascolores, idattr='pika_id', txtattr='cantidad_bajo') }};
     cantidades_medio = {{ forms.dataToJsArr(pikascolores, idattr='pika_id', txtattr='cantidad_medio') }};
