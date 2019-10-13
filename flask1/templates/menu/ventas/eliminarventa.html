@@ -1,8 +1,24 @@
 {% extends '_maingui.html' %}
 
 {% block content %}
+{% call forms.card('Eliminar pedido', size=6)  %}
+<input type="hidden" name="operation" value="delete_pedido">
+<div class="alert alert-warning fade show">
+    <p class="mb-0">Advertencia: esta operación eliminará el pedido.</p>
+</div>
+<!-- Venta -->
+<div class="form-group row">
+    {{ forms.input_select(12, "pedido", "Elija un pedido", required=1) }}
+</div>
+<div class="form-group row">
+    <div class="col">
+        <button type="submit" class="btn btn-primary btn-block">Eliminar</button>
+    </div>
+</div>
+{% endcall %}
+
 {% call forms.card('Eliminar venta', size=6)  %}
-<input type="hidden" name="operation" value="delete">
+<input type="hidden" name="operation" value="delete_venta">
 <div class="alert alert-warning fade show">
     <p class="mb-0">Advertencia: esta operación eliminará la venta y todos sus datos asociados (devuelve stock de pikas)</p>
 </div>
@@ -22,10 +38,13 @@
 <script type="text/javascript">
 $(function() {
 
-    regFormValid();
+    regFormValid(false, function(){ setTimeout('location.reload();', 2000) });
 
     ventasdata = {{ forms.dataToJsArrMulti(ventas, 'fecha', 'comentario') }};
     sel2('.select2-single[name=venta]', 'Venta', ventasdata);
+
+    pedidosdata = {{ forms.dataToJsArrMulti(pedidos, 'fecha', 'comentario') }};
+    sel2('.select2-single[name=pedido]', 'Pedido', pedidosdata);
 
 });
 </script>

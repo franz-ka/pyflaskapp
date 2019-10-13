@@ -144,7 +144,7 @@ def menu_agregelimtipoventa():
 def menu_eliminarventa():
     if request.method == "GET":
         db = get_db()
-        ventas = db.query(Venta).order_by(Venta.fecha.desc()).all()
+        ventas = db.query(Venta).filter(Venta.fecha != None).order_by(Venta.fecha.desc()).all()
         ventasmodif = []
         for v in ventas:
             ventasmodif.append({
@@ -153,39 +153,66 @@ def menu_eliminarventa():
                 'comentario': v.comentario
             })
 
+        pedidospikas = db.query(Venta).filter(Venta.fecha_pedido != None).filter(Venta.fecha == None).order_by(Venta.fecha_pedido.desc())
+        pedidosmodif = []
+        for v in pedidospikas:
+            pedidosmodif.append({
+                'id': v.id,
+                'fecha': v.fecha_pedido.strftime("%d/%m/%Y %H:%M"),
+                'comentario': v.comentario
+            })
+
         r = make_response(render_template(
             'menu/ventas/eliminarventa.html',
-            ventas=ventasmodif
+            ventas=ventasmodif,
+            pedidos=pedidosmodif
         ))
         return r
     else:  # request.method == "POST":
         print('post form:', request.form)
 
-        try:
-            checkparams(request.form, ('venta',))
-        except Exception as e:
-            return str(e), 400
+        operation = request.form['operation']
 
-        db = get_db()
-
-        venta = db.query(Venta).get(int(request.form['venta']))
-        dtnow = datetime.datetime.now()
-        ventapikas = db.query(VentaPika).filter(VentaPika.venta == venta)
-
-        for vp in ventapikas.all():
-            #sumamos stock de pika
-            pikacant = int(vp.cantidad)
-            mov = MovStockPika(pika=vp.pika, cantidad=pikacant, fecha=dtnow)
-            db.add(mov)
-
-            stockpika = db.query(StockPika).get(vp.pika_id)
-            stockpika.cantidad += pikacant
-            stockpika.fecha = mov.fecha
-
-        ventapikas.delete()
-        db.query(Venta).filter(Venta.id == venta.id).delete()
-
-        db.commit()
+        if operation == 'delete_pedido':
+            pedido_id = request.form.get('pedido')
+            if not pedido_id:
+                return 'Debe elegir un pedido válido', 400
+            
+            db = get_db()
+            
+            pedido = db.query(Venta).filter(Venta.id == int(pedido_id))
+            ventapikas = db.query(VentaPika).filter(VentaPika.venta == pedido.one())
+            ventapikas.delete()
+            pedido.delete()
+            
+            db.commit()
+    
+        elif operation == 'delete_venta':
+            venta_id = request.form.get('venta')
+            if not venta_id:
+                return 'Debe elegir una venta válida', 400
+            db = get_db()
+    
+            venta = db.query(Venta).get(int(request.form['venta']))
+            dtnow = datetime.datetime.now()
+            ventapikas = db.query(VentaPika).filter(VentaPika.venta == venta)
+    
+            for vp in ventapikas.all():
+                #sumamos stock de pika
+                pikacant = int(vp.cantidad)
+                mov = MovStockPika(pika=vp.pika, cantidad=pikacant, fecha=dtnow)
+                db.add(mov)
+    
+                stockpika = db.query(StockPika).get(vp.pika_id)
+                stockpika.cantidad += pikacant
+                stockpika.fecha = mov.fecha
+    
+            ventapikas.delete()
+            db.query(Venta).filter(Venta.id == venta.id).delete()
+    
+            db.commit()
+        else:
+            return 'Operación inválida', 400
 
         return ''
 
