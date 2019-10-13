@@ -203,7 +203,7 @@ class StockPikaColor(Base):
         pika = relationship('Pika')
         cantidad_bajo = Column(Integer)
         cantidad_medio = Column(Integer)
-        def __repr__(self): return '<StockPikaColor {}>'.format(self.id)
+        def __repr__(self): return '<StockPikaColor {}>'.format(self.pika_id)
 
 class StockInsumoColor(Base):
         __tablename__ = 'stockinsumocolor'
@@ -211,5 +211,5 @@ class StockInsumoColor(Base):
         insumo = relationship('Insumo')
         cantidad_bajo = Column(Integer)
         cantidad_medio = Column(Integer)
-        def __repr__(self): return '<StockInsumoColor {}>'.format(self.id)
+        def __repr__(self): return '<StockInsumoColor {}>'.format(self.insumo_id)
 
