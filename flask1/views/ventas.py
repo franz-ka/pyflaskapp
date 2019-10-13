@@ -55,7 +55,7 @@ def exportar_ventas():
     db = get_db()
 
     if not len(request.args):
-        ventas = db.query(Venta)
+        ventas = db.query(Venta).filter(Venta.fecha != None)
         filtrado = False
     else:
         query = []
@@ -68,10 +68,10 @@ def exportar_ventas():
                 elif k=='fechahasta': query.append(Venta.fecha <= datetime.datetime.strptime(v,'%d/%m/%Y') + datetime.timedelta(days=1))
         if query:
             from functools import reduce
-            ventas = db.query(Venta).filter(reduce(lambda x, y: x&y, query))
+            ventas = db.query(Venta).filter(Venta.fecha != None).filter(reduce(lambda x, y: x&y, query))
             filtrado = True
         else:
-            ventas = db.query(Venta)
+            ventas = db.query(Venta).filter(Venta.fecha != None)
             filtrado = False
         if request.args['pika']:
             pikaid = int(request.args['pika'])
@@ -80,9 +80,9 @@ def exportar_ventas():
     ventas = ventas.order_by(Venta.fecha.desc()).all()
 
     ex = CsvExporter('ventas.csv')
-    ex.writeHeaders('Id,Fecha,Tipo,Comentario,Pika,Cantidad')
+    ex.writeHeaders('Id,Fecha,Fecha pedido,Tipo,Comentario,Pika,Cantidad')
     for v in ventas:
-        vals = [v.id, v.fecha, v.ventatipo.nombre, v.comentario, '', '']
+        vals = [v.id, v.fecha, v.fecha_pedido or '', v.ventatipo.nombre, v.comentario, '', '']
         if len(v.ventapikas):
             for vpi in v.ventapikas:
                 vals[4] = vpi.pika.nombre
