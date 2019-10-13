@@ -6,7 +6,7 @@
 #flask
 **/logs
 **/instance
-flask1.zip
+*.zip
 
 #pycharm
 **/.idea
