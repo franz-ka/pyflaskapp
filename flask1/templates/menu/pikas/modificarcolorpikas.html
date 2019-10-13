@@ -1,0 +1,65 @@
+{% extends '_maingui.html' %}
+
+{% block content %}
+{% call forms.card('Modificar colores stocks', size=6)  %}
+<!-- Pika -->
+<div class="form-group row">
+    {{ forms.input_select(12, "pika", "Elija un pika", required=1) }}
+</div>
+<div class="form-group row">
+	{{ forms.input_msg(4, 'Cantidad bajo:') }}
+	{{ forms.input_number(4, 'cantidad_bajo_anterior', min=0, required=0, readonly=1) }}
+	{{ forms.input_number(4, 'cantidad_bajo_nueva', min=0, required=0, readonly=0) }}
+</div>
+<div class="form-group row">
+	{{ forms.input_msg(4, 'Cantidad medio:') }}
+	{{ forms.input_number(4, 'cantidad_medio_anterior', min=0, required=0, readonly=1) }}
+	{{ forms.input_number(4, 'cantidad_medio_nueva', min=0, required=0, readonly=0) }}
+</div>
+<!-- BOTONES -->
+<div class="form-group row">
+    <div class="col-sm-12">
+        <button type="submit" class="btn btn-primary btn-block">Modificar</button>
+    </div>
+</div>
+{% endcall %}
+{% endblock %}
+
+{% block js %}
+<script type="text/javascript">
+$(function() {    
+    regFormValid(false, function(){ setTimeout('location.reload();', 2000) });
+
+    cantidades_bajo = {{ forms.dataToJsArr(pikascolores, idattr='pika_id', txtattr='cantidad_bajo') }};
+    cantidades_medio = {{ forms.dataToJsArr(pikascolores, idattr='pika_id', txtattr='cantidad_medio') }};
+
+    pikasdata = {{ forms.dataToJsArr(pikas) }};
+    sel2('.select2-single[name=pika]', 'Pika', pikasdata);
+    $('.select2-single[name=pika]').on('select2:select', function (e) {
+        var data = e.params.data;
+        pikaid=e.params.data.id
+
+        $('input[name=cantidad_bajo_anterior]').val('')
+        for (cb in cantidades_bajo){
+            if (cantidades_bajo[cb].id==pikaid){
+                $('input[name=cantidad_bajo_anterior]').val(cantidades_bajo[cb].text);
+                $('input[name=cantidad_bajo_nueva]').val(cantidades_bajo[cb].text);
+                break;
+            }
+        }
+
+        $('input[name=cantidad_medio_anterior]').val('')
+        for (cm in cantidades_medio){
+            if (cantidades_medio[cm].id==pikaid){
+                $('input[name=cantidad_medio_anterior]').val(cantidades_medio[cm].text);
+                $('input[name=cantidad_medio_nueva]').val(cantidades_medio[cm].text);
+                break;
+            }
+        }
+    }).on('select2:unselect', function(e){
+        $('input[name=cantidad_bajo_anterior]').val('')
+        $('input[name=cantidad_medio_anterior]').val('')
+    });
+});
+</script>
+{% endblock %}

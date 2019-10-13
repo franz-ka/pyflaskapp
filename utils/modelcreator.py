@@ -14,7 +14,9 @@ tables = {
     #'Gcode': ['id', 'Pika', 'nombre,str128,nonull'],
     #'Falla': ['id', 'Maquina', 'Gcode', 'descripcion,str128,nonull', 'fecha,datetime']
     #'Alarma': ['id', 'Insumo', 'cantidad,int,nonull', 'fecha_avisado,datetime']
-    'PrestockPika': ['Pika','cantidad,int,nonull', 'fecha,datetime'] 
+    #'PrestockPika': ['Pika','cantidad,int,nonull', 'fecha,datetime'] 
+    'StockPikaColor': ['Pika','cantidad_bajo,int', 'cantidad_medio,int'] ,
+    'StockInsumoColor': ['Insumo','cantidad_bajo,int', 'cantidad_medio,int'] ,
 }
 
 txt=[]

@@ -261,3 +261,48 @@ def menu_modificarstockpika():
 
         return ''
 
+@bp_pikas.route("/modificarcolorpikas", methods = ['GET', 'POST'])
+@login_required
+def menu_modificarcolorpikas():
+    if request.method == "GET":
+        db = get_db()
+        pikas = db.query(Pika).all()
+        pikascolores = db.query(StockPikaColor).all()
+        
+        r = make_response(render_template(
+            'menu/pikas/modificarcolorpikas.html',
+            pikas=pikas,
+            pikascolores=pikascolores
+        ))
+        return r
+    else: #request.method == "POST":
+        print('post form:',request.form)
+
+        try:
+            checkparams(request.form, ('pika', ))
+        except Exception as e:
+            return str(e), 400
+        
+        if not (request.form['cantidad_bajo_nueva'] or request.form['cantidad_medio_nueva']):
+            return str('Debe proporcionar alguna cantidad nueva'), 400
+
+
+        db = get_db()
+
+        pika = db.query(Pika).get(request.form['pika'])
+        stockpikacolor = db.query(StockPikaColor).get(request.form['pika'])
+        if not stockpikacolor:
+            stockpikacolor = StockPikaColor(pika=pika)
+            db.add(stockpikacolor)
+        
+        if request.form['cantidad_bajo_nueva']:
+            colorcant = int(request.form['cantidad_bajo_nueva'])    
+            stockpikacolor.cantidad_bajo = colorcant
+        
+        if request.form['cantidad_medio_nueva']:
+            colorcant = int(request.form['cantidad_medio_nueva'])
+            stockpikacolor.cantidad_bajo = colorcant
+
+        db.commit()
+
+        return ''

@@ -196,3 +196,20 @@ class Alarma(Base):
     fecha_avisado = Column(DateTime)
 
     def __repr__(self): return '<Alarma {}>'.format(self.id)
+
+class StockPikaColor(Base):
+        __tablename__ = 'stockpikacolor'
+        pika_id = Column(Integer, ForeignKey('pika.id'), primary_key=True)
+        pika = relationship('Pika')
+        cantidad_bajo = Column(Integer)
+        cantidad_medio = Column(Integer)
+        def __repr__(self): return '<StockPikaColor {}>'.format(self.id)
+
+class StockInsumoColor(Base):
+        __tablename__ = 'stockinsumocolor'
+        insumo_id = Column(Integer, ForeignKey('insumo.id'), primary_key=True)
+        insumo = relationship('Insumo')
+        cantidad_bajo = Column(Integer)
+        cantidad_medio = Column(Integer)
+        def __repr__(self): return '<StockInsumoColor {}>'.format(self.id)
+
