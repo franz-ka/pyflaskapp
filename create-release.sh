@@ -1,1 +1,2 @@
-zip -r flask1.zip flask1 -x flask1/__pycache__/* -x flask1/views/__pycache__/*
+rm flask1.zip
+zip -r flask1.zip flask1 utils -x \*\*/__pycache__/\* \*.pyc
