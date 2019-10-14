@@ -3,21 +3,34 @@ from dbconfig import Usuario, \
     PrestockPika, StockPika, StockInsumo, MovStockPika, MovStockInsumo, \
     VentaTipo, Venta, VentaPika, \
     Maquina, Gcode, Falla, Alarma, \
+	StockPikaColor, \
     get_db_session
 from datetime import datetime
 
-# esto crea la nueva tabla de PrestockPika
+# esto crea la nueva tabla de StockPikaColor y StockInsumoColor
 db = get_db_session(create_new=True)
 
 #raise Exception()
+db.query(StockPikaColor).delete()
 
-'''prestocks = []
-now = datetime.now()
+colores = []
 for pika in db.query(Pika).all():
-    prestocks.append(PrestockPika(pika=pika, cantidad=0, fecha=now))
-    
-print(prestocks)
-print(db.add_all(prestocks))
+	prenombre = pika.nombre.split(' ')[0].lower()
+	color = StockPikaColor(pika=pika)
+	if prenombre == 'cogo':
+		color.cantidad_bajo = 3
+		color.cantidad_medio = 8
+	elif prenombre == 'mini':
+		color.cantidad_bajo = 10
+		color.cantidad_medio = 26
+	elif prenombre == 'xl':
+		color.cantidad_bajo = 2
+		color.cantidad_medio = 4
+	else:
+		continue
+	colores.append(color)
+
+print(db.add_all(colores))
 db.commit()
 
-print(db.query(PrestockPika).all())'''
+print(db.query(StockPikaColor).all())

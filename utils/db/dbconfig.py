@@ -9,6 +9,7 @@ from models import Base, \
     Pika, Insumo, PikaInsumo, \
     PrestockPika, StockPika, StockInsumo, MovStockPika, MovStockInsumo, \
     VentaTipo, Venta, VentaPika, \
+    StockPikaColor, StockInsumoColor, \
     Maquina, Gcode, Falla, Alarma
 
 def init_db_engine():
