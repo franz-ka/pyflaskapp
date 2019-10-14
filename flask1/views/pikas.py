@@ -159,15 +159,16 @@ def exportar_stockpikas():
     stopiks = db.query(Pika, PrestockPika, StockPika).filter(Pika.id==PrestockPika.pika_id).filter(Pika.id==StockPika.pika_id).order_by(Pika.nombre).all()
 
     ex = CsvExporter('stockpikas.csv')
-    ex.writeHeaders('Id,Nombre,Prestock,Stock,Actualizado')
+    ex.writeHeaders('Id,Nombre,Prestock,Stock,Total,Actualizado')
     for pika_spika_pspika in stopiks:
-        print(pika_spika_pspika)
+        #print(pika_spika_pspika)
         fecha_mayor = pika_spika_pspika[1].fecha if pika_spika_pspika[1].fecha > pika_spika_pspika[2].fecha else pika_spika_pspika[2].fecha
         ex.writeVals([
             pika_spika_pspika[0].id,
             pika_spika_pspika[0].nombre,
             pika_spika_pspika[1].cantidad,
             pika_spika_pspika[2].cantidad,
+            pika_spika_pspika[1].cantidad+pika_spika_pspika[2].cantidad,
             fecha_mayor])
     return ex.send()
 
