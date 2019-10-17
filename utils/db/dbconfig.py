@@ -10,7 +10,8 @@ from models import Base, \
     PrestockPika, StockPika, StockInsumo, MovStockPika, MovStockInsumo, \
     VentaTipo, Venta, VentaPika, \
     StockPikaColor, StockInsumoColor, \
-    Maquina, Gcode, Falla, Alarma
+    Maquina, Gcode, Falla, Alarma, \
+    FactorProductividad
 
 def init_db_engine():
     from sqlalchemy import create_engine
