@@ -1,0 +1,18 @@
+{% extends '_maingui.html' %}
+
+{% block content %}
+{% call forms.card('Prioridades de impresión')  %}
+{% for prio_pika_id, prio_valor in prioridades %}
+{% set pika = pikasdata_keys[prio_pika_id] %}
+{{ pika.nombre }} {{ prio_valor }}<br>
+{% endfor %}
+{% endcall %}
+{% endblock %}
+
+{% block js %}
+<script type="text/javascript">
+$(function() {
+    
+});
+</script>
+{% endblock %}

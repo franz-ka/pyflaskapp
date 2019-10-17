@@ -1,7 +1,7 @@
 from flask import current_app, Blueprint, request, make_response, render_template, redirect, url_for
 from flask_login import login_required, login_user, logout_user
 
-from sqlalchemy import or_
+from sqlalchemy import or_, func
 import datetime
 
 from flask1.db import get_db
