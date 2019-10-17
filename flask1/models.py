@@ -1,5 +1,5 @@
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import event, Column, Integer, String, DateTime, Boolean, ForeignKey
+from sqlalchemy import event, Column, Integer, String, DateTime, Boolean, Float, ForeignKey
 from sqlalchemy.orm import relationship
 import datetime
 
@@ -212,4 +212,12 @@ class StockInsumoColor(Base):
         cantidad_bajo = Column(Integer)
         cantidad_medio = Column(Integer)
         def __repr__(self): return '<StockInsumoColor {}>'.format(self.insumo_id)
+
+class FactorProductividad(Base):
+        __tablename__ = 'factorproductividad'
+        pika_id = Column(Integer, ForeignKey('pika.id'), primary_key=True)
+        pika = relationship('Pika')
+        factor = Column(Float, nullable=False)
+        fecha_actualizado = Column(DateTime)
+        def __repr__(self): return '<FactorProductividad {}>'.format(self.pika_id)
 

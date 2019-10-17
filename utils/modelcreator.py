@@ -51,7 +51,7 @@ for tname in tables:
             elif fs[1][:3]=='str': type = 'String(' + fs[1][3:] + ')'
             elif fs[1]=='datetime': type = 'DateTime'
             elif fs[1]=='bool': type = 'Boolean'
-            elif fs[1]=='float': type = 'Real'
+            elif fs[1]=='float': type = 'Float'
 
             if 'nonull' in fs:
                 nullstr=', nullable=False'
