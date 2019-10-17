@@ -1,13 +1,18 @@
 import sys
 if len(sys.argv)<2:
-    print('Falta el nombre del menu como argumento')
+    print('Falta el nombre del blueprint como primer argumento')
+    print('Falta el nombre del menu como segundo argumento')
     sys.exit(1)
-if len(sys.argv)>2:
-    print('Solo un argumento se admite')
+if len(sys.argv)<3:
+    print('Falta el nombre del menu como segundo argumento')
+    sys.exit(1)
+if len(sys.argv)>3:
+    print('Solo dos argumentos se admiten')
     sys.exit(1)
 
-mname = sys.argv[1].lower()
-htmlpath = "flask1/templates/menu/{0}.html".format(mname)
+bpname = sys.argv[1].lower()
+mname = sys.argv[2].lower()
+htmlpath = "flask1/templates/menu/{0}/{1}.html".format(bpname, mname)
 
 import os.path
 if os.path.isfile(htmlpath):
@@ -18,19 +23,19 @@ if os.path.isfile(htmlpath):
 
 str=[]
 str.append("------------- _menu.html")
-str.append("{{{{url_for('main.menu_{0}')}}}}".format(mname))
+str.append("{{'endp': 'menu_{0}', 'tit': 'TITULO', 'admin': 1}},".format(mname))
 str.append("")
 
 str.append('''------------- routes.py
-@bp.route("/menu/{0}", methods = ['GET', 'POST'])
+@bp_{0}.route("/{1}", methods = ['GET', 'POST'])
 @login_required
-def menu_{0}():
+def menu_{1}():
     if request.method == "GET":
         db = get_db()
         DATA = db.query(TABLE).all()
         
         r = make_response(render_template(
-            'menu/{0}.html',
+            'menu/{0}/{1}.html',
             DATA=DATA
         ))
         return r
@@ -46,7 +51,7 @@ def menu_{0}():
         
         db.commit()
 
-        return \'\''''.format(mname))
+        return \'\''''.format(bpname, mname))
 str.append("")
 
 with open(htmlpath, "w") as f:
