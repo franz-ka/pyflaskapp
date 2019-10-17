@@ -91,8 +91,8 @@
 </div>
 {%- endmacro %} 
 
-{% macro input_msg(col, msg) -%}
-<div class="col-sm-{{col}}">
+{% macro input_msg(col, msg, css_class='') -%}
+<div class="col-sm-{{col}} {{css_class}}">
     <p class="my-2 ml-2">{{ msg }}</p>
 </div>
 {%- endmacro %} 
