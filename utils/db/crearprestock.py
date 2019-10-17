@@ -22,7 +22,7 @@ db.commit()
 
 print(db.query(PrestockPika).all())'''
 
-dtnow = datetime.datetime.now()
+dtnow = datetime.now()
 for pika in db.query(Pika).all():
     prestockpika = db.query(PrestockPika).get(pika.id)
     if not prestockpika:
