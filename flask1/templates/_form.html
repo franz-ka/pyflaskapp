@@ -1,3 +1,18 @@
+{% macro form(method='POST') -%}
+<form novalidate method="{{method}}">
+    <div class="alert alert-danger fade show" style="display: none;">
+        <p class="mb-0"></p>
+    </div>
+    <div class="alert alert-warning fade show" style="display: none;">
+        <p class="mb-0"></p>
+    </div>
+    <div class="alert alert-success fade show" style="display: none;">
+        <p class="mb-0">Operación realizada</p>
+    </div>
+    {{ caller() }}
+</form>
+{%- endmacro %}
+
 {% macro card(title, size=12, method='POST', css_class='') -%}
 <div class="col-lg-{{size}} {{css_class}}">
     <div class="card card-body bg-light">
@@ -20,8 +35,8 @@
 </div>
 {%- endmacro %}
 
-{% macro cardNoForm(title, size=12) -%}
-<div class="col-lg-{{size}}">
+{% macro cardNoForm(title, size=12, css_class='') -%}
+<div class="col-lg-{{size}} {{css_class}}">
     <div class="card card-body bg-light">
         <h3 class="card-header">{{title}}</h3>
         <div class="card-block">
