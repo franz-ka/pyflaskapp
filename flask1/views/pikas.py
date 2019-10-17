@@ -203,12 +203,15 @@ def menu_agregelimpika():
         db = get_db()
 
         if request.form['operation'] == 'add':
+            dtnow = datetime.datetime.now()
+            
             if db.query(Pika).filter(Pika.nombre==request.form['nombrepika']).first():
                 return str('Ya existe un pika con ese nombre'), 400
             # siempre al agregar un pika se debe agregar su StockPika en 0 sino después hay errores
             pika = Pika(nombre=request.form['nombrepika'])
             db.add(pika)
-            db.add(StockPika(pika=pika, cantidad=0, fecha=datetime.datetime.now()))
+            db.add(StockPika(pika=pika, cantidad=0, fecha=dtnow))
+            db.add(PrestockPika(pika=pika, cantidad=0, fecha=dtnow))
 
         db.commit()
 
@@ -254,9 +257,9 @@ def menu_modificarstockpika():
             #mov = MovStockPika(pika=pika, cantidad=pikacant, fecha=dtnow)
             #db.add(mov)
     
-            stockpika = db.query(PrestockPika).get(request.form['pika'])
-            stockpika.cantidad = pikacant
-            stockpika.fecha = dtnow
+            prestockpika = db.query(PrestockPika).get(request.form['pika'])
+            prestockpika.cantidad = pikacant
+            prestockpika.fecha = dtnow
         
         if request.form['cantidadnueva']:
             pikacant = int(request.form['cantidadnueva'])
