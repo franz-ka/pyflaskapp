@@ -15,8 +15,9 @@ tables = {
     #'Falla': ['id', 'Maquina', 'Gcode', 'descripcion,str128,nonull', 'fecha,datetime']
     #'Alarma': ['id', 'Insumo', 'cantidad,int,nonull', 'fecha_avisado,datetime']
     #'PrestockPika': ['Pika','cantidad,int,nonull', 'fecha,datetime'] 
-    'StockPikaColor': ['Pika','cantidad_bajo,int', 'cantidad_medio,int'] ,
-    'StockInsumoColor': ['Insumo','cantidad_bajo,int', 'cantidad_medio,int'] ,
+    #'StockPikaColor': ['Pika','cantidad_bajo,int', 'cantidad_medio,int'] ,
+    #'StockInsumoColor': ['Insumo','cantidad_bajo,int', 'cantidad_medio,int'] ,
+    'FactorProductividad': ['Pika','factor,float,nonull', 'fecha_actualizado,datetime'] ,
 }
 
 txt=[]
@@ -50,6 +51,7 @@ for tname in tables:
             elif fs[1][:3]=='str': type = 'String(' + fs[1][3:] + ')'
             elif fs[1]=='datetime': type = 'DateTime'
             elif fs[1]=='bool': type = 'Boolean'
+            elif fs[1]=='float': type = 'Real'
 
             if 'nonull' in fs:
                 nullstr=', nullable=False'
@@ -57,7 +59,10 @@ for tname in tables:
             else: nullstr=''
 
             str.append( "{0} = Column({1}{2})".format(fs[0], type, nullstr) )
-    str.append( "def __repr__(self): return '<{0} {{}}>'.format(self.id)".format(tname) )
+    if fields[0]=='id':
+        str.append( "def __repr__(self): return '<{0} {{}}>'.format(self.id)".format(tname) )
+    else:
+        str.append( "def __repr__(self): return '<{0} {{}}>'.format(self.{1})".format(tname, fields[0].lower() + '_id') )
     for i,l in enumerate(str):
         if i>0:
             str[i]='\t' + str[i]
