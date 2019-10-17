@@ -321,3 +321,43 @@ def menu_modificarcolorpikas():
         db.commit()
 
         return ''
+
+@bp_pikas.route("/factoresdeproductividad", methods = ['GET', 'POST'])
+@login_required
+def menu_factoresdeproductividad():
+    if request.method == "GET":
+        db = get_db()
+        #pikas = db.query(Pika).order_by(Pika.nombre).all()
+        #factores = db.query(FactorProductividad).all()
+        pika_factores = db.query(Pika, FactorProductividad).outerjoin(FactorProductividad).all()
+
+        r = make_response(render_template(
+            'menu/pikas/factoresdeproductividad.html',
+            pika_factores=pika_factores
+        ))
+        return r
+    else: #request.method == "POST":
+        print('post form:',request.form)
+
+        try: checkparams(request.form, ('pika_id', 'factor_nuevo'))
+        except Exception as e: return str(e), 400
+
+        db = get_db()
+        
+
+        pika = db.query(Pika).get(request.form['pika_id'])
+        factor_cant = float(request.form['factor_nuevo'])
+        dtnow = datetime.datetime.now()
+        
+        factorprod = db.query(FactorProductividad).get(pika.id)
+        if not factorprod:
+            factorprod = FactorProductividad(pika=pika, factor=factor_cant, fecha_actualizado=dtnow)
+            db.add(factorprod)
+        else:
+            factorprod.factor = factor_cant
+            factorprod.fecha_actualizado = dtnow
+        
+        db.commit()
+
+        return ''
+

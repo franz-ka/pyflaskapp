@@ -1,0 +1,105 @@
+{% extends '_maingui.html' %}
+
+{% block styles %}
+<style>
+.factor_productividad .btnDefinir{
+	width: 30px;
+	height: 30px;
+	margin: 0 auto;
+}
+.factor_productividad .btnDefinir:hover{
+	background-color: white;	
+	color: black;
+}
+.factor_productividad form{
+	padding-top: 0;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+{% call forms.cardNoForm('Factores de productividad', css_class='factor_productividad')  %}
+<table class="table table-sm table-striped table-hover">
+  <thead>
+    <tr>
+      <th>Pika</th>
+      <th>Factor</th>
+      <th>Actualizado</th>
+      <th class="text-center">Cambiar</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for pika_factor in pika_factores %}
+		{% set pika = pika_factor[0] %}
+		{% set factor = pika_factor[1] %}
+
+        <tr>
+            <td>{{pika.nombre}}</td>
+			{% if factor %}
+	            <td>{{factor.factor}}</td>
+	            <td>{{factor.fecha_actualizado.strftime("%d/%m/%Y %H:%M")}}</td>
+			{% else %}
+	            <td>No definido</td>
+	            <td>&nbsp;</td>
+			{% endif %}			
+            <td class="pt-2">
+				<button type="button" class="btnDefinir btn btn-secondary btn-block p-0" data-toggle="modal" data-target="#mainModal" data-pikaid="{{pika.id}}"  data-pikanombre="{{pika.nombre}}"><</button>
+			</td>
+        </tr>
+    {% endfor %}
+</table>
+<div id="mainModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="mainModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="mainModalLabel">Cambiar factor de productividad</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+	{% call forms.form()  %}
+      <div class="modal-body">
+		  <div class="container-fluid">
+			    <div class="row">
+					<input type="hidden" name="pika_id">
+					{{ forms.input_msg(5, 'Pika: ', css_class='modal_pika_nombre') }}
+					{{ forms.input_msg(4, 'Nuevo factor:') }}
+				    <div class="col-sm-3">
+				        <input type="text" name="factor_nuevo" class="form-control" placeholder="Factor" required>
+				    </div>
+			    </div>
+		  </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+        <button type="submit" class="btn btn-primary">Guardar</button>
+      </div>
+	{% endcall %}
+    </div>
+  </div>
+</div>
+{% endcall %}
+{% endblock %}
+
+{% block js %}
+<script type="text/javascript">
+$(function() {
+    regFormValid(false, function(){ setTimeout('location.reload();', 1000) });
+
+    $('#mainModal').on('show.bs.modal', function (event) {
+	  	var button = $(event.relatedTarget) // Button that triggered the modal
+	  	var pikaId = button.data('pikaid')
+	  	var pikaNom = button.data('pikanombre')
+		$('form input[name=pika_id]').val(pikaId)
+		$('.modal_pika_nombre p').html('Pika: ' + pikaNom)
+		$('form input[name=factor_nuevo]').val('')
+		//var recipient = button.data('whatever') // Extract info from data-* attributes
+	  // If necessary, you could initiate an AJAX request here (and then do the updating in a callback).
+	  // Update the modal's content. We'll use jQuery here, but you could use a data binding library or other methods instead.
+	  //var modal = $(this)
+	  //modal.find('.modal-title').text('New message to ' + recipient)
+	  //modal.find('.modal-body input').val(recipient)
+	})
+});
+</script>
+{% endblock %}
