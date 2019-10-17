@@ -5,7 +5,7 @@
 .factor_productividad .btnDefinir{
 	width: 30px;
 	height: 30px;
-	margin: 0 auto;
+	display: inline;
 }
 .factor_productividad .btnDefinir:hover{
 	background-color: white;	
@@ -18,14 +18,17 @@
 {% endblock %}
 
 {% block content %}
-{% call forms.cardNoForm('Factores de productividad', css_class='factor_productividad')  %}
+{% call forms.cardNoForm('Factores', css_class='factor_productividad')  %}
+<div class="alert alert-info fade show">
+    <p class="mb-0">Ventas de los últimos {{dias_factor|int}} días ({{dtventas.strftime("%x")}}). </p>
+</div>
 <table class="table table-sm table-striped table-hover">
   <thead>
     <tr>
       <th>Pika</th>
-      <th>Factor</th>
+      <th>Productividad</th>
       <th>Actualizado</th>
-      <th class="text-center">Cambiar</th>
+      <th>Venta diaria</th>
     </tr>
   </thead>
   <tbody>
@@ -34,17 +37,15 @@
 		{% set factor = pika_factor[1] %}
 
         <tr>
-            <td>{{pika.nombre}}</td>
+            <td>{{pika.nombre}}</td>	
 			{% if factor %}
-	            <td>{{factor.factor}}</td>
+	            <td><button type="button" class="btnDefinir btn btn-secondary btn-block p-0" data-toggle="modal" data-target="#mainModal" data-pikaid="{{pika.id}}"  data-pikanombre="{{pika.nombre}}">></button> {{factor.factor}}</td>
 	            <td>{{factor.fecha_actualizado.strftime("%d/%m/%Y %H:%M")}}</td>
 			{% else %}
-	            <td>No definido</td>
+	            <td><button type="button" class="btnDefinir btn btn-secondary btn-block p-0" data-toggle="modal" data-target="#mainModal" data-pikaid="{{pika.id}}"  data-pikanombre="{{pika.nombre}}">></button> No definido</td>
 	            <td>&nbsp;</td>
-			{% endif %}			
-            <td class="pt-2">
-				<button type="button" class="btnDefinir btn btn-secondary btn-block p-0" data-toggle="modal" data-target="#mainModal" data-pikaid="{{pika.id}}"  data-pikanombre="{{pika.nombre}}"><</button>
-			</td>
+			{% endif %}		
+      		<td>{{ventas_promedios[pika.id] if pika.id in ventas_promedios else 'Sin ventas'}}</td>
         </tr>
     {% endfor %}
 </table>
