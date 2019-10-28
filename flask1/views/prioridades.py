@@ -92,11 +92,12 @@ def menu_prioridadimpresion():
         
         class PikaData:
             id=0
+            nombre=''
             prestock=0
             stock=0
             pedidos=0
             stockreal=0.0
-            factorventa=0.0
+            factorventa=0.0001
             factorprod=0.0
             
         for pika, prestock, stock, factor_prod in pikasdata:
@@ -104,11 +105,12 @@ def menu_prioridadimpresion():
             
             p = PikaData()
             p.id = pika.id
+            p.nombre = pika.nombre
             p.prestock = prestock.cantidad
             p.stock = stock.cantidad
             p.pedidos = 0
             p.stockreal = float(p.prestock + p.stock - p.pedidos)
-            p.factorventa = 0.0
+            p.factorventa = 0.0001
             p.factorprod = float(factor_prod.factor)
             pikas[pika.id] = p
         
@@ -145,6 +147,8 @@ def menu_prioridadimpresion():
         for pika_id, ventas_diarias in ventasdiarias:
             p = pikas[pika_id]
             p.factorventa = float(ventas_diarias)
+            if p.factorventa == 0:
+                p.factorventa = 0.0001
         #print(pikaventasdiarias)
         
         # imprime mal esto
@@ -160,10 +164,11 @@ def menu_prioridadimpresion():
             for pi in pikas.values():    
                 stockreal = pi.stockreal
                 facvent = pi.factorventa
-                
+                #print(f"pika_id={pi.id:2}, pika_nombre={pi.nombre}")
+
                 stckrelativo = stockreal/facvent
                 stock_relativos[pi.id] = stckrelativo
-                print(f"pika_id={pi.id:2}, stockreal={stockreal:5}, facvent={facvent:.4f}, stckrelativo={stckrelativo:5.1f}")
+                print(f"pika=({pi.id:2})'{pi.nombre}', stockreal={stockreal:5}, facvent={facvent:.4f}, stckrelativo={stckrelativo:5.1f}")
             #print(stock_relativos)
                 
             pika_id_min = min(stock_relativos, key=stock_relativos.get)
@@ -172,7 +177,7 @@ def menu_prioridadimpresion():
             
             prioridades.append((pika_id_min, stockrel_min))
             
-            pikas[pika_id_min].stockreal += pikas[pika_id_min].factorprod * dias_factor_venta
+            pikas[pika_id_min].stockreal += pikas[pika_id_min].factorprod * 1.0
             print('upd stockrel to', pikas[pika_id_min].stockreal)
             
             cant_prioris -= 1
