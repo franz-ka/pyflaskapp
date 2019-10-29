@@ -68,9 +68,18 @@ class Pika(Base):
 class Insumo(Base):
     __tablename__ = 'insumo'
     id = Column(Integer, primary_key=True, autoincrement=True)
+    insumotipo_id = Column(Integer, ForeignKey('insumotipo.id'))
+    insumotipo = relationship('InsumoTipo')
     nombre = Column(String(64), nullable=False)
-
+    
     def __repr__(self): return '<Insumo {}>'.format(self.id)
+
+class InsumoTipo(Base):
+    __tablename__ = 'insumotipo'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    nombre = Column(String(64), nullable=False)
+    
+    def __repr__(self): return '<InsumoTipo {}>'.format(self.nombre)
 
 class PikaInsumo(Base):
     __tablename__ = 'pikainsumo'

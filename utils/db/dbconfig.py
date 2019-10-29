@@ -6,7 +6,7 @@ sys.path.append(str(app_path / 'flask1'))
 
 from models import Base, \
     Usuario, \
-    Pika, Insumo, PikaInsumo, \
+    Pika, Insumo, InsumoTipo, PikaInsumo, \
     PrestockPika, StockPika, StockInsumo, MovStockPika, MovStockInsumo, \
     VentaTipo, Venta, VentaPika, \
     StockPikaColor, StockInsumoColor, \
