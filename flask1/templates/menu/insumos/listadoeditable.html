@@ -1,0 +1,138 @@
+{% extends '_maingui.html' %}
+
+{% block styles %}
+<style>
+table .btnDefinir{
+	width: 30px;
+	height: 30px;
+	display: inline;
+}
+table .btnDefinir:hover{
+	background-color: white;	
+	color: black;
+}
+table form{
+	padding-top: 0;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+{% call forms.cardNoForm('Listado editable de insumos')  %}
+<table class="table table-sm table-striped table-hover">
+  <thead>
+    <tr>
+      <th>Tipo de insumo</th>
+      <th>Nombre</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for insu in insumos %}
+        <tr>
+            <td><button type="button" class="btnDefinir btn btn-secondary btn-block p-0" data-toggle="modal" data-target="#tipoModal" data-id="{{insu.id}}"  data-nombre="{{insu.nombre}}">></button> {{insu.insumotipo.nombre or 'Sin dato'}}</td>
+            <td><button type="button" class="btnDefinir btn btn-secondary btn-block p-0" data-toggle="modal" data-target="#nombreModal" data-id="{{insu.id}}"  data-nombre="{{insu.nombre}}">></button> {{insu.nombre}}</td>
+        </tr>
+    {% endfor %}
+</table>
+
+<a class="btn btn-primary btn-block" href="{{url_for('insumos.exportar_stockinsumos')}}">Exportar a CSV</a>
+
+<div id="tipoModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="tipoModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="tipoModalLabel">Cambiar tipo de insumo</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+	{% call forms.form()  %}
+		<div class="modal-body">
+		  <div class="container-fluid">
+				<input type="hidden" name="operation" value="cambiar_tipo">
+			    <div class="row">
+					<input type="hidden" name="insu_id">
+					{{ forms.input_msg(3, 'Insumo:') }}
+					{{ forms.input_msg(9, css_class='modal_insu_nombre') }}
+			    </div>
+			    <div class="row">
+    				{{ forms.input_select(12, "tipoinsu", "Elija un tipo", required=1) }}
+			    </div>
+		  </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+        <button type="submit" class="btn btn-primary">Cambiar</button>
+      </div>
+	{% endcall %}
+    </div>
+  </div>
+</div>
+
+<div id="nombreModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="nombreModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="nombreModalLabel">Cambiar nombre de insumo</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+	{% call forms.form()  %}
+      <div class="modal-body">
+		  <div class="container-fluid">
+				<input type="hidden" name="operation" value="cambiar_nombre">
+			    <div class="row">
+					<input type="hidden" name="insu_id">
+					{{ forms.input_msg(3, 'Insumo:') }}
+					{{ forms.input_msg(9, css_class='modal_insu_nombre') }}
+			    </div>
+			    <div class="row">
+				    <div class="col-sm-12">
+				        <input type="text" name="nombreinsu" class="form-control" placeholder="Nombre" required>
+				    </div>
+			    </div>
+		  </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+        <button type="submit" class="btn btn-primary">Cambiar</button>
+      </div>
+	{% endcall %}
+    </div>
+  </div>
+</div>
+{% endcall %}
+{% endblock %}
+
+{% block js %}
+<script type="text/javascript">
+$(function() {
+
+    regFormValid(false, function(){ setTimeout('location.reload();', 1000) });
+
+    tipoinsusdata = {{ forms.dataToJsArr(tipoinsus) }};
+    sel2('.select2-single[name=tipoinsu]', 'Tipo de insumo', tipoinsusdata);
+    
+    $('#tipoModal').on('show.bs.modal', function (event) {
+	  	var button = $(event.relatedTarget) // Button that triggered the modal
+	  	var id = button.data('id')
+	  	var nom = button.data('nombre')
+		$('form input[name=insu_id]').val(id)
+		$('.modal_insu_nombre p').html(nom)		
+	}).on('hide.bs.modal', function (event) {
+    	$('.select2-single[name=tipoinsumo]').val(null).trigger('change');
+	})
+	
+    $('#nombreModal').on('show.bs.modal', function (event) {
+	  	var button = $(event.relatedTarget) // Button that triggered the modal
+	  	var id = button.data('id')
+	  	var nom = button.data('nombre')
+		$('form input[name=insu_id]').val(id)
+		$('.modal_insu_nombre p').html(nom)	
+	}).on('hide.bs.modal', function (event) {
+		$('form input[name=nombreinsu]').val('')
+	})
+});
+</script>
+{% endblock %}

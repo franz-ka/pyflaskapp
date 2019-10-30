@@ -315,3 +315,40 @@ def menu_insumoabierto():
         check_alarmas()
 
         return ''
+
+@bp_insumos.route("/listadoeditable", methods = ['GET', 'POST'])
+@login_required
+def menu_listadoeditable():
+    if request.method == "GET":
+        db = get_db()
+        insumos = db.query(Insumo).order_by(Insumo.nombre).all()
+        tipoinsus = db.query(InsumoTipo).all()
+        
+        r = make_response(render_template(
+            'menu/insumos/listadoeditable.html',
+            insumos=insumos,
+            tipoinsus=tipoinsus
+        ))
+        return r
+    else: #request.method == "POST":
+        print('post form:',request.form)
+
+        try: checkparams(request.form, ('operation', 'insu_id'))
+        except Exception as e: return str(e), 400
+
+        db = get_db()
+        
+        insumo = db.query(Insumo).get(request.form['insu_id'])
+        operation = request.form['operation']
+        if operation == 'cambiar_tipo':
+            tipo = int(request.form['tipoinsu'])
+            insumo.insumotipo_id = tipo
+        elif operation == 'cambiar_nombre':
+            nombre = request.form['nombreinsu']
+            insumo.nombre = nombre
+        else:
+            return 'Operación inválida', 400
+        
+        db.commit()
+
+        return ''
