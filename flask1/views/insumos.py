@@ -344,7 +344,7 @@ def menu_listadoeditable():
             tipo = int(request.form['tipoinsu'])
             insumo.insumotipo_id = tipo
         elif operation == 'cambiar_nombre':
-            nombre = request.form['nombreinsu']
+            nombre = request.form['nombreinsu'].strip()
             insumo.nombre = nombre
         else:
             return 'Operación inválida', 400
