@@ -254,6 +254,7 @@ def menu_ingresarpedido():
         )
         if vendido:
             vent.fecha = dtnow
+            tipoinsu_venta = db.query(InsumoTipo).filter(InsumoTipo.nombre=='Venta').one()
         db.add(vent)
         for i, pikaid in enumerate(pikas):
             if i<len(cants) and cants[i] and pikaid:
@@ -271,6 +272,19 @@ def menu_ingresarpedido():
                 db.add(VentaPika(venta=vent, pika=pika, cantidad=pikacant))
                 
                 if vendido:
+                    pikainsus = db.query(PikaInsumo).join(Insumo).filter(PikaInsumo.pika==pika, Insumo.insumotipo==tipoinsu_venta)
+                    
+                    #restamos stock de insumos de venta
+                    for pikainsu in pikainsus:
+                        stockinsu = db.query(StockInsumo).get(pikainsu.insumo_id)
+                        if stockinsu.cantidad < pikainsu.cantidad*pikacant:
+                            return 'No hay suficiente stock de "{}" para el pika "{}" (hay {}, requiere {})'.format(pikainsu.insumo.nombre, pika.nombre, stockinsu.cantidad, pikainsu.cantidad*pikacant), 400
+    
+                        movinsu = MovStockInsumo(insumo=pikainsu.insumo, cantidad=pikainsu.cantidad, fecha=dtnow)
+                        db.add(movinsu)
+                        stockinsu.cantidad -= movinsu.cantidad*pikacant
+                        stockinsu.fecha = movinsu.fecha
+                        
                     #restamos stock de pika
                     mov = MovStockPika(pika=pika, cantidad=-int(cants[i]), fecha=dtnow)
                     db.add(mov)
@@ -301,6 +315,7 @@ def vender_pedido():
     dtnow = datetime.datetime.now()
     venta = db.query(Venta).get(int(request.form['venta_id']))
     venta.fecha=dtnow
+    tipoinsu_venta = db.query(InsumoTipo).filter(InsumoTipo.nombre=='Venta').one()
     print(venta.id, venta.fecha, f'"{venta.comentario}"')
     
     ventapikas = db.query(VentaPika).filter(VentaPika.venta_id==venta.id).all()
@@ -310,6 +325,19 @@ def vender_pedido():
         if stockpika.cantidad < vpi.cantidad:
             errors.append('Requiere {} "{}", pero hay {}'.format(vpi.cantidad, vpi.pika.nombre, stockpika.cantidad))
         
+        pikainsus = db.query(PikaInsumo).join(Insumo).filter(PikaInsumo.pika==vpi.pika, Insumo.insumotipo==tipoinsu_venta)
+        
+        #restamos stock de insumos de venta
+        for pikainsu in pikainsus:
+            stockinsu = db.query(StockInsumo).get(pikainsu.insumo_id)
+            if stockinsu.cantidad < pikainsu.cantidad*vpi.cantidad:
+                return 'No hay suficiente stock de "{}" para el pika "{}" (hay {}, requiere {})'.format(pikainsu.insumo.nombre, vpi.pika.nombre, stockinsu.cantidad, pikainsu.cantidad*vpi.cantidad), 400
+    
+            movinsu = MovStockInsumo(insumo=pikainsu.insumo, cantidad=pikainsu.cantidad, fecha=dtnow)
+            db.add(movinsu)
+            stockinsu.cantidad -= movinsu.cantidad*vpi.cantidad
+            stockinsu.fecha = movinsu.fecha
+            
         #restamos stock de pika
         mov = MovStockPika(pika=vpi.pika, cantidad=-vpi.cantidad, fecha=dtnow)
         db.add(mov)

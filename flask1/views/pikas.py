@@ -27,15 +27,16 @@ def menu_ingresarprestock():
         pikas = request.form.getlist('pika')
         cants = request.form.getlist('cantidad')
         dtnow = datetime.datetime.now()
+        tipoinsu_prestock = db.query(InsumoTipo).filter(InsumoTipo.nombre=='Prestock').one()
         for i, pikaid in enumerate(pikas):
             if i<len(cants) and cants[i] and pikaid:
                 pika = db.query(Pika).get(pikaid)
                 pikacant = int(cants[i])
                 prestock = db.query(PrestockPika).get(pikaid)
-                #pikainsus = db.query(PikaInsumo).filter(PikaInsumo.pika==pika)
-
-                #restamos stock de insumos
-                '''for pikainsu in pikainsus:
+                pikainsus = db.query(PikaInsumo).join(Insumo).filter(PikaInsumo.pika==pika, Insumo.insumotipo==tipoinsu_prestock)
+                
+                #restamos stock de insumos de prestock
+                for pikainsu in pikainsus:
                     stockinsu = db.query(StockInsumo).get(pikainsu.insumo_id)
                     if stockinsu.cantidad < pikainsu.cantidad*pikacant:
                         return 'No hay suficiente stock de "{}" para el pika "{}" (hay {}, requiere {})'.format(pikainsu.insumo.nombre, pika.nombre, stockinsu.cantidad, pikainsu.cantidad*pikacant), 400
@@ -43,11 +44,11 @@ def menu_ingresarprestock():
                     movinsu = MovStockInsumo(insumo=pikainsu.insumo, cantidad=pikainsu.cantidad, fecha=dtnow)
                     db.add(movinsu)
                     stockinsu.cantidad -= movinsu.cantidad*pikacant
-                    stockinsu.fecha = movinsu.fecha'''
+                    stockinsu.fecha = movinsu.fecha
 
                 #sumamos stock de pika
-                #mov = MovPrestockPika(pika=pika, cantidad=int(cants[i]), fecha=dtnow)
-                #db.add(mov)
+                mov = MovStockPika(pika=pika, cantidad=int(cants[i]), fecha=dtnow)
+                db.add(mov)
                 prestock.cantidad += pikacant
                 prestock.fecha = dtnow
 
@@ -80,13 +81,14 @@ def menu_armadopika():
         pikas = request.form.getlist('pika')
         cants = request.form.getlist('cantidad')
         dtnow = datetime.datetime.now()
+        tipoinsu_armado = db.query(InsumoTipo).filter(InsumoTipo.nombre=='Armado').one()
         for i, pikaid in enumerate(pikas):
             if i<len(cants) and cants[i] and pikaid:
                 pika = db.query(Pika).get(pikaid)
                 pikacant = int(cants[i])
                 prestockpika = db.query(PrestockPika).get(pikaid)
                 stockpika = db.query(StockPika).get(pikaid)
-                pikainsus = db.query(PikaInsumo).filter(PikaInsumo.pika==pika)
+                pikainsus = db.query(PikaInsumo).join(Insumo).filter(PikaInsumo.pika==pika, Insumo.insumotipo==tipoinsu_armado)
 
                 if pikacant > prestockpika.cantidad:
                     return 'No hay suficiente prestock para el pika "{}" (hay {}, requiere {})'.format(
@@ -96,7 +98,7 @@ def menu_armadopika():
                 prestockpika.cantidad -= pikacant
                 prestockpika.fecha = dtnow
                 
-                #restamos stock de insumos
+                #restamos stock de insumos de armado
                 for pikainsu in pikainsus:
                     stockinsu = db.query(StockInsumo).get(pikainsu.insumo_id)
                     if stockinsu.cantidad < pikainsu.cantidad*pikacant:
