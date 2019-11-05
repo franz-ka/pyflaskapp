@@ -1,6 +1,6 @@
 import sys
-from pathlib import Path
-app_path = (Path(__file__).parent.parent).absolute()
+import os
+app_path = os.path.abspath(__file__ + "/../../")
 print('Usando path =', str(app_path))
 sys.path.append(str(app_path)) 
 
