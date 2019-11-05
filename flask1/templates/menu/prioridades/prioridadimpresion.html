@@ -4,7 +4,7 @@
 <style>
 
 .container {
-	padding-top: 0.7rem !important;
+	/*padding-top: 0.7rem !important;*/
 }
 
 .card-header{
@@ -55,14 +55,14 @@
 <div class="row">
 	{% for prio_pika_id, prio_valor in prioridades %}
 		{% set pika = pikas[prio_pika_id] %}
-		  <div class="col-md-4 col-lg-3 pika-{{ pika.css_class }} mb-3">
+		  <div class="col-md-4 col-lg-3 pika-{{ pika.css_class }} mb-2 mb-md-5">
 		    <div class="card">
 		      <div class="card-body text-center">
 			      <div class="pre-card-inner">
 						<!--<h5 class="card-title">{{ pika.nombre }}</h5>-->
 						<img class="img-fluid img-pika" src="{{ url_for('static' , filename=pika.img ) }}" />
 						<p class="card-text mb-0">{{ prio_valor|round(2) }}</p>
-						<a href="#" class="btn btn-primary w-100">Imprimir</a>
+						<a href="#" class="d-none btn btn-primary w-100">Imprimir</a>
 			      </div>
 		      </div>
 		    </div>
