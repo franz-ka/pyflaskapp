@@ -1,12 +1,76 @@
 {% extends '_maingui.html' %}
 
+{% block styles %}
+<style>
+
+.container {
+	padding-top: 0.7rem !important;
+}
+
+.card-header{
+	background-color: #f8f9fa !important;
+}
+
+.card {
+	background-color: transparent !important;
+	border: none;
+}
+
+.pre-card-inner {
+	border: solid black 1px;
+}
+
+.card-body {
+	padding: 0 1.8rem;
+}
+
+@media (min-width: 992px) {
+	.card-body {
+		padding: 0 1.8rem;
+	}
+}
+
+@media (min-width: 1200px) {
+	.card-body {
+		padding: 0 2.7rem;
+	}
+}
+
+.card-text {
+	background-color: #f8f9fa !important;
+}
+
+
+{% for pika in pikas %}
+	.pika-{{ pika.css_class }}{
+		/*{{pika.img}}*/
+	}
+{% endfor %}
+
+</style>
+{% endblock %}
+
 {% block content %}
 {% call forms.card('Prioridades de impresión')  %}
-{% for prio_pika_id, prio_valor in prioridades %}
-{% set pika = pikasdata_keys[prio_pika_id] %}
-{{ pika.nombre }} {{ prio_valor }}<br>
-{% endfor %}
+<div class="row">
+	{% for prio_pika_id, prio_valor in prioridades %}
+		{% set pika = pikas[prio_pika_id] %}
+		  <div class="col-md-4 col-lg-3 pika-{{ pika.css_class }} mb-3">
+		    <div class="card">
+		      <div class="card-body text-center">
+			      <div class="pre-card-inner">
+						<!--<h5 class="card-title">{{ pika.nombre }}</h5>-->
+						<img class="img-fluid img-pika" src="{{ url_for('static' , filename=pika.img ) }}" />
+						<p class="card-text mb-0">{{ prio_valor|round(2) }}</p>
+						<a href="#" class="btn btn-primary w-100">Imprimir</a>
+			      </div>
+		      </div>
+		    </div>
+		  </div>
+	{% endfor %}
+</div>
 {% endcall %}
+
 {% endblock %}
 
 {% block js %}

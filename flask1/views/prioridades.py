@@ -72,22 +72,6 @@ def menu_prioridadimpresion():
     if request.method == "GET":
         db = get_db()
         
-        pikasdata_keys = {}
-        pikasdata = db.query(Pika, PrestockPika, StockPika, FactorProductividad) \
-            .join(PrestockPika) \
-            .join(StockPika) \
-            .join(FactorProductividad) \
-            .order_by(Pika.nombre).all()
-        #print(pikasdata)
-        
-        '''stocksreales = {}
-        for pika, prestock, stock in pikasdata:
-            prestck = prestock.cantidad
-            stck = stock.cantidad
-            pedidos = pikapedidos.get(pika.id, 0)
-            stocksreales[pika.id] = prestck + stck - pedidos'''
-        #print(stocksreales)
-        
         pikas = {}
         
         class PikaData:
@@ -98,6 +82,8 @@ def menu_prioridadimpresion():
             stockreal=0.0
             factorventa=0.0001
             factorprod=0.0
+            css_class=''
+            img=''
                         
             #getter
             @property
@@ -116,6 +102,12 @@ def menu_prioridadimpresion():
             def __repr__(self):
                 return f'(#{self.id}) {self.nombre}, prestk={self.prestock}, stk={self.stock}, ped={self.pedidos}, stkR={self.stockreal}, facVen={self.factorventa:.3}'
         
+        pikasdata = db.query(Pika, PrestockPika, StockPika, FactorProductividad) \
+            .join(PrestockPika) \
+            .join(StockPika) \
+            .join(FactorProductividad) \
+            .order_by(Pika.nombre).all()
+        #print(pikasdata)
         # cargamos pikas prestocks, stocks y factor prod
         for pika, prestock, stock, factor_prod in pikasdata:            
             p = PikaData()
@@ -124,11 +116,11 @@ def menu_prioridadimpresion():
             p.prestock = prestock.cantidad
             p.stock = stock.cantidad
             p.upd_stock()
-            p.factorprod = float(factor_prod.factor)
+            p.factorprod = float(factor_prod.factor)            
+            # ícono y clase css
+            p.css_class = pika.nombre.replace(' ', '')
+            p.img = 'img/pikas-prioridades/' + pika.nombre.replace(' ', '') + '.png'
             pikas[pika.id] = p
-            
-            # para devolver al request
-            pikasdata_keys[pika.id] = pika
         
         # Cargamos pedidos de ventas (afecto stock real)
         
@@ -195,7 +187,7 @@ def menu_prioridadimpresion():
                 p.factorventa = 0.0001
         #print(pikaventasdiarias)
         
-        # imprime mal esto
+        # imprimimos data
         print('=== Pikas Data:')
         pprint(pikas)
         
@@ -227,11 +219,14 @@ def menu_prioridadimpresion():
             
             cant_prioris -= 1
             print('------------Fin iteración')
-        print('prioridades=', prioridades)
+        
+        # imprimimos data
+        print('=== Prioridades Data:')
+        pprint(prioridades)
                 
         r = make_response(render_template(
             'menu/prioridades/prioridadimpresion.html',
-            pikasdata_keys=pikasdata_keys,
+            pikas=pikas,
             prioridades=prioridades
         ))
         return r
