@@ -184,9 +184,11 @@ def menu_agregeliminsu():
     if request.method == "GET":
         db = get_db()
         insus = db.query(Insumo).order_by(Insumo.nombre).all()
+        tipoinsus = db.query(InsumoTipo).all()
 
         r = make_response(render_template(
             'menu/insumos/agregeliminsu.html',
+            tipoinsus=tipoinsus,
             insus=insus
         ))
         return r
@@ -195,7 +197,7 @@ def menu_agregeliminsu():
 
         if request.form['operation'] == 'add':
             try:
-                checkparams(request.form, ('nombreinsu',))
+                checkparams(request.form, ('nombreinsu','tipoinsu'))
             except Exception as e:
                 return str(e), 400
         elif request.form['operation'] == 'delete':
@@ -211,7 +213,8 @@ def menu_agregeliminsu():
         if request.form['operation'] == 'add':
             if db.query(Insumo).filter(Insumo.nombre==request.form['nombreinsu']).first():
                 return 'Ya existe un insumo con ese nombre', 400
-            insu = Insumo(nombre=request.form['nombreinsu'])
+            tipoinsu = int(request.form['tipoinsu'])
+            insu = Insumo(nombre=request.form['nombreinsu'], insumotipo_id=tipoinsu)
             db.add(insu)
             db.add(StockInsumo(insumo=insu, cantidad=0, fecha=datetime.datetime.now()))
             if request.form['alarmacantidad']:

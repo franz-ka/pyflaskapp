@@ -10,6 +10,9 @@
     </div>
 </div>
 <div class="form-group row">
+	{{ forms.input_select(12, "tipoinsu", "Elija un tipo", required=1) }}
+</div>
+<div class="form-group row">
 	{{ forms.input_msg(6, 'Alarma en:') }}
 	{{ forms.input_number(6, 'alarmacantidad', min=0, required=0, readonly=0) }}
 </div>
@@ -39,6 +42,9 @@
 $(function() {
 
     regFormValid();
+
+    tipoinsusdata = {{ forms.dataToJsArr(tipoinsus) }};
+    sel2('.select2-single[name=tipoinsu]', 'Tipo de insumo', tipoinsusdata);
 
     insusdata = {{ forms.dataToJsArr(insus) }};
     sel2('.select2-single[name=insumo]', 'Insumo', insusdata);
