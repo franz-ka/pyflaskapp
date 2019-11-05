@@ -9,9 +9,11 @@ def menu_ingresarprestock():
     if request.method == "GET":
         db = get_db()
         pikas = db.query(Pika).order_by(Pika.nombre).all()
+        svg_icon = open(current_app._static_path + '/img/box.svg').read()
 
         r = make_response(render_template(
             'menu/pikas/ingresarprestock.html',
+            svg_icon=svg_icon,
             pikas=pikas
         ))
 
@@ -64,9 +66,11 @@ def menu_armadopika():
     if request.method == "GET":
         db = get_db()
         pikas = db.query(Pika).order_by(Pika.nombre).all()
+        svg_icon = open(current_app._static_path + '/img/arrow.svg').read()
 
         r = make_response(render_template(
             'menu/pikas/armadopika.html',
+            svg_icon=svg_icon,
             pikas=pikas
         ))
         return r

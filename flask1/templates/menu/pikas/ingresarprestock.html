@@ -1,7 +1,24 @@
 {% extends '_maingui.html' %}
 
+{% block styles %}
+<style>
+.card-header svg{
+	width: 30px;
+	height: 30px;
+	position: relative;
+	top: 5px;
+	left: -5px;
+	fill: green;
+}
+
+.card-body {
+	background-color: #f2fded !important;
+}
+</style>
+{% endblock %}
+
 {% block content %}
-{% call forms.card('Ingresar prestock')  %}
+{% call forms.card('Ingresar prestock', icon=svg_icon)  %}
 <!-- Pika -->
 {% for i in range(4) %}
 <div class="form-group row addable">

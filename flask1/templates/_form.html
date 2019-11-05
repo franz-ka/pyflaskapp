@@ -13,10 +13,10 @@
 </form>
 {%- endmacro %}
 
-{% macro card(title, size=12, method='POST', css_class='') -%}
+{% macro card(title, size=12, method='POST', css_class='', icon='') -%}
 <div class="col-lg-{{size}} {{css_class}}">
     <div class="card card-body bg-light">
-        <h3 class="card-header">{{title}}</h3>
+        <h3 class="card-header">{{icon|safe}}{{title}}</h3>
         <div class="card-block">
             <form novalidate method="{{method}}">
                 <div class="alert alert-danger fade show" style="display: none;">

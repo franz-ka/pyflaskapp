@@ -51,6 +51,11 @@ def create_app(test_config=None):
         file_handler.setFormatter(logging.Formatter('\n%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]'))
         file_handler.setLevel(logging.WARNING)
         app.logger.addHandler(file_handler)
+        
+    # guardar static path    
+    static_path = str(os.path.abspath(__file__ + "/../static"))
+    print('Usando static path =', static_path)
+    app._static_path = static_path
 
     ###### DB
     from . import db
