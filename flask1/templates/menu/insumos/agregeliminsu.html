@@ -28,7 +28,7 @@
 <div class="form-group row">
     {{ forms.input_select(6, "insumo", "Elija un insumo", required=1) }}
     <div class="col-sm-6">
-        <button type="submit" class="btn btn-primary btn-block">Eliminar</button>
+        <button type="submit" class="btn btn-primary btn-block" onclick="if (!confirm('¿Está segurx que desea eliminar este insumo?')) event.preventDefault()">Eliminar</button>
     </div>
 </div>
 {% endcall %}

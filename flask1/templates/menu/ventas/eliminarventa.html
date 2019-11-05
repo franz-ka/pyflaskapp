@@ -12,7 +12,7 @@
 </div>
 <div class="form-group row">
     <div class="col">
-        <button type="submit" class="btn btn-primary btn-block">Eliminar</button>
+        <button type="submit" class="btn btn-primary btn-block" onclick="if (!confirm('¿Está segurx que desea eliminar este pedido?')) event.preventDefault()">Eliminar</button>
     </div>
 </div>
 {% endcall %}
@@ -28,7 +28,7 @@
 </div>
 <div class="form-group row">
     <div class="col">
-        <button type="submit" class="btn btn-primary btn-block">Eliminar</button>
+        <button type="submit" class="btn btn-primary btn-block" onclick="if (!confirm('¿Está segurx que desea eliminar esta venta?')) event.preventDefault()>Eliminar</button>
     </div>
 </div>
 {% endcall %}
