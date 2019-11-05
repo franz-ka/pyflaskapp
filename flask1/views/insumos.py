@@ -278,7 +278,8 @@ def menu_modificarstockinsu():
 def menu_insumoabierto():
     if request.method == "GET":
         db = get_db()
-        insuscons = db.query(Insumo).join(StockInsumo).filter(or_(Insumo.nombre.ilike("x -%"), Insumo.nombre.ilike("y -%"), Insumo.nombre.ilike("z -%")), StockInsumo.cantidad > 0).order_by(Insumo.nombre).all()
+        tipoinsu_consumible = db.query(InsumoTipo).filter(InsumoTipo.nombre=='Consumible').one()
+        insuscons = db.query(Insumo).join(StockInsumo).filter(Insumo.insumotipo == tipoinsu_consumible, StockInsumo.cantidad > 0, ~Insumo.nombre.ilike("pla %")).order_by(Insumo.nombre).all()
 
         r = make_response(render_template(
             'menu/insumos/insumoabierto.html',
