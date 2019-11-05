@@ -95,43 +95,87 @@ def menu_prioridadimpresion():
             nombre=''
             prestock=0
             stock=0
-            pedidos=0
             stockreal=0.0
             factorventa=0.0001
             factorprod=0.0
+                        
+            #getter
+            @property
+            def pedidos(self):
+                    return self.__pedidos
+                
+            @pedidos.setter
+            def pedidos(self, pedidos):
+                    self.__pedidos = float(pedidos)
+                    self.upd_stock()
             
-        for pika, prestock, stock, factor_prod in pikasdata:
-            pikasdata_keys[pika.id] = pika
+            def upd_stock(self):
+                self.stockreal = float(self.prestock + self.stock - self.pedidos)
+            pedidos=0.0
             
+            def __repr__(self):
+                return f'(#{self.id}) {self.nombre}, prestk={self.prestock}, stk={self.stock}, ped={self.pedidos}, stkR={self.stockreal}, facVen={self.factorventa:.3}'
+        
+        # cargamos pikas prestocks, stocks y factor prod
+        for pika, prestock, stock, factor_prod in pikasdata:            
             p = PikaData()
             p.id = pika.id
             p.nombre = pika.nombre
             p.prestock = prestock.cantidad
             p.stock = stock.cantidad
-            p.pedidos = 0
-            p.stockreal = float(p.prestock + p.stock - p.pedidos)
-            p.factorventa = 0.0001
+            p.upd_stock()
             p.factorprod = float(factor_prod.factor)
             pikas[pika.id] = p
+            
+            # para devolver al request
+            pikasdata_keys[pika.id] = pika
         
         # Cargamos pedidos de ventas (afecto stock real)
-        ventapedidos = db.query(
+        
+        ventatipo_mayorista = db.query(VentaTipo).filter(VentaTipo.nombre=='Mayorista').one()
+        ventatipo_tiendaonl = db.query(VentaTipo).filter(VentaTipo.nombre=='Tienda Online').one()
+        
+        # los 2 pedidos de tipo mayoristas más antiguos
+        cant_mayoristas = 2
+        ventapedidos_mayoristas_slice = db.query(
+                Venta.id
+            ).filter(Venta.fecha_pedido != None, Venta.fecha == None
+            ).filter(Venta.ventatipo==ventatipo_mayorista
+            ).order_by(Venta.fecha_pedido
+            ).all()[ : cant_mayoristas ]
+            
+        # sus ids
+        ventapedidos_mayoristas_ids = [v.id for v in ventapedidos_mayoristas_slice]
+        
+        # sus datos de pikas
+        ventapedidos_mayorista = db.query(
                 VentaPika.pika_id,
                 func.sum(VentaPika.cantidad).label('total')
             ).join(Venta
-            ).filter(Venta.fecha_pedido != None
-            ).filter(Venta.fecha == None
+            ).filter(Venta.id.in_(ventapedidos_mayoristas_ids)
             ).group_by(VentaPika.pika_id
             ).all()
-        #print(ventapedidos)
-        pikapedidos = {}
-        for pika_id, pedidos_totales in ventapedidos:
-            p = pikas[pika_id]
-            p.pedidos = pedidos_totales
-            p.stockreal = float(p.prestock + p.stock - p.pedidos)
-        #print(pikapedidos)
+        
+        # cargamos
+        for pika_id, pedidos_totales in ventapedidos_mayorista:
+            pikas[pika_id].pedidos += pedidos_totales
+            
+        # todos los pedidos de tienda online, y datos de pikas
+        ventapedidos_tiendaonl = db.query(
+                VentaPika.pika_id,
+                func.sum(VentaPika.cantidad).label('total')
+            ).join(Venta
+            ).filter(Venta.fecha_pedido != None, Venta.fecha == None
+            ).filter(Venta.ventatipo==ventatipo_tiendaonl
+            ).group_by(VentaPika.pika_id
+            ).all()
 
-        # Cargamos factores de venta
+        # cargamos
+        for pika_id, pedidos_totales in ventapedidos_tiendaonl:
+            pikas[pika_id].pedidos += pedidos_totales
+
+        # Calculamos factores de venta
+        
         dtnow = datetime.datetime.now()
         dtventas = dtnow - datetime.timedelta(days=dias_factor_venta)
         ventasdiarias = db.query(
@@ -152,7 +196,8 @@ def menu_prioridadimpresion():
         #print(pikaventasdiarias)
         
         # imprime mal esto
-        #print('pikas=', pikas)
+        print('=== Pikas Data:')
+        pprint(pikas)
         
         # stock real / factor de venta
         prioridades = []
