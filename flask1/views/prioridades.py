@@ -84,20 +84,21 @@ def menu_prioridadimpresion():
             factorprod=0.0
             css_class=''
             img=''
+            __pedidos=0.0
                         
             #getter
             @property
             def pedidos(self):
-                    return self.__pedidos
+                return self.__pedidos
                 
             @pedidos.setter
             def pedidos(self, pedidos):
-                    self.__pedidos = float(pedidos)
-                    self.upd_stock()
+                self.__pedidos = float(pedidos)
+                self.upd_stock()
             
             def upd_stock(self):
                 self.stockreal = float(self.prestock + self.stock - self.pedidos)
-            pedidos=0.0
+            
             
             def __repr__(self):
                 return f'(#{self.id}) {self.nombre}, prestk={self.prestock}, stk={self.stock}, ped={self.pedidos}, stkR={self.stockreal}, facVen={self.factorventa:.3}'
@@ -193,9 +194,10 @@ def menu_prioridadimpresion():
         
         # stock real / factor de venta
         prioridades = []
-        cant_prioris = 11
+        cant_prioris_tot = 12
+        cant_prioris = cant_prioris_tot
         while cant_prioris:
-            print(f'------------Comienzo iteración (restan {cant_prioris})')
+            print(f'-------------Iteración #{cant_prioris_tot-cant_prioris+1}')
             
             stock_relativos = {}
             for pi in pikas.values():    
@@ -205,24 +207,24 @@ def menu_prioridadimpresion():
 
                 stckrelativo = stockreal/facvent
                 stock_relativos[pi.id] = stckrelativo
-                print(f"pika=({pi.id:2})'{pi.nombre}', stockreal={stockreal:5}, facvent={facvent:.4f}, stckrelativo={stckrelativo:5.1f}")
+                #print(f"pika=({pi.id:2})'{pi.nombre}', stockreal={stockreal:5}, facvent={facvent:.4f}, stckrelativo={stckrelativo:5.1f}")
             #print(stock_relativos)
                 
             pika_id_min = min(stock_relativos, key=stock_relativos.get)
             stockrel_min = stock_relativos[pika_id_min]
-            print('min pika & stock rel=', pika_id_min, stockrel_min)
+            print(f'min pika = {pikas[pika_id_min].nombre}, stkR={stockrel_min}')
             
             prioridades.append((pika_id_min, stockrel_min))
             
             pikas[pika_id_min].stockreal += pikas[pika_id_min].factorprod * 1.0
-            print('upd stockrel to', pikas[pika_id_min].stockreal)
+            print('nuevo stkR=', pikas[pika_id_min].stockreal)
             
             cant_prioris -= 1
-            print('------------Fin iteración')
+            #print('------------Fin iteración')
         
         # imprimimos data
-        print('=== Prioridades Data:')
-        pprint(prioridades)
+        #print('=== Prioridades Data:')
+        #pprint(prioridades)
                 
         r = make_response(render_template(
             'menu/prioridades/prioridadimpresion.html',
