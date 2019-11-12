@@ -1,7 +1,7 @@
 from flask import current_app, Blueprint, request, make_response, render_template, redirect, url_for
 from flask_login import login_required, login_user, logout_user
 
-from sqlalchemy import or_, func
+from sqlalchemy import or_, not_, func
 import datetime
 from pprint import pprint
 

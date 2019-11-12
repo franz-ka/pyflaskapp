@@ -70,6 +70,8 @@ def menu_factoresdeimpresion():
 @login_required
 def menu_prioridadimpresion():
     if request.method == "GET":
+        modo_noche = 'modo_noche' in request.args and request.args['modo_noche'] == 'si'
+        
         db = get_db()
         
         pikas = {}
@@ -108,9 +110,12 @@ def menu_prioridadimpresion():
             .join(StockPika) \
             .join(FactorProductividad) \
             .order_by(Pika.nombre).all()
+            
         #print(pikasdata)
         # cargamos pikas prestocks, stocks y factor prod
-        for pika, prestock, stock, factor_prod in pikasdata:            
+        for pika, prestock, stock, factor_prod in pikasdata:
+            if modo_noche and pika.nombre.lower().startswith('xl '):
+                continue
             p = PikaData()
             p.id = pika.id
             p.nombre = pika.nombre
@@ -151,7 +156,8 @@ def menu_prioridadimpresion():
         
         # cargamos
         for pika_id, pedidos_totales in ventapedidos_mayorista:
-            pikas[pika_id].pedidos += pedidos_totales
+            if pika_id in pikas:
+                pikas[pika_id].pedidos += pedidos_totales
             
         # todos los pedidos de tienda online, y datos de pikas
         ventapedidos_tiendaonl = db.query(
@@ -165,7 +171,8 @@ def menu_prioridadimpresion():
 
         # cargamos
         for pika_id, pedidos_totales in ventapedidos_tiendaonl:
-            pikas[pika_id].pedidos += pedidos_totales
+            if pika_id in pikas:
+                pikas[pika_id].pedidos += pedidos_totales
 
         # Calculamos factores de venta
         
@@ -182,10 +189,11 @@ def menu_prioridadimpresion():
         #print(ventasdiarias)
         pikaventasdiarias = {}
         for pika_id, ventas_diarias in ventasdiarias:
-            p = pikas[pika_id]
-            p.factorventa = float(ventas_diarias)
-            if p.factorventa == 0:
-                p.factorventa = 0.0001
+            if pika_id in pikas:
+                p = pikas[pika_id]
+                p.factorventa = float(ventas_diarias)
+                if p.factorventa == 0:
+                    p.factorventa = 0.0001
         #print(pikaventasdiarias)
         
         # imprimimos data

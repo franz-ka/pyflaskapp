@@ -40,6 +40,15 @@
 	background-color: #f8f9fa !important;
 }
 
+.form-check{
+	float: right;
+	font-size: 1.1rem;
+	padding-top: 4px;
+}
+
+.form-check-label{
+	padding-top: 4px;
+}
 
 {% for pika in pikas %}
 	.pika-{{ pika.css_class }}{
@@ -51,32 +60,53 @@
 {% endblock %}
 
 {% block content %}
-{% call forms.card('Prioridades de impresión')  %}
-<div class="row">
-	{% for prio_pika_id, prio_valor in prioridades %}
-		{% set pika = pikas[prio_pika_id] %}
-		  <div class="col-md-4 col-lg-3 pika-{{ pika.css_class }} mb-2 mb-md-5">
-		    <div class="card">
-		      <div class="card-body text-center">
-			      <div class="pre-card-inner">
-						<!--<h5 class="card-title">{{ pika.nombre }}</h5>-->
-						<img class="img-fluid img-pika" src="{{ url_for('static' , filename=pika.img ) }}" />
-						<p class="card-text mb-0">{{ prio_valor|round(2) }}</p>
-						<a href="#" class="d-none btn btn-primary w-100">Imprimir</a>
-			      </div>
-		      </div>
-		    </div>
-		  </div>
-	{% endfor %}
+<!--<div class="col-lg-12">
+    <div class="card card-body bg-light">
+        <h3 class="card-header">Prioridades de impresión</h3>
+        <div class="card-block">
+            HTML
+        </div>
+    </div>
+</div>-->
+<div class="col-lg-12 mb-3">
+    <div class="card card-body bg-light">
+		<h3 class="card-header">
+			<span>Prioridades de impresión</span>	
+			<div class="form-check">
+			    <input type="checkbox" class="form-check-input" id="modoCheck" onchange="modoCheckChange(event)">
+			    <label class="form-check-label" for="modoCheck">Modo noche</label>
+		  	</div>	
+		</h3>
+    </div>
 </div>
-{% endcall %}
+{% for prio_pika_id, prio_valor in prioridades %}
+	{% set pika = pikas[prio_pika_id] %}
+	  <div class="col-6 col-md-4 col-lg-3 pika-{{ pika.css_class }} mb-2 mb-md-5">
+	    <div class="card">
+	      <div class="card-body text-center">
+		      <div class="pre-card-inner">
+					<!--<h5 class="card-title">{{ pika.nombre }}</h5>-->
+					<img class="img-fluid img-pika" src="{{ url_for('static' , filename=pika.img ) }}" />
+					<p class="card-text mb-0">{{ prio_valor|round(2) }}</p>
+					<a href="#" class="d-none btn btn-primary w-100">Imprimir</a>
+		      </div>
+	      </div>
+	    </div>
+	  </div>
+{% endfor %}
 
 {% endblock %}
 
 {% block js %}
 <script type="text/javascript">
 $(function() {
-    
+    if (location.search.indexOf('modo_noche=si') != -1)
+		$('#modoCheck').attr('checked', true)
 });
+
+function modoCheckChange(e){
+	var chkd = $(e. target).is(':checked');
+	location.href = 'http://' + location.host + location.pathname + '?modo_noche=' + (chkd?'si':'no')
+}
 </script>
 {% endblock %}
