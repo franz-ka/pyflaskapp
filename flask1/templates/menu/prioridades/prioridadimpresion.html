@@ -53,6 +53,10 @@
 	padding-top: 4px;
 }
 
+.pre-card-inner.ticked{
+	opacity: 0.3;
+}
+
 {% for pika in pikas %}
 	.pika-{{ pika.css_class }}{
 		/*{{pika.img}}*/
@@ -105,6 +109,10 @@
 $(function() {
     if (location.search.indexOf('modo_noche=si') != -1)
 		$('#modoCheck').attr('checked', true)
+		
+	$('.pre-card-inner').on('click', function(){
+		$(this).toggleClass('ticked')
+	})
 });
 
 function modoCheckChange(e){
