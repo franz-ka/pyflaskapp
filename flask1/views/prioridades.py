@@ -149,51 +149,72 @@ def menu_prioridadimpresion():
             p.img = 'img/pikas-prioridades/' + pika.nombre.replace(' ', '') + '.png'
             pikas[pika.id] = p
         
-        # Cargamos pedidos de ventas (afecto stock real)
+        urgentes = get_urgentes()
         
-        ventatipo_mayorista = db.query(VentaTipo).filter(VentaTipo.nombre=='Mayorista').one()
-        ventatipo_tiendaonl = db.query(VentaTipo).filter(VentaTipo.nombre=='Tienda Online').one()
-        
-        # los 2 pedidos de tipo mayoristas más antiguos
-        cant_mayoristas = 2
-        ventapedidos_mayoristas_slice = db.query(
-                Venta.id
-            ).filter(Venta.fecha_pedido != None, Venta.fecha == None
-            ).filter(Venta.ventatipo==ventatipo_mayorista
-            ).order_by(Venta.fecha_pedido
-            ).all()[ : cant_mayoristas ]
+        if urgentes:
+            urgentes_ids = [p.venta_id for p in urgentes]
             
-        # sus ids
-        ventapedidos_mayoristas_ids = [v.id for v in ventapedidos_mayoristas_slice]
-        
-        # sus datos de pikas
-        ventapedidos_mayorista = db.query(
-                VentaPika.pika_id,
-                func.sum(VentaPika.cantidad).label('total')
-            ).join(Venta
-            ).filter(Venta.id.in_(ventapedidos_mayoristas_ids)
-            ).group_by(VentaPika.pika_id
-            ).all()
-        
-        # cargamos
-        for pika_id, pedidos_totales in ventapedidos_mayorista:
-            if pika_id in pikas:
-                pikas[pika_id].pedidos += pedidos_totales
+            # todos los pedidos urgentes, y datos de pikas
+            ventapedidos_urgentes = db.query(
+                    VentaPika.pika_id,
+                    func.sum(VentaPika.cantidad).label('total')
+                ).join(Venta
+                ).filter(Venta.fecha_pedido != None, Venta.fecha == None
+                ).filter(Venta.id.in_(urgentes_ids)
+                ).group_by(VentaPika.pika_id
+                ).all()
+                
+            # cargamos
+            for pika_id, pedidos_totales in ventapedidos_urgentes:
+                if pika_id in pikas:
+                    pikas[pika_id].pedidos += pedidos_totales
+        else:
+            # si no hay urgentes, usar mayoristas y tienda online
+            # Cargamos pedidos de ventas (afecto stock real)
             
-        # todos los pedidos de tienda online, y datos de pikas
-        ventapedidos_tiendaonl = db.query(
-                VentaPika.pika_id,
-                func.sum(VentaPika.cantidad).label('total')
-            ).join(Venta
-            ).filter(Venta.fecha_pedido != None, Venta.fecha == None
-            ).filter(Venta.ventatipo==ventatipo_tiendaonl
-            ).group_by(VentaPika.pika_id
-            ).all()
-
-        # cargamos
-        for pika_id, pedidos_totales in ventapedidos_tiendaonl:
-            if pika_id in pikas:
-                pikas[pika_id].pedidos += pedidos_totales
+            ventatipo_mayorista = db.query(VentaTipo).filter(VentaTipo.nombre=='Mayorista').one()
+            ventatipo_tiendaonl = db.query(VentaTipo).filter(VentaTipo.nombre=='Tienda Online').one()
+            
+            # los 2 pedidos de tipo mayoristas más antiguos
+            cant_mayoristas = 2
+            ventapedidos_mayoristas_slice = db.query(
+                    Venta.id
+                ).filter(Venta.fecha_pedido != None, Venta.fecha == None
+                ).filter(Venta.ventatipo==ventatipo_mayorista
+                ).order_by(Venta.fecha_pedido
+                ).all()[ : cant_mayoristas ]
+                
+            # sus ids
+            ventapedidos_mayoristas_ids = [v.id for v in ventapedidos_mayoristas_slice]
+            
+            # sus datos de pikas
+            ventapedidos_mayorista = db.query(
+                    VentaPika.pika_id,
+                    func.sum(VentaPika.cantidad).label('total')
+                ).join(Venta
+                ).filter(Venta.id.in_(ventapedidos_mayoristas_ids)
+                ).group_by(VentaPika.pika_id
+                ).all()
+            
+            # cargamos
+            for pika_id, pedidos_totales in ventapedidos_mayorista:
+                if pika_id in pikas:
+                    pikas[pika_id].pedidos += pedidos_totales
+                
+            # todos los pedidos de tienda online, y datos de pikas
+            ventapedidos_tiendaonl = db.query(
+                    VentaPika.pika_id,
+                    func.sum(VentaPika.cantidad).label('total')
+                ).join(Venta
+                ).filter(Venta.fecha_pedido != None, Venta.fecha == None
+                ).filter(Venta.ventatipo==ventatipo_tiendaonl
+                ).group_by(VentaPika.pika_id
+                ).all()
+    
+            # cargamos
+            for pika_id, pedidos_totales in ventapedidos_tiendaonl:
+                if pika_id in pikas:
+                    pikas[pika_id].pedidos += pedidos_totales
 
         # Calculamos factores de venta
         
