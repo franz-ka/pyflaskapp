@@ -45,22 +45,41 @@ def menu_factoresdeimpresion():
     else: #request.method == "POST":
         print('post form:',request.form)
 
-        try: checkparams(request.form, ('pika_id', 'factor_nuevo'))
+        try: checkparams(request.form, ('pika_id',))
         except Exception as e: return str(e), 400
 
         db = get_db()
         
         pika = db.query(Pika).get(request.form['pika_id'])
-        factor_cant = float(request.form['factor_nuevo'])
-        dtnow = datetime.datetime.now()
         
-        factorprod = db.query(FactorProductividad).get(pika.id)
-        if not factorprod:
-            factorprod = FactorProductividad(pika=pika, factor=factor_cant, fecha_actualizado=dtnow)
-            db.add(factorprod)
+        operation = request.form['operation']
+        if operation == 'cambiar_prod':
+            try: checkparams(request.form, ('factor_nuevo',))
+            except Exception as e: return str(e), 400
+            factor_cant = float(request.form['factor_nuevo'])
+            dtnow = datetime.datetime.now()
+            
+            factorprod = db.query(FactorProductividad).get(pika.id)
+            if not factorprod:
+                factorprod = FactorProductividad(pika=pika, factor=factor_cant, fecha_actualizado=dtnow)
+                db.add(factorprod)
+            else:
+                factorprod.factor = factor_cant
+                factorprod.fecha_actualizado = dtnow            
+        elif operation == 'cambiar_vd':
+            try: checkparams(request.form, ('vd_nueva',))
+            except Exception as e: return str(e), 400
+            vd_cant = request.form['vd_nueva']
+            if vd_cant != '':
+                try:
+                    vd_cant = float(vd_cant)
+                except ValueError:
+                    return 'El valor debe ser un número. El separador decimal es "." (punto)', 400
+            else:
+                vd_cant = None
+            pika.venta_diaria_manual = vd_cant
         else:
-            factorprod.factor = factor_cant
-            factorprod.fecha_actualizado = dtnow
+            return 'Operación inválida', 400
         
         db.commit()
 
@@ -79,6 +98,7 @@ def menu_prioridadimpresion():
         class PikaData:
             id=0
             nombre=''
+            venta_diaria_manual=None
             prestock=0
             stock=0
             stockreal=0.0
@@ -119,6 +139,7 @@ def menu_prioridadimpresion():
             p = PikaData()
             p.id = pika.id
             p.nombre = pika.nombre
+            p.venta_diaria_manual = pika.venta_diaria_manual
             p.prestock = prestock.cantidad
             p.stock = stock.cantidad
             p.upd_stock()
@@ -191,7 +212,10 @@ def menu_prioridadimpresion():
         for pika_id, ventas_diarias in ventasdiarias:
             if pika_id in pikas:
                 p = pikas[pika_id]
-                p.factorventa = float(ventas_diarias)
+                if p.venta_diaria_manual != None:
+                    p.factorventa = p.venta_diaria_manual
+                else:
+                    p.factorventa = float(ventas_diarias)
                 if p.factorventa == 0:
                     p.factorventa = 0.0001
         #print(pikaventasdiarias)

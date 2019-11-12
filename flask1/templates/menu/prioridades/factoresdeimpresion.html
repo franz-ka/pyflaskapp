@@ -2,14 +2,18 @@
 
 {% block styles %}
 <style>
-.factor_productividad .btnDefinir{
+.factor_productividad td .btn{
 	width: 30px;
 	height: 30px;
 	display: inline;
 }
-.factor_productividad .btnDefinir:hover{
+.factor_productividad td .btn:hover{
 	background-color: white;	
 	color: black;
+}
+.factor_productividad td.has-vd{
+	text-decoration: line-through;
+	opacity: 0.6;
 }
 .factor_productividad form{
 	padding-top: 0;
@@ -29,6 +33,7 @@
       <th>Productividad</th>
       <th>Actualizado</th>
       <th>Venta diaria</th>
+      <th>V. d. manual</th>
     </tr>
   </thead>
   <tbody>
@@ -39,21 +44,23 @@
         <tr>
             <td>{{pika.nombre}}</td>	
 			{% if factor %}
-	            <td><button type="button" class="btnDefinir btn btn-secondary btn-block p-0" data-toggle="modal" data-target="#mainModal" data-pikaid="{{pika.id}}"  data-pikanombre="{{pika.nombre}}">></button> {{factor.factor}}</td>
+	            <td><button type="button" class="btnDefinirProd btn btn-secondary btn-block p-0" data-toggle="modal" data-target="#prodModal" data-pikaid="{{pika.id}}"  data-pikanombre="{{pika.nombre}}">></button> {{factor.factor}}</td>
 	            <td>{{factor.fecha_actualizado.strftime("%d/%m/%Y %H:%M")}}</td>
 			{% else %}
-	            <td><button type="button" class="btnDefinir btn btn-secondary btn-block p-0" data-toggle="modal" data-target="#mainModal" data-pikaid="{{pika.id}}"  data-pikanombre="{{pika.nombre}}">></button> No definido</td>
+	            <td><button type="button" class="btnDefinirProd btn btn-secondary btn-block p-0" data-toggle="modal" data-target="#prodModal" data-pikaid="{{pika.id}}"  data-pikanombre="{{pika.nombre}}">></button> No definido</td>
 	            <td>&nbsp;</td>
 			{% endif %}		
-      		<td>{{ventas_promedios[pika.id] if pika.id in ventas_promedios else 'Sin ventas'}}</td>
+      		<td class="{{'has-vd' if pika.venta_diaria_manual else ''}}">{{ventas_promedios[pika.id] if pika.id in ventas_promedios else 'Sin ventas'}}</td>
+            <td><button type="button" class="btnDefinirVD btn btn-secondary btn-block p-0" data-toggle="modal" data-target="#vdModal" data-pikaid="{{pika.id}}"  data-pikanombre="{{pika.nombre}}">></button> {{ pika.venta_diaria_manual or '-' }}</td>
         </tr>
     {% endfor %}
 </table>
-<div id="mainModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="mainModalLabel" aria-hidden="true">
+
+<div id="prodModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="prodModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="mainModalLabel">Cambiar factor de productividad</h5>
+        <h5 class="modal-title" id="prodModalLabel">Cambiar factor de productividad</h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar">
           <span aria-hidden="true">&times;</span>
         </button>
@@ -61,12 +68,45 @@
 	{% call forms.form()  %}
       <div class="modal-body">
 		  <div class="container-fluid">
+				<input type="hidden" name="operation" value="cambiar_prod">
 			    <div class="row">
 					<input type="hidden" name="pika_id">
 					{{ forms.input_msg(5, 'Pika: ', css_class='modal_pika_nombre') }}
 					{{ forms.input_msg(4, 'Nuevo factor:') }}
 				    <div class="col-sm-3">
 				        <input type="text" name="factor_nuevo" class="form-control" placeholder="Factor" required>
+				    </div>
+			    </div>
+		  </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+        <button type="submit" class="btn btn-primary">Guardar</button>
+      </div>
+	{% endcall %}
+    </div>
+  </div>
+</div>
+
+<div id="vdModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="vdModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="vdModalLabel">Cambiar venta diaria manualmente</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+	{% call forms.form()  %}
+      <div class="modal-body">
+		  <div class="container-fluid">
+				<input type="hidden" name="operation" value="cambiar_vd">
+			    <div class="row">
+					<input type="hidden" name="pika_id">
+					{{ forms.input_msg(5, 'Pika: ', css_class='modal_pika_nombre') }}
+					{{ forms.input_msg(4, 'Venta diaria:') }}
+				    <div class="col-sm-3">
+				        <input type="text" name="vd_nueva" class="form-control" placeholder="Venta d.">
 				    </div>
 			    </div>
 		  </div>
@@ -87,19 +127,28 @@
 $(function() {
     regFormValid(false, function(){ setTimeout('location.reload();', 1000) });
 
-    $('#mainModal').on('show.bs.modal', function (event) {
+    $('#prodModal').on('show.bs.modal', function (event) {
 	  	var button = $(event.relatedTarget) // Button that triggered the modal
 	  	var pikaId = button.data('pikaid')
 	  	var pikaNom = button.data('pikanombre')
-		$('form input[name=pika_id]').val(pikaId)
-		$('.modal_pika_nombre p').html('Pika: ' + pikaNom)
-		$('form input[name=factor_nuevo]').val('')
+		$('#prodModal form input[name=pika_id]').val(pikaId)
+		$('#prodModal .modal_pika_nombre p').html('Pika: ' + pikaNom)
+		$('#prodModal form input[name=factor_nuevo]').val('')
 		//var recipient = button.data('whatever') // Extract info from data-* attributes
 	  // If necessary, you could initiate an AJAX request here (and then do the updating in a callback).
 	  // Update the modal's content. We'll use jQuery here, but you could use a data binding library or other methods instead.
 	  //var modal = $(this)
 	  //modal.find('.modal-title').text('New message to ' + recipient)
 	  //modal.find('.modal-body input').val(recipient)
+	})
+
+    $('#vdModal').on('show.bs.modal', function (event) {
+	  	var button = $(event.relatedTarget) // Button that triggered the modal
+	  	var pikaId = button.data('pikaid')
+	  	var pikaNom = button.data('pikanombre')
+		$('#vdModal form input[name=pika_id]').val(pikaId)
+		$('#vdModal .modal_pika_nombre p').html('Pika: ' + pikaNom)
+		$('#vdModal form input[name=vd_nueva]').val('')
 	})
 });
 </script>

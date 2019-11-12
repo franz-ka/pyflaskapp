@@ -62,6 +62,7 @@ class Pika(Base):
     __tablename__ = 'pika'
     id = Column(Integer, primary_key=True, autoincrement=True)
     nombre = Column(String(64), nullable=False)
+    venta_diaria_manual = Column(Float, nullable=True)
 
     def __repr__(self): return '<Pika {}>'.format(self.id)
 
@@ -98,7 +99,6 @@ class PrestockPika(Base):
     cantidad = Column(Integer, nullable=False)
     fecha = Column(DateTime)
     def __repr__(self): return '<PrestockPika {}>'.format(self.pika_id)
-
 
 class StockPika(Base):
     __tablename__ = 'stockpika'
