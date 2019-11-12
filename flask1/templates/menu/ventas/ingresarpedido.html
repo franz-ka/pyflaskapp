@@ -2,13 +2,17 @@
 
 {% block styles %}
 <style>
-.listado_pedidos .btnVender{
+.listado_pedidos td .btn{
 	width: 30px;
 	height: 30px;
 }
-.listado_pedidos .btnVender:hover{
+.listado_pedidos td .btn-secondary:hover{
 	background-color: white;	
 	color: black;
+}
+.listado_pedidos td .btn-danger:hover{
+	background-color: white;	
+	color: #dc3545;
 }
 </style>
 {% endblock %}
@@ -50,8 +54,9 @@
       <th>Tipo</th>
       <th>Comentario</th>
       <th>Pika</th>
-      <th>Cantidad</th>
-      <th>Vender</th>
+      <th>Cant.</th>
+      <th>Ven.</th>
+      <th>Urg.</th>
     </tr>
   </thead>
   <tbody>
@@ -59,7 +64,7 @@
     {% for ventapi in ventapikas %}
         <tr>
 			<input type="hidden" class="venta_id" value="{{ventapi.venta_id}}">
-            {% if vars.last_ventid != ventapi.venta_id %}
+			{% if vars.last_ventid != ventapi.venta_id %}
                 <td>{{ventapi.venta.fecha_pedido.strftime("%d/%m/%Y %H:%M")}}</td>
                 <td>{{ventapi.venta.ventatipo.nombre}}</td>
                 <td>{{ventapi.venta.comentario}}</td>
@@ -72,11 +77,15 @@
             <td>{{ventapi.pika.nombre}}</td>
             <td>{{ventapi.cantidad}}</td>
             {% if vars.last_ventid != ventapi.venta_id %}
-	            <td class="pt-2">
+	            <td class="">
 					<button type="button" class="btnVender btn btn-secondary btn-block p-0">✓</button>
+				</td>
+	            <td class="">
+					<button type="button" class="btnUrgencia btn btn-{{ 'danger' if ventapi.venta_id in urgentes else 'secondary' }} btn-block p-0">!</button>
 				</td>
                 {% if vars.update({'last_ventid': ventapi.venta_id}) %}{% endif %}
             {% else %}
+                <td></td>
                 <td></td>
             {% endif %}
         </tr>
@@ -133,6 +142,54 @@ $(function() {
 				ventaspikas_rows.addClass('table-danger')
 				alert(r.responseText)
 				setTimeout(function(){ ventaspikas_rows.removeClass('table-danger'); }, 700)
+             }
+        });
+	});
+
+    $('.btnUrgencia').click(function(){
+		var $this = $(this)
+		var isurgent = $this.hasClass('btn-danger')
+		
+		if (isurgent){
+			if (!confirm('¿Está segurx que desea sacarle la urgencia a este pedido?'))
+				return;
+		}else{
+			if (!confirm('¿Está segurx que desea marcar este pedido como urgente?'))
+				return;
+		}
+			
+		var table = $this.parents('table');
+		var parent_row = $this.parents('tr')
+		
+		var venta_id = parent_row.children('.venta_id').val();
+		console.log(venta_id, isurgent)	
+		
+        var ventaspikas = table.find('.venta_id[value='+venta_id+']')
+		var ventaspikas_rows = ventaspikas.parents('tr');
+		
+		lockForm(table)
+        $.ajax({
+             type: "POST",
+             url: 'pedido_urgente',
+             data: { venta_id: venta_id },
+             success: function(r){
+                unlockForm(table);
+				
+				if (isurgent){
+					$this.removeClass('btn-danger')
+					$this.addClass('btn-secondary')
+				}else{
+					$this.removeClass('btn-secondary')
+					$this.addClass('btn-danger')
+				}
+				ventaspikas_rows.addClass('table-success')
+				setTimeout(function(){ ventaspikas_rows.removeClass('table-success'); }, 900)
+             },
+             error: function(r){
+                unlockForm(table);
+				ventaspikas_rows.addClass('table-danger')
+				alert(r.responseText)
+				setTimeout(function(){ ventaspikas_rows.removeClass('table-danger'); }, 900)
              }
         });
 	});

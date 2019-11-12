@@ -207,26 +207,32 @@ class Alarma(Base):
     def __repr__(self): return '<Alarma {}>'.format(self.id)
 
 class StockPikaColor(Base):
-        __tablename__ = 'stockpikacolor'
-        pika_id = Column(Integer, ForeignKey('pika.id'), primary_key=True)
-        pika = relationship('Pika')
-        cantidad_bajo = Column(Integer)
-        cantidad_medio = Column(Integer)
-        def __repr__(self): return '<StockPikaColor {}>'.format(self.pika_id)
+    __tablename__ = 'stockpikacolor'
+    pika_id = Column(Integer, ForeignKey('pika.id'), primary_key=True)
+    pika = relationship('Pika')
+    cantidad_bajo = Column(Integer)
+    cantidad_medio = Column(Integer)
+    def __repr__(self): return '<StockPikaColor {}>'.format(self.pika_id)
 
 class StockInsumoColor(Base):
-        __tablename__ = 'stockinsumocolor'
-        insumo_id = Column(Integer, ForeignKey('insumo.id'), primary_key=True)
-        insumo = relationship('Insumo')
-        cantidad_bajo = Column(Integer)
-        cantidad_medio = Column(Integer)
-        def __repr__(self): return '<StockInsumoColor {}>'.format(self.insumo_id)
+    __tablename__ = 'stockinsumocolor'
+    insumo_id = Column(Integer, ForeignKey('insumo.id'), primary_key=True)
+    insumo = relationship('Insumo')
+    cantidad_bajo = Column(Integer)
+    cantidad_medio = Column(Integer)
+    def __repr__(self): return '<StockInsumoColor {}>'.format(self.insumo_id)
 
 class FactorProductividad(Base):
-        __tablename__ = 'factorproductividad'
-        pika_id = Column(Integer, ForeignKey('pika.id'), primary_key=True)
-        pika = relationship('Pika')
-        factor = Column(Float, nullable=False)
-        fecha_actualizado = Column(DateTime)
-        def __repr__(self): return '<FactorProductividad {}>'.format(self.pika_id)
+    __tablename__ = 'factorproductividad'
+    pika_id = Column(Integer, ForeignKey('pika.id'), primary_key=True)
+    pika = relationship('Pika')
+    factor = Column(Float, nullable=False)
+    fecha_actualizado = Column(DateTime)
+    def __repr__(self): return '<FactorProductividad {}>'.format(self.pika_id)
+
+class PedidoUrgente(Base):
+    __tablename__ = 'pedidourgente'
+    venta_id = Column(Integer, ForeignKey('venta.id'), primary_key=True)
+    venta = relationship('Venta')
+    def __repr__(self): return '<PedidoUrgente {}>'.format(self.venta_id)
 

@@ -113,12 +113,17 @@ def menu_eliminarventa():
 @login_required
 def menu_ingresarpedido():
     if request.method == "GET":
-
+        urgentes_all = get_urgentes()
+        urgentes = {}
+        for u in urgentes_all:
+            urgentes[u.venta_id] = True
+        
         return make_response(render_template(
             'menu/ventas/ingresarpedido.html',
             ventatipos = get_ventatipos(),
             pikas = get_pikas(),
-            ventapikas = get_pedidos()
+            ventapikas = get_pedidos(),
+            urgentes = urgentes
         ))
         
     else:  # request.method == "POST":
@@ -150,6 +155,19 @@ def menu_vender_pedido():
     try:
         checkparams(request.form, ('venta_id',))
         vender_pedido(request.form['venta_id'])        
+    except Exception as e:
+        return str(e), 400
+    
+    return ''
+
+@bp_ventas.route("/pedido_urgente", methods = ['POST'])
+@login_required
+def menu_pedido_urgente():
+    print('post form:', request.form)
+
+    try:
+        checkparams(request.form, ('venta_id',))
+        tog_urgente(request.form['venta_id'])        
     except Exception as e:
         return str(e), 400
     

@@ -1,6 +1,6 @@
 tables = {
     #'Pika': ['id','nombre,str64,nonull'] ,
-    'Insumo': ['id', 'InsumoTipo', 'nombre,str64,nonull'] ,
+    #'Insumo': ['id', 'InsumoTipo', 'nombre,str64,nonull'] ,
     #'PikaInsumo': ['Pika', 'Insumo', 'cantidad,int,nonull'] ,
     #'StockPika': ['Pika','cantidad,int,nonull', 'fecha,datetime'] ,
     #'StockInsumo': ['Insumo','cantidad,int,nonull', 'fecha,datetime'] ,
@@ -18,7 +18,8 @@ tables = {
     #'StockPikaColor': ['Pika','cantidad_bajo,int', 'cantidad_medio,int'] ,
     #'StockInsumoColor': ['Insumo','cantidad_bajo,int', 'cantidad_medio,int'] ,
     #'FactorProductividad': ['Pika','factor,float,nonull', 'fecha_actualizado,datetime'] ,
-    'InsumoTipo': ['id', 'nombre,str64,nonull']
+    #'InsumoTipo': ['id', 'nombre,str64,nonull']
+    'PedidoUrgente': ['Venta']
 }
 
 txt=[]

@@ -14,6 +14,11 @@ def del_ventatipo(id):
     ventas = db.query(Venta).filter(Venta.ventatipo==tipo)
     for v in ventas:
         db.query(VentaPika).filter(VentaPika.venta==v).delete()
+    
+        urgente = db.query(PedidoUrgente).filter(PedidoUrgente.venta_id==v.id)
+        if urgente.all():
+            urgente.delete()
+            
     ventas.delete()
     db.query(VentaTipo).filter(VentaTipo.id==tipo.id).delete()
 
@@ -92,6 +97,10 @@ def del_venta(venta_id):
 
     ventapikas.delete()
     db.query(Venta).filter(Venta.id == venta.id).delete()
+    
+    urgente = db.query(PedidoUrgente).filter(PedidoUrgente.venta_id==venta_id)
+    if urgente.all():
+        urgente.delete()
 
     db.commit()
 
@@ -126,6 +135,10 @@ def del_pedido(pedido_id):
     ventapikas = db.query(VentaPika).filter(VentaPika.venta == pedido.one())
     ventapikas.delete()
     pedido.delete()
+    
+    urgente = db.query(PedidoUrgente).filter(PedidoUrgente.venta_id==pedido_id)
+    if urgente.all():
+        urgente.delete()
     
     db.commit()
 
@@ -225,8 +238,31 @@ def vender_pedido(venta_id):
         stockpika.cantidad -= vpi.cantidad
         stockpika.fecha = mov.fecha
     
+    urgente = db.query(PedidoUrgente).filter(PedidoUrgente.venta_id==venta_id)
+    if urgente.all():
+        urgente.delete()
+    
     if errors:
         # No commiteamos
         raise Exception('No hay suficiente stock:\n' + '\n'.join(errors))
     
     db.commit()
+
+def get_urgentes():
+    db = get_db()   
+    
+    urgentes = db.query(PedidoUrgente).all()
+    
+    return urgentes
+
+def tog_urgente(venta_id):
+    db = get_db()   
+    
+    urgente = db.query(PedidoUrgente).filter(PedidoUrgente.venta_id==venta_id)
+    if urgente.all():
+        urgente.delete()
+    else:
+        db.add(PedidoUrgente(venta_id=venta_id))
+        
+    db.commit()
+
