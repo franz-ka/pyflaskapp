@@ -98,7 +98,7 @@ def del_venta(venta_id):
 def get_pedidos():
     db = get_db()
     
-    pedidos = db.query(VentaPika).join(Venta).filter(Venta.fecha_pedido != None).filter(Venta.fecha == None).order_by(Venta.fecha_pedido.desc())
+    pedidos = db.query(VentaPika).join(Venta).filter(Venta.fecha_pedido != None).filter(Venta.fecha == None).order_by(Venta.fecha_pedido.asc())
     
     return pedidos
 
