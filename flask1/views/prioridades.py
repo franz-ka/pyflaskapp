@@ -279,10 +279,20 @@ def menu_prioridadimpresion():
         #print('=== Prioridades Data:')
         #pprint(prioridades)
                 
+        if urgentes:
+            urgentes_ventapikas = db.query(VentaPika
+            ).join(Venta
+            ).filter(Venta.fecha_pedido != None, Venta.fecha == None
+            ).filter(Venta.id.in_(urgentes_ids)
+            ).all()
+        else:
+            urgentes_ventapikas = None
+        
         r = make_response(render_template(
             'menu/prioridades/prioridadimpresion.html',
             pikas=pikas,
-            prioridades=prioridades
+            prioridades=prioridades,
+            urgentes_ventapikas=urgentes_ventapikas
         ))
         return r
     else: #request.method == "POST":
