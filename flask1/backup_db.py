@@ -41,7 +41,7 @@ def check_backup_db():
 def send_backup_db():    
     msg = MIMEMultipart()
     msg['From'] = "stockcogonauts@gmail.com"
-    msg['To'] = "bungew@gmail.com"
+    msg['To'] = "cogonauts@gmail.com"
     msg['Date'] = formatdate(localtime=True)
     msg['Subject'] = "Backup de la BBDD"
 
@@ -59,7 +59,7 @@ def send_backup_db():
     s.starttls()
     s.ehlo()
     s.login("stockcogonauts@gmail.com", "Markdijono1375$")
-    s.sendmail("stockcogonauts@gmail.com", "bungew@gmail.com", msg.as_string())
+    s.sendmail("stockcogonauts@gmail.com", "cogonauts@gmail.com", msg.as_string())
     s.quit()
     
     print('Backup de la BBDD envíado')
