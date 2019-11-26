@@ -7,6 +7,44 @@ def get_pikas():
     
     return pikas
 
+def inc_stock_pika(pika, stockpika, cantidad, date):
+    if type(cantidad) != int: cantidad = int(cantidad)
+    
+    return set_stock_pika(pika, stockpika, stockpika.cantidad + cantidad, date)
+    
+def set_stock_pika(pika, stockpika, cantidad, date):
+    if type(cantidad) != int: cantidad = int(cantidad)
+        
+    db = get_db()
+    
+    stockpika.cantidad = cantidad
+    stockpika.fecha = date
+    
+    mov = MovStockPika(
+        pika = pika, 
+        cantidad = stockpika.cantidad, 
+        fecha = stockpika.fecha)
+    db.add(mov)
+
+def inc_prestock_pika(pika, prestockpika, cantidad, date):
+    if type(cantidad) != int: cantidad = int(cantidad)
+    
+    return set_prestock_pika(pika, prestockpika, prestockpika.cantidad + cantidad, date)
+    
+def set_prestock_pika(pika, prestockpika, cantidad, date):
+    if type(cantidad) != int: cantidad = int(cantidad)
+        
+    db = get_db()
+    
+    prestockpika.cantidad = cantidad
+    prestockpika.fecha = date
+    
+    mov = MovPrestockPika(
+        pika = pika, 
+        cantidad = prestockpika.cantidad, 
+        fecha = prestockpika.fecha)
+    db.add(mov)
+
 '''def add_ventatipo(nombre): 
     db = get_db()   
     

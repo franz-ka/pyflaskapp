@@ -88,12 +88,9 @@ def del_venta(venta_id):
     for vp in ventapikas.all():
         #sumamos stock de pika
         pikacant = int(vp.cantidad)
-        mov = MovStockPika(pika=vp.pika, cantidad=pikacant, fecha=dtnow)
-        db.add(mov)
-
         stockpika = db.query(StockPika).get(vp.pika_id)
-        stockpika.cantidad += pikacant
-        stockpika.fecha = mov.fecha
+        
+        inc_stock_pika(vp.pika, stockpika, pikacant, dtnow)
 
     ventapikas.delete()
     db.query(Venta).filter(Venta.id == venta.id).delete()
@@ -191,10 +188,7 @@ def add_pedido(vendido, pikas, cants, tipo, comentario):
                     stockinsu.fecha = movinsu.fecha
                     
                 #restamos stock de pika
-                mov = MovStockPika(pika=pika, cantidad=-int(cants[i]), fecha=dtnow)
-                db.add(mov)
-                stockpika.cantidad -= pikacant
-                stockpika.fecha = mov.fecha
+                inc_stock_pika(pika, stockpika, -pikacant, dtnow)
 
     db.commit()
     
@@ -233,10 +227,7 @@ def vender_pedido(venta_id):
             stockinsu.fecha = movinsu.fecha
             
         #restamos stock de pika
-        mov = MovStockPika(pika=vpi.pika, cantidad=-vpi.cantidad, fecha=dtnow)
-        db.add(mov)
-        stockpika.cantidad -= vpi.cantidad
-        stockpika.fecha = mov.fecha
+        inc_stock_pika(vpi.pika, stockpika, -vpi.cantidad, dtnow)
     
     urgente = db.query(PedidoUrgente).filter(PedidoUrgente.venta_id==venta_id)
     if urgente.all():
