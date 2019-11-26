@@ -1,5 +1,6 @@
 # coding=utf-8
 from ._common import *
+from _datetime import datetime, timedelta
 
 bp_pikas = Blueprint('pikas', __name__, url_prefix='/pikas')
 
@@ -391,3 +392,101 @@ def menu_factoresdeimpresion():
 
         return ''
 
+@bp_pikas.route("/graficostock", methods = ['GET', 'POST'])
+@login_required
+def menu_graficostock():
+    if request.method == "GET":
+        db = get_db()
+        
+        days_totales = 30
+        days_offset_today = 0
+        dtnow = datetime.now() - timedelta(days=days_offset_today)
+        dtstart = dtnow - timedelta(days=days_totales)
+        
+        stocks = db.query(StockPika) \
+            .join(Pika) \
+            .order_by(Pika.id) \
+            .all()
+        stocks_id = {s.pika_id: s.cantidad for s in stocks}
+            
+        movstocks = db.query(MovStockPika) \
+            .join(Pika) \
+            .filter(MovStockPika.fecha >= dtstart, Pika.nombre.ilike("cogo %")) \
+            .order_by(Pika.id, MovStockPika.fecha) \
+            .all()
+            
+        class PikaData:
+            def __init__(self,id,nombre,stock):
+                self.id = id
+                self.nombre = nombre
+                self.stock = stock
+                self.cants = {}
+                self.totmovcant = 0
+            def __repr__(self):
+                return f'Pika {self.id} {self.nombre}, stock={self.stock}, totmovcant={self.totmovcant}, cants={len(self.cants)}'
+                
+        pikasdata = []    
+        
+        def grouperPika( item ): 
+            return item.pika
+        def grouperMonthDay( item ): 
+            return item.fecha.month, item.fecha.day
+        
+        for (pika, grpPika) in itertools.groupby(movstocks, grouperPika):
+            pika_data = PikaData(pika.id, pika.nombre, stocks_id[pika.id])
+            pika_data.cants = {}
+            for ((month, day), grpMonDay) in itertools.groupby(grpPika, grouperMonthDay):
+                if month not in pika_data.cants:
+                    pika_data.cants[month] = {}
+                if day not in pika_data.cants[month]:
+                    pika_data.cants[month][day] = 0
+                for mvs in grpMonDay:
+                    pika_data.cants[month][day] += mvs.cantidad
+                    pika_data.totmovcant += mvs.cantidad
+            pikasdata.append(pika_data)
+            
+        times_data = []
+        for _ in range(len(pikasdata)):
+            times_data.append([])
+            
+        date_deltas = []
+        for d in range(days_totales):
+            date_deltas.append(dtstart + timedelta(days=d))
+            
+        for (i, p) in enumerate(pikasdata):
+            last_cant = p.stock - p.totmovcant
+            # QUÉ PASA SI TIENE EL PRIMER VALOR? SE SUMA DOS VECES!
+            for date_i in range(days_totales):
+                date = date_deltas[date_i]
+                if date.month in p.cants and date.day in p.cants[date.month]:
+                    last_cant += p.cants[date.month][date.day]
+                times_data[i].append(last_cant)
+            
+        # log data
+        pprint(pikasdata)
+        for (i, t) in enumerate(times_data):
+            print(i,len(t),t)
+            
+        pika_nombres = []
+        for p in pikasdata:        
+            pika_nombres.append(p.nombre)
+        
+        r = make_response(render_template(
+            'menu/pikas/graficostock.html',
+            pika_nombres=pika_nombres,
+            times_data=times_data
+        ))
+        return r
+    else: #request.method == "POST":
+        print('post form:',request.form)
+
+        try: checkparams(request.form, ('PARAM1', 'PARAMN'))
+        except Exception as e: return str(e), 400
+
+        db = get_db()
+        
+        pass
+        
+        db.commit()
+
+        return ''

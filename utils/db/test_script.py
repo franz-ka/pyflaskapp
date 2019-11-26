@@ -1,9 +1,45 @@
 from sqlalchemy import or_, func
 from dbconfig import init_db_engine, get_db_session,\
-    Insumo, InsumoTipo, VentaPika, Pika, PikaInsumo, Venta, VentaTipo
+    Insumo, InsumoTipo, VentaPika, Pika, PikaInsumo, Venta, VentaTipo, MovStockPika
+import sys, datetime
 
 db = get_db_session()
 
+days_totales = 60
+dtnow = datetime.datetime.now()
+dtstart = dtnow - datetime.timedelta(days=days_totales)
+movstocks = db.query(MovStockPika) \
+    .filter(MovStockPika.fecha >= dtstart) \
+    .join(Pika) \
+    .order_by(Pika.id, MovStockPika.fecha) \
+    .all()
+    
+import itertools 
+
+
+def grouperPika( item ): 
+    return item.pika
+def grouperMonthDay( item ): 
+    return item.fecha.month, item.fecha.day
+
+for (pika, grpPika) in itertools.groupby(movstocks, grouperPika):
+    #pika_data = PikaData(pika.id, pika.nombre)
+    #pikasdata.append(pika_data)
+    sum_dates = {}
+    for ((month, day), grpMonDay) in itertools.groupby(grpPika, grouperMonthDay):
+        if month not in sum_dates:
+            sum_dates[month] = {}
+        if day not in sum_dates[month]:
+            sum_dates[month][day] = 0
+        for mvs in grpMonDay:
+            sum_dates[month][day] += mvs.cantidad
+    print(pika, sum_dates)
+print(dtstart)
+print(dtstart + datetime.timedelta(days=1))
+print(dtstart + datetime.timedelta(days=2))
+print(dtstart + datetime.timedelta(days=3))
+print(dtstart + datetime.timedelta(days=4))
+sys.exit()
 
 ventatipo_mayorista = db.query(VentaTipo).filter(VentaTipo.nombre=='Mayorista').one()
 ventatipo_tiendaonl = db.query(VentaTipo).filter(VentaTipo.nombre=='Tienda Online').one()
