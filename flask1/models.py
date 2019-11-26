@@ -236,3 +236,11 @@ class PedidoUrgente(Base):
     venta = relationship('Venta')
     def __repr__(self): return '<PedidoUrgente {}>'.format(self.venta_id)
 
+class MovPrestockPika(Base):
+    __tablename__ = 'movprestockpika'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    pika_id = Column(Integer, ForeignKey('pika.id'))
+    pika = relationship('Pika')
+    cantidad = Column(Integer, nullable=False)
+    fecha = Column(DateTime)
+    def __repr__(self): return '<MovPrestockPika {}>'.format(self.pika_id)
