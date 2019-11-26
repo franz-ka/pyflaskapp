@@ -1,0 +1,91 @@
+{% extends '_maingui.html' %}
+
+{% block content %}
+{% call forms.card('Gráfico Stock')  %}
+<div id="chart"></div>
+{% endcall %}
+{% endblock %}
+
+{% block js %}
+<script src="{{ url_for('static', filename='js/apexcharts.min.js' ) }}" type="text/javascript"></script>
+<script type="text/javascript">
+$(function() {
+	
+    var options = {
+	    chart: {
+	        height: 350,
+	        type: 'line',
+	        zoom: {
+	            enabled: false
+	        }
+	    },
+	    series: [
+			/*{
+		        //name: "Desktopsss",
+		        data: [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+		    },*/
+			{% for time_data in times_data %}
+				{
+					name: "{{pika_nombres[loop.index-1]}}",
+					data: {{time_data|replace("None","null")}}
+				},
+			{% endfor %}
+		],
+		// texto flotante que aparece sobre los puntos de la línea
+	    dataLabels: {
+	        enabled: false
+	    },
+		//colors: ['#000', '#B32824'],
+	    stroke: {
+	        curve: 'straight',
+			//width: [1, 4]
+	    },
+	    /*title: {
+	        text: 'Product Trends by Month',
+	        align: 'left'
+	    },*/
+	    grid: {
+	        row: {
+	            colors: ['#f3f3f3', 'transparent'], // takes an array which will be repeated on columns
+	            opacity: 0.5
+	        },
+	    },
+		// los cartelitos que aparecen cuando le ponés el mouse encima
+		tooltip: {
+			//enabledOnSeries: [1],
+		},
+		// los textos en los costados, sobre los ejes que dicen qué es la data
+		legend: {
+			showForZeroSeries: false
+		},
+		// los puntitos que aparecen sobre las líneas
+		markers: {
+			//size: [0, 6],
+			size: 0,
+			hover:{
+				size: 0
+			}
+		},
+		/*yaxis: {
+			min: 0,
+			max: 500
+		},*/
+	    xaxis: {
+	        //categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep'],
+    		tickAmount: 6,
+            axisBorder: {
+                show: false
+            }
+	    }
+	}
+	
+	var chart = new ApexCharts(
+	    document.querySelector("#chart"),
+	    options
+	);
+	
+	chart.render();
+
+});
+</script>
+{% endblock %}
