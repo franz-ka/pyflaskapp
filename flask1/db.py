@@ -18,7 +18,7 @@ def get_db():
     # It is used to store data that might be accessed by multiple functions during the request
     if 'db' not in g:
         g.db = current_app.DBSession
-        print(f'Fetch DB #{ id(g.db) }')
+        #print(f'Fetch DB #{ id(g.db) }')
     return g.db
 
 
