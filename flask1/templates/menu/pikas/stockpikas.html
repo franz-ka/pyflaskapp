@@ -8,17 +8,19 @@
       <th>Pika</th>
       <th>Prestock</th>
       <th>Stock</th>
+      <th>Pedidos</th>
       <th>Total</th>
       <th>Actualizado</th>
     </tr>
   </thead>
   <tbody>
-    {% for pika_spika_pspika in DATA %}
+    {% for pika_data in DATA %}
 		{% set css_class = '' %}
-		{% set pika_id = pika_spika_pspika[0].id %}
-		{% set prestock = pika_spika_pspika[1].cantidad %}
-		{% set stock = pika_spika_pspika[2].cantidad %}
-		{% set stock_total = prestock + stock %}
+		{% set pika_id = pika_data.Pika.id %}
+		{% set prestock = pika_data.PrestockPika.cantidad %}
+		{% set stock = pika_data.StockPika.cantidad %}
+		{% set pedidos = pika_data.pedidos %}
+		{% set stock_total = prestock + stock - pedidos %}
 		
 		{% if pika_id in pikascolores %}
 			{% if pikascolores[pika_id][0] and stock_total <= pikascolores[pika_id][0] %}
@@ -29,12 +31,13 @@
     	{% endif %}
 
         <tr class="{{css_class}}">
-            <td>{{pika_spika_pspika[0].nombre}}</td>
+            <td>{{pika_data.Pika.nombre}}</td>
             <td>{{prestock}}</td>
             <td>{{stock}}</td>
+            <td>{{pedidos}}</td>
             <td>{{stock_total}}</td>
             <td scope="row">
-				{% set fecha_mayor = pika_spika_pspika[1].fecha if pika_spika_pspika[1].fecha > pika_spika_pspika[2].fecha else pika_spika_pspika[2].fecha %}
+				{% set fecha_mayor = pika_data.PrestockPika.fecha if pika_data.PrestockPika.fecha > pika_data.StockPika.fecha else pika_data.StockPika.fecha %}
 				{{fecha_mayor.strftime("%d/%m/%Y %H:%M")}}
 			</td>
         </tr>

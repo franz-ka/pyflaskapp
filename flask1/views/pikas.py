@@ -123,10 +123,15 @@ def menu_stockpikas():
     if request.method == "GET":
         db = get_db()
         # esto devuelve un array de listas de 4 elementos [0]=Pika [1]=PrestockPika [2]=StockPika
-        DATA = db.query(Pika, PrestockPika, StockPika) \
-            .filter(Pika.id==PrestockPika.pika_id) \
-            .filter(Pika.id==StockPika.pika_id) \
-            .order_by(Pika.nombre).all()
+        DATA = db.query(Pika, PrestockPika, StockPika, func.sum(VentaPika.cantidad).label('pedidos')) \
+            .join(PrestockPika) \
+            .join(StockPika) \
+            .join(VentaPika) \
+            .join(Venta) \
+            .filter(Venta.fecha_pedido != None) \
+            .filter(Venta.fecha == None) \
+            .group_by(VentaPika.pika_id) \
+            .order_by(Pika.nombre)
             
         pikascolores = db.query(StockPikaColor).all()
         pikascolores_modif = {}
