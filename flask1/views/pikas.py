@@ -1,6 +1,5 @@
 # coding=utf-8
 from ._common import *
-from _datetime import datetime, timedelta
 
 bp_pikas = Blueprint('pikas', __name__, url_prefix='/pikas')
 
@@ -394,8 +393,8 @@ def menu_graficostock():
         
         days_totales = 30
         days_offset_today = 0
-        dtnow = datetime.now() - timedelta(days=days_offset_today)
-        dtstart = dtnow - timedelta(days=days_totales)
+        dtnow = datetime.datetime.now() - datetime.timedelta(days=days_offset_today)
+        dtstart = dtnow - datetime.timedelta(days=days_totales)
         
         stocks = db.query(StockPika) \
             .join(Pika) \

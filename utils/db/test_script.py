@@ -2,21 +2,48 @@ from sqlalchemy import or_, func
 from dbconfig import init_db_engine, get_db_session,\
     Insumo, InsumoTipo, VentaPika, Pika, PikaInsumo, \
     Venta, VentaTipo, PrestockPika, StockPika, Alarma, \
-    StockInsumo
-import sys, datetime
+    StockInsumo, MovStockPika, MovPrestockPika
+import sys, datetime, itertools 
+
+'''
+El script general de gráficos tiene dos inputs:
+La cantidad de días desde hoy hacia el pasado a tomar = D
+Los ids de picas a mirar = Ps
+
+El gráfico tiene un punto por cada día desde D hasta hoy
+Cada punto muestra el prestock+stock-pedidos que había en ese momento
+Por ende, hay que traer estos 3 datos
+
+Prestock y stock provienen de sus respectivas tablas de movimiento
+Pedidos hay que deducirlo de la tabla de ventas
+Todo filtrado por los pikas ids que se seleccionaron
+
+Dado un punto X en el gráfico (fecha), se mira
+- el pre/stock con max(mov.fecha<=X)
+- la venta con fecha_pedido <= X y fecha_venta[= None or > X]
+'''
+
 
 db = get_db_session()
 
 days_totales = 60
 dtnow = datetime.datetime.now()
 dtstart = dtnow - datetime.timedelta(days=days_totales)
-movstocks = db.query(MovStockPika) \
-    .filter(MovStockPika.fecha >= dtstart) \
+print(days_totales, dtnow, dtstart)
+
+def grouperPika( item ): 
+    return item.pika
+
+movprestock = db.query(MovPrestockPika) \
+    .filter(MovPrestockPika.fecha >= dtstart) \
+    .order_by(MovPrestockPika.fecha) \
     .join(Pika) \
-    .order_by(Pika.id, MovStockPika.fecha) \
     .all()
-    
-import itertools 
+
+l = [(pika,list(movs)) for pika, movs in itertools.groupby(movprestock, grouperPika)]
+print(l)
+sys.exit()
+
 
 
 def grouperPika( item ): 
