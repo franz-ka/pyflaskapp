@@ -1,35 +1,33 @@
 from sqlalchemy import or_, func
 from dbconfig import init_db_engine, get_db_session,\
     Insumo, InsumoTipo, VentaPika, Pika, PikaInsumo, \
-    Venta, VentaTipo, PrestockPika, StockPika
+    Venta, VentaTipo, PrestockPika, StockPika, Alarma, \
+    StockInsumo
 
 db = get_db_session()
 
-q = db.query(VentaPika, func.sum(VentaPika.cantidad)) \
-    .join(Venta) \
-    .filter(Venta.fecha_pedido != None) \
-    .filter(Venta.fecha == None) \
-    .group_by(VentaPika.pika_id) \
-    .order_by(Venta.fecha_pedido.asc())
 
-#r = q.all()
-#print(r)
-#print([(rr[0].pika_id, rr[1]) for rr in r])
-
-q = db.query(Pika, PrestockPika, StockPika, func.sum(VentaPika.cantidad).label('pedidos')) \
-    .join(PrestockPika) \
-    .join(StockPika) \
-    .join(VentaPika) \
+q2 = db \
+    .query(Insumo, func.sum(VentaPika.cantidad*PikaInsumo.cantidad).label('pedidos')) \
     .join(Venta) \
-    .filter(Venta.fecha_pedido != None) \
-    .filter(Venta.fecha == None) \
-    .group_by(VentaPika.pika_id) \
-    .order_by(Pika.nombre)
+    .filter(Venta.fecha_pedido != None, Venta.fecha == None) \
+    .join(PikaInsumo, VentaPika.pika_id == PikaInsumo.pika_id) \
+    .group_by(PikaInsumo.insumo_id) \
+    .join(Insumo) \
+    .subquery()
+print(q2)
+print(dir(q2))
+print(q2.name, 123, q2.alias, 234, q2.columns)
+
+q = db \
+    .query(Insumo, Alarma, StockInsumo, 'anon_1.pedidos', (StockInsumo.cantidad - q2.pedidos).label('stock_total')) \
+    .join(Alarma) \
+    .join(StockInsumo) \
+    .join(q2, isouter=True)
+print(q)
 r = q.all()
 print(r)
-print(dir(r[1]))
-print(r[1].PrestockPika)
-print(r[1]['PrestockPika'])
+#print(len(r))
 
 #q = db.query(VentaTipo).all()
 
