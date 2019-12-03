@@ -173,8 +173,9 @@ def menu_rolloplaabierto():
                 stockrollo.fecha = mov.fecha
 
         db.commit()
-
-        check_alarmas()
+        
+        if not current_app.config['DEBUG_FLASK']:
+            check_alarmas()
 
         return ''
 
@@ -269,7 +270,8 @@ def menu_modificarstockinsu():
 
         db.commit()
 
-        check_alarma(insu)
+        if not current_app.config['DEBUG_FLASK']:
+            check_alarma(insu)
 
         return ''
 
@@ -316,7 +318,8 @@ def menu_insumoabierto():
 
         db.commit()
 
-        check_alarmas()
+        if not current_app.config['DEBUG_FLASK']:
+            check_alarmas()
 
         return ''
 
