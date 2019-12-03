@@ -90,7 +90,7 @@ def del_venta(venta_id):
         pikacant = int(vp.cantidad)
         stockpika = db.query(StockPika).get(vp.pika_id)
         
-        inc_stock_pika(vp.pika, stockpika, pikacant, dtnow)
+        inc_stock_pika(vp.pika, stockpika, pikacant, dtnow, 'eliminar venta')
 
     ventapikas.delete()
     db.query(Venta).filter(Venta.id == venta.id).delete()
@@ -188,7 +188,7 @@ def add_pedido(vendido, pikas, cants, tipo, comentario):
                     stockinsu.fecha = movinsu.fecha
                     
                 #restamos stock de pika
-                inc_stock_pika(pika, stockpika, -pikacant, dtnow)
+                inc_stock_pika(pika, stockpika, -pikacant, dtnow, 'venta')
 
     db.commit()
     
@@ -227,7 +227,7 @@ def vender_pedido(venta_id):
             stockinsu.fecha = movinsu.fecha
             
         #restamos stock de pika
-        inc_stock_pika(vpi.pika, stockpika, -vpi.cantidad, dtnow)
+        inc_stock_pika(vpi.pika, stockpika, -vpi.cantidad, dtnow, 'venta')
     
     urgente = db.query(PedidoUrgente).filter(PedidoUrgente.venta_id==venta_id)
     if urgente.all():

@@ -7,12 +7,12 @@ def get_pikas():
     
     return pikas
 
-def inc_stock_pika(pika, stockpika, cantidad, date):
+def inc_stock_pika(pika, stockpika, cantidad, date, causa):
     if type(cantidad) != int: cantidad = int(cantidad)
     
-    return set_stock_pika(pika, stockpika, stockpika.cantidad + cantidad, date)
+    return set_stock_pika(pika, stockpika, stockpika.cantidad + cantidad, date, causa)
     
-def set_stock_pika(pika, stockpika, cantidad, date):
+def set_stock_pika(pika, stockpika, cantidad, date, causa):
     if type(cantidad) != int: cantidad = int(cantidad)
         
     db = get_db()
@@ -23,15 +23,16 @@ def set_stock_pika(pika, stockpika, cantidad, date):
     mov = MovStockPika(
         pika = pika, 
         cantidad = stockpika.cantidad, 
-        fecha = stockpika.fecha)
+        fecha = stockpika.fecha,
+        causa = causa)
     db.add(mov)
 
-def inc_prestock_pika(pika, prestockpika, cantidad, date):
+def inc_prestock_pika(pika, prestockpika, cantidad, date, causa):
     if type(cantidad) != int: cantidad = int(cantidad)
     
-    return set_prestock_pika(pika, prestockpika, prestockpika.cantidad + cantidad, date)
+    return set_prestock_pika(pika, prestockpika, prestockpika.cantidad + cantidad, date, causa)
     
-def set_prestock_pika(pika, prestockpika, cantidad, date):
+def set_prestock_pika(pika, prestockpika, cantidad, date, causa):
     if type(cantidad) != int: cantidad = int(cantidad)
         
     db = get_db()
@@ -42,7 +43,8 @@ def set_prestock_pika(pika, prestockpika, cantidad, date):
     mov = MovPrestockPika(
         pika = pika, 
         cantidad = prestockpika.cantidad, 
-        fecha = prestockpika.fecha)
+        fecha = prestockpika.fecha,
+        causa = causa)
     db.add(mov)
 
 '''def add_ventatipo(nombre): 

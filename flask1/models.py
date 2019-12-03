@@ -118,6 +118,17 @@ class StockInsumo(Base):
 
     def __repr__(self): return '<StockInsumo {}>'.format(self.insumo_id)
 
+class MovPrestockPika(Base):
+    __tablename__ = 'movprestockpika'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    pika_id = Column(Integer, ForeignKey('pika.id'))
+    pika = relationship('Pika')
+    cantidad = Column(Integer, nullable=False)
+    fecha = Column(DateTime)
+    causa = Column(String(64), nullable=False)
+    
+    def __repr__(self): return '<MovPrestockPika {} (pika={})>'.format(self.id, self.pika_id)
+
 class MovStockPika(Base):
     __tablename__ = 'movstockpika'
     id = Column(Integer, primary_key=True, autoincrement=True)
@@ -125,8 +136,9 @@ class MovStockPika(Base):
     pika = relationship('Pika')
     cantidad = Column(Integer, nullable=False)
     fecha = Column(DateTime)
+    causa = Column(String(64), nullable=False)
 
-    def __repr__(self): return '<MovStockPika {}>'.format(self.id)
+    def __repr__(self): return '<MovStockPika {} (pika={})>'.format(self.id, self.pika_id)
 
 class MovStockInsumo(Base):
     __tablename__ = 'movstockinsumo'
@@ -235,12 +247,3 @@ class PedidoUrgente(Base):
     venta_id = Column(Integer, ForeignKey('venta.id'), primary_key=True)
     venta = relationship('Venta')
     def __repr__(self): return '<PedidoUrgente {}>'.format(self.venta_id)
-
-class MovPrestockPika(Base):
-    __tablename__ = 'movprestockpika'
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    pika_id = Column(Integer, ForeignKey('pika.id'))
-    pika = relationship('Pika')
-    cantidad = Column(Integer, nullable=False)
-    fecha = Column(DateTime)
-    def __repr__(self): return '<MovPrestockPika {}>'.format(self.pika_id)

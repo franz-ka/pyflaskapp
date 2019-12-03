@@ -48,7 +48,7 @@ def menu_ingresarprestock():
                     stockinsu.cantidad -= movinsu.cantidad*pikacant
                     stockinsu.fecha = movinsu.fecha
 
-                inc_prestock_pika(pika, prestock, cants[i], dtnow)
+                inc_prestock_pika(pika, prestock, cants[i], dtnow, 'ingreso prestock')
 
         db.commit()
 
@@ -95,7 +95,7 @@ def menu_armadopika():
                         pika.nombre, prestockpika.cantidad, pikacant), 400
 
                 #restamos prestock
-                inc_prestock_pika(pika, prestockpika, -pikacant, dtnow)
+                inc_prestock_pika(pika, prestockpika, -pikacant, dtnow, 'armado pika')
                 
                 #restamos stock de insumos de armado
                 for pikainsu in pikainsus:
@@ -109,7 +109,7 @@ def menu_armadopika():
                     stockinsu.fecha = movinsu.fecha
 
                 #sumamos stock
-                inc_stock_pika(pika, stockpika, pikacant, dtnow)
+                inc_stock_pika(pika, stockpika, pikacant, dtnow, 'armado pika')
 
         db.commit()
 
@@ -218,8 +218,8 @@ def menu_agregelimpika():
             stockpika = StockPika(pika=pika, cantidad=0, fecha=dtnow)
             db.add(prestockpika)
             db.add(stockpika)
-            set_prestock_pika(pika, prestockpika, 0, dtnow)
-            set_stock_pika(pika, stockpika, 0, dtnow)
+            set_prestock_pika(pika, prestockpika, 0, dtnow, 'nuevo pika')
+            set_stock_pika(pika, stockpika, 0, dtnow, 'nuevo pika')
             
         db.commit()
 
@@ -262,13 +262,13 @@ def menu_modificarstockpika():
             pikacant = int(request.form['precantidadnueva'])
             prestockpika = db.query(PrestockPika).get(request.form['pika'])
             
-            set_prestock_pika(pika, prestockpika, pikacant, dtnow)
+            set_prestock_pika(pika, prestockpika, pikacant, dtnow, 'modificación manual')
         
         if request.form['cantidadnueva']:
             pikacant = int(request.form['cantidadnueva'])            
             stockpika = db.query(StockPika).get(request.form['pika'])
             
-            set_stock_pika(pika, stockpika, pikacant, dtnow)
+            set_stock_pika(pika, stockpika, pikacant, dtnow, 'modificación manual')
 
         db.commit()
 
