@@ -58,10 +58,34 @@ def menu_listadoalarmas():
     if request.method == "GET":
         db = get_db()
         # alarmas = db.query(Alarma).join(Insumo).order_by(Insumo.nombre).all()
-        alarmas_stocks = db.query(Alarma, StockInsumo).filter(StockInsumo.insumo_id == Alarma.insumo_id).all()
+        insus_pedidos = db \
+            .query(Insumo, func.sum(VentaPika.cantidad*PikaInsumo.cantidad).label('pedidos')) \
+            .join(Venta) \
+            .filter(Venta.fecha_pedido != None, Venta.fecha == None) \
+            .join(PikaInsumo, VentaPika.pika_id == PikaInsumo.pika_id) \
+            .group_by(PikaInsumo.insumo_id) \
+            .join(Insumo) \
+            .subquery()
+        
+        alarmas_stocks = db \
+            .query(Insumo, Alarma, StockInsumo, 'anon_1.pedidos') \
+            .join(Alarma) \
+            .join(StockInsumo) \
+            .join(insus_pedidos, isouter=True) \
+            .order_by(Insumo.nombre) \
+            .all()
+            
+        alarmas_stocks_vencidas = list(filter(
+            lambda e: e[2].cantidad-(e[3] or 0) <= e[1].cantidad,
+            alarmas_stocks
+        ))
+        alarmas_stocks_novenc = list(filter(
+            lambda e: e not in alarmas_stocks_vencidas,
+            alarmas_stocks
+        ))
 
         r = make_response(render_template(
             'menu/alarmas/listadoalarmas.html',
-            alarmas_stocks=alarmas_stocks
+            alarmas_stocks=alarmas_stocks_vencidas + alarmas_stocks_novenc
         ))
         return r

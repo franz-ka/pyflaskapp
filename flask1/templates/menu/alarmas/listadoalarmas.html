@@ -7,16 +7,22 @@
     <tr>
       <th>Insumo</th>
       <th>Stock</th>
+      <th>Pedidos</th>
+      <th>Total</th>
       <th>Alarma</th>
       <th>Última alarma enviada</th>
     </tr>
   </thead>
   <tbody>
     {# en el indice [0] está la alarma, en el [1] el stock #}
-    {% for al, st in alarmas_stocks %}
-        <tr>
+    {% for ins, al, st, ped in alarmas_stocks %}
+    	{% set stock_total = st.cantidad - (0 if not ped else ped) %}
+        {% set vencida = stock_total <= al.cantidad %}
+		<tr {% if vencida %}class="table-danger"{% endif %}>
             <td>{{al.insumo.nombre}}</td>
             <td>{{st.cantidad}}</td>
+            <td>{{ped or ''}}</td>
+            <td>{{stock_total}}</td>
             <td>{{al.cantidad}}</td>
             {% if al.fecha_avisado %}
             <td>{{al.fecha_avisado.strftime("%d/%m/%Y %H:%M")}}</td>
