@@ -64,7 +64,7 @@ class Pika(Base):
     nombre = Column(String(64), nullable=False)
     venta_diaria_manual = Column(Float, nullable=True)
 
-    def __repr__(self): return '<Pika {}>'.format(self.id)
+    def __repr__(self): return '<Pika {} "{}">'.format(self.id, self.nombre)
 
 class Insumo(Base):
     __tablename__ = 'insumo'
@@ -73,14 +73,14 @@ class Insumo(Base):
     insumotipo = relationship('InsumoTipo')
     nombre = Column(String(64), nullable=False)
     
-    def __repr__(self): return '<Insumo {}>'.format(self.id)
+    def __repr__(self): return '<Insumo {} "{}">'.format(self.id, self.nombre)
 
 class InsumoTipo(Base):
     __tablename__ = 'insumotipo'
     id = Column(Integer, primary_key=True, autoincrement=True)
     nombre = Column(String(64), nullable=False)
     
-    def __repr__(self): return '<InsumoTipo {}>'.format(self.nombre)
+    def __repr__(self): return '<InsumoTipo {} "{}">'.format(self.id, self.nombre)
 
 class PikaInsumo(Base):
     __tablename__ = 'pikainsumo'
@@ -143,7 +143,7 @@ class VentaTipo(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     nombre = Column(String(64), nullable=False)
 
-    def __repr__(self): return '<VentaTipo {}>'.format(self.id)
+    def __repr__(self): return '<VentaTipo {} "{}">'.format(self.id, self.nombre)
 
 class Venta(Base):
     __tablename__ = 'venta'
@@ -204,7 +204,7 @@ class Alarma(Base):
     cantidad = Column(Integer, nullable=False)
     fecha_avisado = Column(DateTime)
 
-    def __repr__(self): return '<Alarma {}>'.format(self.id)
+    def __repr__(self): return '<Alarma {} (insumo {})>'.format(self.id, self.insumo_id)
 
 class StockPikaColor(Base):
     __tablename__ = 'stockpikacolor'
