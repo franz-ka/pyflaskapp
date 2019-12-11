@@ -127,7 +127,7 @@ class MovPrestockPika(Base):
     fecha = Column(DateTime)
     causa = Column(String(64), nullable=False)
     
-    def __repr__(self): return '<MovPrestockPika {} (pika={})>'.format(self.id, self.pika_id)
+    def __repr__(self): return '<MovPrestockPika {} (pika={}, fecha={})>'.format(self.id, self.pika_id, self.fecha)
 
 class MovStockPika(Base):
     __tablename__ = 'movstockpika'
@@ -138,7 +138,7 @@ class MovStockPika(Base):
     fecha = Column(DateTime)
     causa = Column(String(64), nullable=False)
 
-    def __repr__(self): return '<MovStockPika {} (pika={})>'.format(self.id, self.pika_id)
+    def __repr__(self): return '<MovStockPika {} (pika={}, fecha={})>'.format(self.id, self.pika_id, self.fecha)
 
 class MovStockInsumo(Base):
     __tablename__ = 'movstockinsumo'
@@ -167,7 +167,7 @@ class Venta(Base):
     comentario = Column(String(128))
     ventapikas = relationship('VentaPika')
 
-    def __repr__(self): return '<Venta {}>'.format(self.id)
+    def __repr__(self): return '<Venta {} (fecha={}, fecha_pedido={})>'.format(self.id, self.fecha, self.fecha_pedido)
 
 class VentaPika(Base):
     __tablename__ = 'ventapika'
@@ -178,7 +178,7 @@ class VentaPika(Base):
     pika = relationship('Pika')
     cantidad = Column(Integer, nullable=False)
 
-    def __repr__(self): return '<VentaPika {}>'.format(self.id)
+    def __repr__(self): return '<VentaPika {} (pika={})>'.format(self.id, self.pika_id)
 
 class Maquina(Base):
     __tablename__ = 'maquina'
