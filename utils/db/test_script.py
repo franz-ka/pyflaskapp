@@ -60,6 +60,10 @@ def grouperPikaId( item ):
         return item.pika_id
 
 db = get_db()
+a=db.query(MovPrestockPika).order_by(MovPrestockPika.fecha).limit(1).one()
+print(a.fecha)
+sys.exit()
+#########################
 
 # Parámetros iniciales
 pika_ids = [14, 9, 12]#list(range(14))#

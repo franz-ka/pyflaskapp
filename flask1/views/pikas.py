@@ -456,7 +456,7 @@ def menu_graficostock():
         db = get_db()
         
         # Parámetros iniciales
-        dtnow = datetime.datetime(day=25, month=11, year=2019)  # datetime.datetime.now()
+        dtnow = datetime.datetime.now() #datetime.datetime(day=25, month=11, year=2019)#
         dtend = datetime.datetime.strptime(fecha_hasta,'%d/%m/%Y') if fecha_hasta else dtnow
         if fecha_desde:
             dtstart = datetime.datetime.strptime(fecha_desde,'%d/%m/%Y')
@@ -483,6 +483,8 @@ def menu_graficostock():
             pikas[pika.id] = PikaData(pika.id, pika.nombre)
         
         # Traer stocks de pikas
+        first_prestock = db.query(MovPrestockPika).order_by(MovPrestockPika.fecha).limit(1).one()
+        
         movprestock = db.query(MovPrestockPika) \
             .filter(MovPrestockPika.fecha >= dtstart, MovPrestockPika.pika_id.in_(pikas.keys())) \
             .order_by(MovPrestockPika.pika_id, MovPrestockPika.fecha) \
@@ -575,7 +577,8 @@ def menu_graficostock():
                 'pikas_select': pikas_select,
                 'fechadesde': dtstart.strftime("%d/%m/%Y") if fecha_desde else '',
                 'fechahasta': dtend.strftime("%d/%m/%Y")
-            }
+            },
+            first_prestock = first_prestock.fecha.strftime("%d/%m/%Y") if dtstart <= first_prestock.fecha else ''
         ))
         return r
     else:  # request.method == "POST":

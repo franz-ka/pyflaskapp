@@ -43,8 +43,12 @@ for (var i=0; i<pikasLen; i++){
 }
 	
 $(function() {
+	var first_prestock = '{{first_prestock|safe}}'
+	if (first_prestock)
+		$('.alert-warning').show().find('p').html('Tenga en cuenta que los prestocks solo se registraron desde el ' + first_prestock)
+		
     $('input[name="fechadesde"]').add('input[name="fechahasta"]').datepicker()
-	
+		
     pikasGroups = [
 		{ 'id': 'cogos', 'text': 'Cogos' },
 		{ 'id': 'minis', 'text': 'Minis' },
