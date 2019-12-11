@@ -3,7 +3,8 @@ from ._common import *
 
 bp_pikas = Blueprint('pikas', __name__, url_prefix='/pikas')
 
-@bp_pikas.route("/ingresarprestock", methods = ['GET', 'POST'])
+
+@bp_pikas.route("/ingresarprestock", methods=['GET', 'POST'])
 @login_required
 def menu_ingresarprestock():
     if request.method == "GET":
@@ -18,8 +19,8 @@ def menu_ingresarprestock():
         ))
 
         return r
-    else: #request.method == "POST":
-        print('post form:',request.form)
+    else:  # request.method == "POST":
+        print('post form:', request.form)
 
         try: checkparams(request.form, ('pika', 'cantidad'))
         except Exception as e: return str(e), 400
@@ -29,23 +30,23 @@ def menu_ingresarprestock():
         pikas = request.form.getlist('pika')
         cants = request.form.getlist('cantidad')
         dtnow = datetime.datetime.now()
-        tipoinsu_prestock = db.query(InsumoTipo).filter(InsumoTipo.nombre=='Prestock').one()
+        tipoinsu_prestock = db.query(InsumoTipo).filter(InsumoTipo.nombre == 'Prestock').one()
         for i, pikaid in enumerate(pikas):
-            if i<len(cants) and cants[i] and pikaid:
+            if i < len(cants) and cants[i] and pikaid:
                 pika = db.query(Pika).get(pikaid)
                 pikacant = int(cants[i])
                 prestock = db.query(PrestockPika).get(pikaid)
-                pikainsus = db.query(PikaInsumo).join(Insumo).filter(PikaInsumo.pika==pika, Insumo.insumotipo==tipoinsu_prestock)
+                pikainsus = db.query(PikaInsumo).join(Insumo).filter(PikaInsumo.pika == pika, Insumo.insumotipo == tipoinsu_prestock)
                 
-                #restamos stock de insumos de prestock
+                # restamos stock de insumos de prestock
                 for pikainsu in pikainsus:
                     stockinsu = db.query(StockInsumo).get(pikainsu.insumo_id)
-                    if stockinsu.cantidad < pikainsu.cantidad*pikacant:
-                        return 'No hay suficiente stock de "{}" para el pika "{}" (hay {}, requiere {})'.format(pikainsu.insumo.nombre, pika.nombre, stockinsu.cantidad, pikainsu.cantidad*pikacant), 400
+                    if stockinsu.cantidad < pikainsu.cantidad * pikacant:
+                        return 'No hay suficiente stock de "{}" para el pika "{}" (hay {}, requiere {})'.format(pikainsu.insumo.nombre, pika.nombre, stockinsu.cantidad, pikainsu.cantidad * pikacant), 400
 
                     movinsu = MovStockInsumo(insumo=pikainsu.insumo, cantidad=pikainsu.cantidad, fecha=dtnow)
                     db.add(movinsu)
-                    stockinsu.cantidad -= movinsu.cantidad*pikacant
+                    stockinsu.cantidad -= movinsu.cantidad * pikacant
                     stockinsu.fecha = movinsu.fecha
 
                 inc_prestock_pika(pika, prestock, cants[i], dtnow, 'ingreso prestock')
@@ -57,7 +58,8 @@ def menu_ingresarprestock():
 
         return ''
 
-@bp_pikas.route("/armadopika", methods = ['GET', 'POST'])
+
+@bp_pikas.route("/armadopika", methods=['GET', 'POST'])
 @login_required
 def menu_armadopika():
     if request.method == "GET":
@@ -71,8 +73,8 @@ def menu_armadopika():
             pikas=pikas
         ))
         return r
-    else: #request.method == "POST":
-        print('post form:',request.form)
+    else:  # request.method == "POST":
+        print('post form:', request.form)
 
         try: checkparams(request.form, ('pika', 'cantidad'))
         except Exception as e: return str(e), 400
@@ -82,34 +84,34 @@ def menu_armadopika():
         pikas = request.form.getlist('pika')
         cants = request.form.getlist('cantidad')
         dtnow = datetime.datetime.now()
-        tipoinsu_armado = db.query(InsumoTipo).filter(InsumoTipo.nombre=='Armado').one()
+        tipoinsu_armado = db.query(InsumoTipo).filter(InsumoTipo.nombre == 'Armado').one()
         for i, pikaid in enumerate(pikas):
-            if i<len(cants) and cants[i] and pikaid:
+            if i < len(cants) and cants[i] and pikaid:
                 pika = db.query(Pika).get(pikaid)
                 pikacant = int(cants[i])
                 prestockpika = db.query(PrestockPika).get(pikaid)
                 stockpika = db.query(StockPika).get(pikaid)
-                pikainsus = db.query(PikaInsumo).join(Insumo).filter(PikaInsumo.pika==pika, Insumo.insumotipo==tipoinsu_armado)
+                pikainsus = db.query(PikaInsumo).join(Insumo).filter(PikaInsumo.pika == pika, Insumo.insumotipo == tipoinsu_armado)
 
                 if pikacant > prestockpika.cantidad:
                     return 'No hay suficiente prestock para el pika "{}" (hay {}, requiere {})'.format(
                         pika.nombre, prestockpika.cantidad, pikacant), 400
 
-                #restamos prestock
+                # restamos prestock
                 inc_prestock_pika(pika, prestockpika, -pikacant, dtnow, 'armado pika')
                 
-                #restamos stock de insumos de armado
+                # restamos stock de insumos de armado
                 for pikainsu in pikainsus:
                     stockinsu = db.query(StockInsumo).get(pikainsu.insumo_id)
-                    if stockinsu.cantidad < pikainsu.cantidad*pikacant:
-                        return 'No hay suficiente stock de "{}" para el pika "{}" (hay {}, requiere {})'.format(pikainsu.insumo.nombre, pika.nombre, stockinsu.cantidad, pikainsu.cantidad*pikacant), 400
+                    if stockinsu.cantidad < pikainsu.cantidad * pikacant:
+                        return 'No hay suficiente stock de "{}" para el pika "{}" (hay {}, requiere {})'.format(pikainsu.insumo.nombre, pika.nombre, stockinsu.cantidad, pikainsu.cantidad * pikacant), 400
 
                     movinsu = MovStockInsumo(insumo=pikainsu.insumo, cantidad=pikainsu.cantidad, fecha=dtnow)
                     db.add(movinsu)
-                    stockinsu.cantidad -= movinsu.cantidad*pikacant
+                    stockinsu.cantidad -= movinsu.cantidad * pikacant
                     stockinsu.fecha = movinsu.fecha
 
-                #sumamos stock
+                # sumamos stock
                 inc_stock_pika(pika, stockpika, pikacant, dtnow, 'armado pika')
 
         db.commit()
@@ -118,6 +120,7 @@ def menu_armadopika():
             check_alarmas()
 
         return ''
+
 
 @bp_pikas.route("/stockpikas", methods=['GET', 'POST'])
 @login_required
@@ -157,25 +160,27 @@ def menu_stockpikas():
 
         return redirect(url_for('main.menu_stockpikas'))
 
+
 @bp_pikas.route("/exportar/stockpikas.csv", methods=['GET'])
 @login_required
 def exportar_stockpikas():
     db = get_db()
-    stopiks = db.query(Pika, PrestockPika, StockPika).filter(Pika.id==PrestockPika.pika_id).filter(Pika.id==StockPika.pika_id).order_by(Pika.nombre).all()
+    stopiks = db.query(Pika, PrestockPika, StockPika).filter(Pika.id == PrestockPika.pika_id).filter(Pika.id == StockPika.pika_id).order_by(Pika.nombre).all()
 
     ex = CsvExporter('stockpikas.csv')
     ex.writeHeaders('Id,Nombre,Prestock,Stock,Total,Actualizado')
     for pika_spika_pspika in stopiks:
-        #print(pika_spika_pspika)
+        # print(pika_spika_pspika)
         fecha_mayor = pika_spika_pspika[1].fecha if pika_spika_pspika[1].fecha > pika_spika_pspika[2].fecha else pika_spika_pspika[2].fecha
         ex.writeVals([
             pika_spika_pspika[0].id,
             pika_spika_pspika[0].nombre,
             pika_spika_pspika[1].cantidad,
             pika_spika_pspika[2].cantidad,
-            pika_spika_pspika[1].cantidad+pika_spika_pspika[2].cantidad,
+            pika_spika_pspika[1].cantidad + pika_spika_pspika[2].cantidad,
             fecha_mayor])
     return ex.send()
+
 
 @bp_pikas.route("/agregelimpika", methods=['GET', 'POST'])
 @login_required
@@ -210,7 +215,7 @@ def menu_agregelimpika():
         if request.form['operation'] == 'add':
             dtnow = datetime.datetime.now()
             
-            if db.query(Pika).filter(Pika.nombre==request.form['nombrepika']).first():
+            if db.query(Pika).filter(Pika.nombre == request.form['nombrepika']).first():
                 return str('Ya existe un pika con ese nombre'), 400
             # siempre al agregar un pika se debe agregar su StockPika en 0 sino después hay errores
             pika = Pika(nombre=request.form['nombrepika'])
@@ -226,6 +231,7 @@ def menu_agregelimpika():
         db.commit()
 
         return ''
+
 
 @bp_pikas.route("/modificarstockpika", methods=['GET', 'POST'])
 @login_required
@@ -247,13 +253,12 @@ def menu_modificarstockpika():
         print('post form:', request.form)
 
         try:
-            checkparams(request.form, ('pika', ))
+            checkparams(request.form, ('pika',))
         except Exception as e:
             return str(e), 400
         
         if not (request.form['precantidadnueva'] or request.form['cantidadnueva']):
             return str('Debe proporcionar algún número de stock nuevo'), 400
-
 
         db = get_db()
 
@@ -276,7 +281,8 @@ def menu_modificarstockpika():
 
         return ''
 
-@bp_pikas.route("/modificarcolorpikas", methods = ['GET', 'POST'])
+
+@bp_pikas.route("/modificarcolorpikas", methods=['GET', 'POST'])
 @login_required
 def menu_modificarcolorpikas():
     if request.method == "GET":
@@ -290,17 +296,16 @@ def menu_modificarcolorpikas():
             pikascolores=pikascolores
         ))
         return r
-    else: #request.method == "POST":
-        print('post form:',request.form)
+    else:  # request.method == "POST":
+        print('post form:', request.form)
 
         try:
-            checkparams(request.form, ('pika', ))
+            checkparams(request.form, ('pika',))
         except Exception as e:
             return str(e), 400
         
         if not (request.form['cantidad_bajo_nueva'] or request.form['cantidad_medio_nueva']):
             return str('Debe proporcionar alguna cantidad nueva'), 400
-
 
         db = get_db()
 
@@ -322,36 +327,37 @@ def menu_modificarcolorpikas():
 
         return ''
 
-@bp_pikas.route("/factoresdeimpresion", methods = ['GET', 'POST'])
+
+@bp_pikas.route("/factoresdeimpresion", methods=['GET', 'POST'])
 @login_required
 def menu_factoresdeimpresion():
     if request.method == "GET":
         db = get_db()
-        #pikas = db.query(Pika).order_by(Pika.nombre).all()
-        #factores = db.query(FactorProductividad).all()
+        # pikas = db.query(Pika).order_by(Pika.nombre).all()
+        # factores = db.query(FactorProductividad).all()
         pika_factores = db.query(Pika, FactorProductividad).outerjoin(FactorProductividad).all()
 
         from sqlalchemy import func
         dias_factor = 60.0
         dtnow = datetime.datetime.now()
         dtventas = dtnow - datetime.timedelta(days=dias_factor)
-        #print(dias_factor, dtventas)
+        # print(dias_factor, dtventas)
         
-        #ventapikas = db.query(VentaPika).join(Venta).filter(Venta.fecha != None)
+        # ventapikas = db.query(VentaPika).join(Venta).filter(Venta.fecha != None)
         ventapikas = db.query(
             VentaPika.pika_id,
-            func.sum(VentaPika.cantidad/dias_factor).label('total')
+            func.sum(VentaPika.cantidad / dias_factor).label('total')
         ).join(Venta
         ).filter(Venta.fecha != None
         ).filter(Venta.fecha >= dtventas
         ).group_by(VentaPika.pika_id
         ).all()
-        #print(ventapikas)
+        # print(ventapikas)
         
         ventas_promedios = {}
         for pika_id, venta_promedio in ventapikas:
             ventas_promedios[pika_id] = "{0:.2f}".format(venta_promedio)
-        #print(ventas_promedios)
+        # print(ventas_promedios)
 
         r = make_response(render_template(
             'menu/pikas/factoresdeimpresion.html',
@@ -361,8 +367,8 @@ def menu_factoresdeimpresion():
             ventas_promedios=ventas_promedios
         ))
         return r
-    else: #request.method == "POST":
-        print('post form:',request.form)
+    else:  # request.method == "POST":
+        print('post form:', request.form)
 
         try: checkparams(request.form, ('pika_id', 'factor_nuevo'))
         except Exception as e: return str(e), 400
@@ -385,93 +391,195 @@ def menu_factoresdeimpresion():
 
         return ''
 
-@bp_pikas.route("/graficostock", methods = ['GET', 'POST'])
+
+@bp_pikas.route("/graficostock", methods=['GET', 'POST'])
 @login_required
 def menu_graficostock():
     if request.method == "GET":
-        db = get_db()
+        pikas_select = request.args.get('pikas_select', 'cogos')
+        fecha_desde = request.args.get('fechadesde')
+        fecha_hasta = request.args.get('fechahasta')
         
-        days_totales = 30
-        days_offset_today = 0
-        dtnow = datetime.datetime.now() - datetime.timedelta(days=days_offset_today)
-        dtstart = dtnow - datetime.timedelta(days=days_totales)
+        '''
+        El script general de gráficos tiene dos inputs:
+        La cantidad de días desde hoy hacia el pasado a tomar = D
+        Los ids de picas a mirar = Ps
         
-        stocks = db.query(StockPika) \
-            .join(Pika) \
-            .order_by(Pika.id) \
-            .all()
-        stocks_id = {s.pika_id: s.cantidad for s in stocks}
-            
-        movstocks = db.query(MovStockPika) \
-            .join(Pika) \
-            .filter(MovStockPika.fecha >= dtstart, Pika.nombre.ilike("cogo %")) \
-            .order_by(Pika.id, MovStockPika.fecha) \
-            .all()
-            
+        El gráfico tiene un punto por cada día desde D hasta hoy
+        Cada punto muestra el prestock+stock-pedidos que había en ese momento
+        Por ende, hay que traer estos 3 datos
+        
+        Prestock y stock provienen de sus respectivas tablas de movimiento
+        Pedidos hay que deducirlo de la tabla de ventas
+        Todo filtrado por los pikas ids que se seleccionaron
+        
+        Dado un punto X en el gráfico (fecha), se mira
+        - el pre/stock con max(mov.fecha<=X)
+        - la venta con fecha_pedido <= X y fecha_venta[= None or > X]
+        '''
+        
         class PikaData:
-            def __init__(self,id,nombre,stock):
+
+            def __init__(self, id, nombre):
                 self.id = id
                 self.nombre = nombre
-                self.stock = stock
-                self.cants = {}
-                self.totmovcant = 0
-            def __repr__(self):
-                return f'Pika {self.id} {self.nombre}, stock={self.stock}, totmovcant={self.totmovcant}, cants={len(self.cants)}'
+                self.movs_prestock = None
+                self.movs_stock = None
+                self.pedidos = None
+                self.points = []
+                self.points_data = []
                 
-        pikasdata = []    
+            def print(self):
+                print(f'Pika id={self.id}, nombre={self.nombre}')
+                print(f'- movs_prestock:')
+                pprint(self.movs_prestock)
+                print(f'- movs_stock:')
+                pprint(self.movs_stock)
+                print(f'- pedidos:')
+                pprint(self.pedidos)
+                
+            def print_points(self):
+                print(f'Pika id={self.id}, nombre={self.nombre}')
+                print(f'- points:')
+                pprint(self.points)
+                print(f'- points_data:')
+                pprint(self.points_data)
+                
+        pikas = {}
         
-        def grouperPika( item ): 
-            return item.pika
-        def grouperMonthDay( item ): 
-            return item.fecha.month, item.fecha.day
+        def grouperPikaId(item): 
+            if (hasattr(item, 'VentaPika')):
+                return item.VentaPika.pika_id
+            else:
+                return item.pika_id
         
-        for (pika, grpPika) in itertools.groupby(movstocks, grouperPika):
-            pika_data = PikaData(pika.id, pika.nombre, stocks_id[pika.id])
-            pika_data.cants = {}
-            for ((month, day), grpMonDay) in itertools.groupby(grpPika, grouperMonthDay):
-                if month not in pika_data.cants:
-                    pika_data.cants[month] = {}
-                if day not in pika_data.cants[month]:
-                    pika_data.cants[month][day] = 0
-                for mvs in grpMonDay:
-                    pika_data.cants[month][day] += mvs.cantidad
-                    pika_data.totmovcant += mvs.cantidad
-            pikasdata.append(pika_data)
+        db = get_db()
+        
+        # Parámetros iniciales
+        dtnow = datetime.datetime(day=25, month=11, year=2019)  # datetime.datetime.now()
+        dtend = datetime.datetime.strptime(fecha_hasta,'%d/%m/%Y') if fecha_hasta else dtnow
+        if fecha_desde:
+            dtstart = datetime.datetime.strptime(fecha_desde,'%d/%m/%Y')
+        else:
+            dtstart = dtend - datetime.timedelta(days=60)
+        days_totales = (dtend - dtstart).days
+        #dtstart = dtnow - datetime.timedelta(days=days_totales)
+        print(f"Días totales={days_totales}, fecha actual={dtnow}, fecha comienzo={dtstart}")
+        
+        # Traer ids y nombres de pikas
+        pikas_sql = db.query(Pika)
+        if pikas_select == 'todos':
+            pass
+        elif pikas_select == 'cogos':
+            pikas_sql = pikas_sql.filter(Pika.nombre.ilike('cogo %'))
+        elif pikas_select == 'minis':
+            pikas_sql = pikas_sql.filter(Pika.nombre.ilike('mini %'))
+        elif pikas_select == 'xls':
+            pikas_sql = pikas_sql.filter(Pika.nombre.ilike('xl %'))
+        pikas_sql = pikas_sql.all()
+        
+        # Cargar
+        for pika in pikas_sql:
+            pikas[pika.id] = PikaData(pika.id, pika.nombre)
+        
+        # Traer stocks de pikas
+        movprestock = db.query(MovPrestockPika) \
+            .filter(MovPrestockPika.fecha >= dtstart, MovPrestockPika.pika_id.in_(pikas.keys())) \
+            .order_by(MovPrestockPika.pika_id, MovPrestockPika.fecha) \
+            .all()
+        
+        movstock = db.query(MovStockPika) \
+            .filter(MovStockPika.fecha >= dtstart, MovStockPika.pika_id.in_(pikas.keys())) \
+            .order_by(MovStockPika.pika_id, MovStockPika.fecha) \
+            .all()
+        
+        pedidos = db.query(VentaPika, Venta) \
+            .join(Venta) \
+            .filter(
+                Venta.fecha_pedido != None,
+                Venta.fecha_pedido >= dtstart,  # no queremos pedidos históricos, solo los del plazo
+                or_(Venta.fecha == None, Venta.fecha > dtstart),  # si se vendieron antes del comienzo del plazo no nos interesan (ya se contabilizan en los stocks)
+                VentaPika.pika_id.in_(pikas.keys())
+            ) \
+            .order_by(VentaPika.pika_id, Venta.fecha_pedido) \
+            .all()
+        
+        # Cargar stocks en objetos de pikas            
+        for pika_id, movs in itertools.groupby(movprestock, grouperPikaId):
+            pikas[pika_id].movs_prestock = list(movs) 
+        
+        for pika_id, movs in itertools.groupby(movstock, grouperPikaId):
+            pikas[pika_id].movs_stock = list(movs)
+        
+        for pika_id, peds in itertools.groupby(pedidos, grouperPikaId):
+            pikas[pika_id].pedidos = list(peds)
+        
+        # Reportar data de pikas cargada
+        for p in pikas.values():
+            print('=' * 50, 'Pikas data')
+            p.print()
+        
+        # Calcular puntos de gráfico (+ 1 porque hay que contar el día de hoy)
+        print('@' * 50, 'Days data')
+        fechas = []
+        for day in range(days_totales + 1):
+            date = dtstart + datetime.timedelta(days=day)
+            fechas.append(date.strftime("%d/%m/%Y"))
+            print(f"Day {day}, dtstart={dtstart}, date={date}")
             
-        times_data = []
-        for _ in range(len(pikasdata)):
-            times_data.append([])
-            
-        date_deltas = []
-        for d in range(days_totales):
-            date_deltas.append(dtstart + timedelta(days=d))
-            
-        for (i, p) in enumerate(pikasdata):
-            last_cant = p.stock - p.totmovcant
-            # QUÉ PASA SI TIENE EL PRIMER VALOR? SE SUMA DOS VECES!
-            for date_i in range(days_totales):
-                date = date_deltas[date_i]
-                if date.month in p.cants and date.day in p.cants[date.month]:
-                    last_cant += p.cants[date.month][date.day]
-                times_data[i].append(last_cant)
-            
-        # log data
-        pprint(pikasdata)
-        for (i, t) in enumerate(times_data):
-            print(i,len(t),t)
-            
-        pika_nombres = []
-        for p in pikasdata:        
-            pika_nombres.append(p.nombre)
+            for pika in pikas.values():
+                # Calculamos la última actualización de prestock antes (o igual) que la fecha del punto
+                if pika.movs_prestock:
+                    for mov in pika.movs_prestock:
+                        if mov.fecha > date:
+                            break
+                    prestock = mov.cantidad
+                else:
+                    prestock = 0
+                    
+                # Idem prestock
+                if pika.movs_stock:
+                    for mov in pika.movs_stock:
+                        if mov.fecha > date:
+                            break
+                    stock = mov.cantidad
+                else:
+                    stock = 0
+                    
+                # Calculamos pedido al día del punto
+                pedido = 0
+                if pika.pedidos:
+                    for venta_pika, venta in pika.pedidos:
+                        if venta.fecha_pedido > date:
+                            break
+                        # Si no se vendió, todo ok, está como pedido pendiente
+                        # Si se vendió, pero después de la fecha del punto, estuvo como pedido en ese momento
+                        if not venta.fecha or venta.fecha > date:
+                            pedido += venta_pika.cantidad
+                    
+                stock_real = prestock + stock - pedido
+                pika.points.append(stock_real)
+                pika.points_data.append((prestock, stock, pedido))
+        
+        # Reportar points
+        for p in pikas.values():
+            print('#' * 50, 'Points data')
+            p.print_points()
         
         r = make_response(render_template(
             'menu/pikas/graficostock.html',
-            pika_nombres=pika_nombres,
-            times_data=times_data
+            pikas_nombres = [p.nombre for p in pikas.values()],
+            pikas_points = [p.points for p in pikas.values()],
+            fechas = fechas,
+            filter_params = {
+                'pikas_select': pikas_select,
+                'fechadesde': dtstart.strftime("%d/%m/%Y") if fecha_desde else '',
+                'fechahasta': dtend.strftime("%d/%m/%Y")
+            }
         ))
         return r
-    else: #request.method == "POST":
-        print('post form:',request.form)
+    else:  # request.method == "POST":
+        print('post form:', request.form)
 
         try: checkparams(request.form, ('PARAM1', 'PARAMN'))
         except Exception as e: return str(e), 400

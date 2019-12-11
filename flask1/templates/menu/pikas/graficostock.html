@@ -1,7 +1,21 @@
 {% extends '_maingui.html' %}
 
 {% block content %}
-{% call forms.card('Gráfico Stock')  %}
+{% call forms.card('Gráfico Stock', method='GET')  %}
+<div class="form-group row">
+	{{ forms.input_select(4, 'pikas_select', '') }}
+    <div class="col-sm-4">
+        <input type="text" class="form-control" name="fechadesde" placeholder="Fecha desde">
+    </div>
+    <div class="col-sm-4">
+        <input type="text" class="form-control" name="fechahasta" placeholder="Fecha hasta">
+    </div>
+</div>
+<div class="form-group row">
+    <div class="offset-sm-8 col-sm-4">
+        <button type="submit" class="btn btn-primary btn-block">Filtrar</button>
+    </div>
+</div>
 <div id="chart"></div>
 {% endcall %}
 {% endblock %}
@@ -9,25 +23,64 @@
 {% block js %}
 <script src="{{ url_for('static', filename='js/apexcharts.min.js' ) }}" type="text/javascript"></script>
 <script type="text/javascript">
+
+// ApexCharts - https://apexcharts.com/
+var pikasLen = {{pikas_points|length}}
+var pointsLen = {{pikas_points[0]|length if pikas_points else 0}}
+
+var zeros = []
+for (var i=0; i<pointsLen; i++)
+	zeros.push(0)
+
+var widths = [1]
+var defaultColors = ['#2E93fA', '#66DA26', '#546E7A', '#E91E63', '#FF9800']
+var colors = ['#000']
+var tooltipsIn = []
+for (var i=0; i<pikasLen; i++){
+	widths.push(4)
+	colors.push(defaultColors[i%defaultColors.length])
+	tooltipsIn.push(i+1)
+}
+	
 $(function() {
+    $('input[name="fechadesde"]').add('input[name="fechahasta"]').datepicker()
+	
+    pikasGroups = [
+		{ 'id': 'cogos', 'text': 'Cogos' },
+		{ 'id': 'minis', 'text': 'Minis' },
+		{ 'id': 'xls', 'text': 'XLs' },
+		{ 'id': 'todos', 'text': 'Todos' },
+	];
+    sel2('.select2-single[name=pikas_select]', 'Pikas', pikasGroups);
+
+	filter_params = {{filter_params|safe}}
+
+	$('input[name="fechadesde"]').datepicker('setDate', filter_params['fechadesde'] || null)
+	$('input[name="fechahasta"]').datepicker('setDate', filter_params['fechahasta'])
+	$('.select2-single[name=pikas_select]').val(filter_params['pikas_select']).trigger("change");
+	
+	var win_height = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
+	var chart_y = $('#chart')[0].getBoundingClientRect().top;
+	
+	var fechas = {{fechas|safe}}
 	
     var options = {
 	    chart: {
-	        height: 350,
+	        height: win_height - chart_y - 60,
 	        type: 'line',
 	        zoom: {
 	            enabled: false
 	        }
 	    },
 	    series: [
-			/*{
-		        //name: "Desktopsss",
-		        data: [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
-		    },*/
-			{% for time_data in times_data %}
+			{
+		        name: "0",
+		        data: zeros
+		    },
+			{% for points in pikas_points %}
 				{
-					name: "{{pika_nombres[loop.index-1]}}",
-					data: {{time_data|replace("None","null")}}
+					name: "{{pikas_nombres[loop.index-1]}}",
+					data: {{points}}
 				},
 			{% endfor %}
 		],
@@ -35,10 +88,11 @@ $(function() {
 	    dataLabels: {
 	        enabled: false
 	    },
-		//colors: ['#000', '#B32824'],
-	    stroke: {
+		colors: colors,
+	    // https://apexcharts.com/docs/options/stroke/
+		stroke: {
 	        curve: 'straight',
-			//width: [1, 4]
+			width: widths
 	    },
 	    /*title: {
 	        text: 'Product Trends by Month',
@@ -50,13 +104,17 @@ $(function() {
 	            opacity: 0.5
 	        },
 	    },
-		// los cartelitos que aparecen cuando le ponés el mouse encima
+		// los cartelitos que aparecen cuando le ponés el mouse encima - https://apexcharts.com/docs/options/tooltip/
 		tooltip: {
-			//enabledOnSeries: [1],
+			enabledOnSeries: tooltipsIn,
+			x: {
+				formatter: function(index, data){
+					return fechas[index]
+				}
+			}
 		},
-		// los textos en los costados, sobre los ejes que dicen qué es la data
+		// los textos en los costados, sobre los ejes que dicen qué es la data - https://apexcharts.com/docs/options/legend/
 		legend: {
-			showForZeroSeries: false
 		},
 		// los puntitos que aparecen sobre las líneas
 		markers: {
@@ -66,16 +124,31 @@ $(function() {
 				size: 0
 			}
 		},
-		/*yaxis: {
-			min: 0,
-			max: 500
-		},*/
+		yaxis: {
+			title: {
+            	text: 'Stock real',
+			}
+		},
+		// https://apexcharts.com/docs/options/xaxis/
 	    xaxis: {
-	        //categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep'],
-    		tickAmount: 6,
+	        categories: fechas,
             axisBorder: {
                 show: false
-            }
+            },
+			// textito que dice qué opción del xaxis está mostrando (ya se ve en los tooltip de los puntos)
+			tooltip: {
+				enabled: false
+			},
+			labels: {
+				formatter: function(value, timestamp, index,d) {
+					if (value == filter_params['fechadesde'] || value == filter_params['fechahasta'])
+						return value
+					else{
+						if(fechas.indexOf(value)%7 == 0)
+							return value
+					}
+				}
+			}
 	    }
 	}
 	
