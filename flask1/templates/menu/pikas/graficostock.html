@@ -27,19 +27,33 @@
 // ApexCharts - https://apexcharts.com/
 var pikasLen = {{pikas_points|length}}
 var pointsLen = {{pikas_points[0]|length if pikas_points else 0}}
-
+var pikaNombres = {{pikas_nombres|safe}}
+var pikaNombres_lower = []
+for (var i=0; i<pikaNombres.length; i++)
+	pikaNombres_lower.push(pikaNombres[i].toLowerCase())
+	
 var zeros = []
 for (var i=0; i<pointsLen; i++)
 	zeros.push(0)
 
 var widths = [1]
+var tooltipsIn = []
 var defaultColors = ['#2E93fA', '#66DA26', '#546E7A', '#E91E63', '#FF9800']
 var colors = ['#000']
-var tooltipsIn = []
 for (var i=0; i<pikasLen; i++){
 	widths.push(4)
-	colors.push(defaultColors[i%defaultColors.length])
 	tooltipsIn.push(i+1)
+	var pikaName = pikaNombres_lower[i]
+	if (pikaName.indexOf('baku') != -1)
+		colors.push('#ED5034')
+	else if (pikaName.indexOf('donn') != -1)
+		colors.push('#969696')
+	else if (pikaName.indexOf('skup') != -1)
+		colors.push('#F8408F')
+	else if (pikaName.indexOf('koko') != -1)
+		colors.push('#84E300')
+	else
+		colors.push(defaultColors[i%defaultColors.length])
 }
 	
 $(function() {
