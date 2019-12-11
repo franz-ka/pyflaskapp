@@ -456,15 +456,14 @@ def menu_graficostock():
         db = get_db()
         
         # Parámetros iniciales
-        dtnow = datetime.datetime.now() #datetime.datetime(day=25, month=11, year=2019)#
-        dtend = datetime.datetime.strptime(fecha_hasta,'%d/%m/%Y') if fecha_hasta else dtnow
+        dtend_default = datetime.datetime.now() + datetime.timedelta(days=1) #datetime.datetime(day=25, month=11, year=2019)#
+        dtend = datetime.datetime.strptime(fecha_hasta,'%d/%m/%Y') if fecha_hasta else dtend_default
         if fecha_desde:
             dtstart = datetime.datetime.strptime(fecha_desde,'%d/%m/%Y')
         else:
             dtstart = dtend - datetime.timedelta(days=60)
         days_totales = (dtend - dtstart).days
-        #dtstart = dtnow - datetime.timedelta(days=days_totales)
-        print(f"Días totales={days_totales}, fecha actual={dtnow}, fecha comienzo={dtstart}")
+        print(f"Días totales={days_totales}, fecha comienzo={dtstart}, fecha fin={dtend}")
         
         # Traer ids y nombres de pikas
         pikas_sql = db.query(Pika)
