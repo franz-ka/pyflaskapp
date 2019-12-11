@@ -456,7 +456,7 @@ def menu_graficostock():
         db = get_db()
         
         # Parámetros iniciales
-        dtend_default = datetime.datetime.now() + datetime.timedelta(days=1) #datetime.datetime(day=25, month=11, year=2019)#
+        dtend_default = datetime.datetime.now() #+ datetime.timedelta(days=1) #datetime.datetime(day=25, month=11, year=2019)#
         dtend = datetime.datetime.strptime(fecha_hasta,'%d/%m/%Y') if fecha_hasta else dtend_default
         if fecha_desde:
             dtstart = datetime.datetime.strptime(fecha_desde,'%d/%m/%Y')
