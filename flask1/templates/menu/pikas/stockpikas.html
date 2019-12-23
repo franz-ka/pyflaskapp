@@ -19,7 +19,7 @@
 		{% set pika_id = pika_data.Pika.id %}
 		{% set prestock = pika_data.PrestockPika.cantidad %}
 		{% set stock = pika_data.StockPika.cantidad %}
-		{% set pedidos = pika_data.pedidos %}
+		{% set pedidos = pika_data.pedidos or 0 %}
 		{% set stock_total = prestock + stock - pedidos %}
 		
 		{% if pika_id in pikascolores %}
