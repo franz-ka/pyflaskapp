@@ -29,24 +29,22 @@ def exportar_ventas():
 
     ex = CsvExporter('ventas.csv')
     ex.writeHeaders('Id,Fecha,Fecha pedido,Tipo,Comentario,Pika,Cantidad')
+    last_venta_id = 0
     for vp in ventas:
-        v = vp.venta
-        vals = [
-            v.id,
-            v.fecha,
-            v.fecha_pedido or '',
-            v.ventatipo.nombre,
-            v.comentario,
-            '',
-            ''
-        ]
-        if len(v.ventapikas):
-            for vpi in v.ventapikas:
-                vals[5] = vpi.pika.nombre
-                vals[6] = vpi.cantidad
-                ex.writeVals(vals)
-        else:
-            ex.writeVals(vals)
+        if last_venta_id != vp.venta_id:
+            v = vp.venta
+            vals = [
+                v.id,
+                v.fecha,
+                v.fecha_pedido or '',
+                v.ventatipo.nombre,
+                v.comentario,
+                '',
+                ''
+            ]
+        vals[5] = vp.pika.nombre
+        vals[6] = vp.cantidad
+        ex.writeVals(vals)
             
     return ex.send()
 
