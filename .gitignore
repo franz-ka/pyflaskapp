@@ -5,7 +5,8 @@
 
 #flask
 **/logs
-**/instance
+**/instance/*
+!instance/config.example.py
 *.zip
 
 #pycharm
