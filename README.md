@@ -1,5 +1,3 @@
-**! ! EN PRODUCCIÓN ! !**
-
 # pyflaskapp
 
 Para el primer uso: 
@@ -12,23 +10,21 @@ Para el primer uso:
 
 Posteriormente solo hace falta hacer `flask run` para hostear o `python3 run.py`
 
-Archivos principales:
-* `routes.py` : Mapeo de urls a funciones y lógicas de get/post
-* `models.py` : Clases de la base de datos
-* `templates/__maingui.html` : Esqueleto html
-* `templates/_menu.html` : Menu html
-* `templates/menu/*.html` : Pantallas html
-* `templates/_form.html` : Macros html de forms
-
-Otros archivos:
-* `__init__.py` : Creador de aplicación Flask
-* `utils/modelcreator.py` : Crea las clases para models.py
-* `utils/menuitemcreator.py` : Utilidad para crear nuevos items en el menú
-* `db.py` : Definición de comandos db (como init-db)
-* `login.py` : Modelos y lógica de login
-* `csvexport.py` : Clase usada para exportar a .csv
-* `instance/flask1.db` : Base de datos sqlite3
-
-Unas screens:
-![alt text](https://i.ibb.co/M2LJ83d/11.png)
-![alt text](https://i.ibb.co/qWxDMsM/22.png)
+## Estructura de carpetas
+* `run.py` : Punto de entrada de la aplicación
+* `flask1/` : Contiene la aplicación principal
+  * `__init__.py` : Definición de contructor de la aplicación
+  * `models.py` : Clases de la BBDD en SQL Alchemy
+  * `routes.py` : Rutas generales de la aplicación (no de los menús)
+  * `static/` : Archivos estáticos (o sea no procesador por el intérprete de python) como css, js e imágenes
+  * `templates/` : HTMLs de la aplicación
+    * `__base.html` y `_maingui.html` : HTMLs esqueleto
+    * `_menu.html` : Ítems del menú principal (sidebar)
+    * `_form.html` : Definición de funciones utilitarias para el armado de HTMLs
+  * `views/` : Acá están las rutas de los menús y sus lógicas de BBDD
+* `instance/` : Tiene archivos que no se suben al repositorio, como la BBDD y la configuración
+* `logs/` : Logs del sistema, tampoco se suben al repositorio
+* `utils/` : Contiene scripts utilitarios para el desarrollo
+  * `modelcreator.py` : Sirve para crear modelos para SQL Alchemy a partir de arrays
+  * `menuitemcreator.py` : Sirve para crear nuevas pantallas. Se usa pasándole 2 parámetros: el primero es bajo qué menú irá el nuevo ítem (pikas, insumos, etc.) y el segundo es el nombre del archivo que tendrá la nueva pantalla.
+  * `db/test_script.py` : Sirve para testear funciones de SQL Alchemy sin necesidad de correr levantar site
