@@ -29,7 +29,7 @@ Para usos posteriores solo hace falta activar el virtual env y hacer `flask run`
   * `db/test_script.py` : Sirve para testear funciones de SQL Alchemy sin necesidad de correr levantar site
 
 ## Templateo de HTML con Jinja2
-Los template HTML utilizan la libería Jinja2. Las expresiones de Jinja2 están entre `{{ ... }}` o `{% ... %}`. Dentro de estos símbolos se puede usar un código similar a Python.
+Los template HTML utilizan la libería Jinja2. Las expresiones de Jinja2 están entre `{{ ... }}` o `{% ... %}`. Dentro de estos símbolos se puede usar un código similar a Python. Para leer datos de la aplicación principal mirar el apartado de [Manejo de requests](#manejo-de-requests).
 
 Algunos usos básicos de Jinja2 son:
 
@@ -73,3 +73,35 @@ Para eliminar un registro puede usar cualquiera de las querys anteriores pero en
 También puede llamar `.delete()` directamente sobre un objeto de la BBDD
 
 Recuerde que si hace alguna modificacion de algún campo de algún registro, o agrega/elimina uno entero, debe hacer `db.commit()` para efectuar los cambios.
+
+## Manejo de requests
+
+Las requests se reciben en las rutas definidas en `views/`.
+
+Cada ruta corresponde a una función, y tiene un decorador del tipo:   
+`@bp_<menú>.route(<url de ruta>, <métodos aceptados>)`
+
+Por ejemplo:   
+`@bp_fallas.route("/listadofallas", methods=['GET', 'POST'])`.
+
+La `<url de ruta>` va a ser relativo al menú donde se encuentra dicha ruta. Si estamos en el menú `pikas`, y definimos la url de ruta como `/agregarpika`, la ruta final será `<url del site>/pikas/agregarpika`.
+
+Los `<métodos aceptados>` es un array que puede contener `'GET'`, `'POST'`, o los dos.
+
+Toda la información de una request será accesible desde dentro de la función de la ruta mediante la variable `request`.
+
+Si estamos en un POST, la data del formulario se accede mediante `request.form['<nombre de campo>']`.
+
+Si estamos en un GET, mediante `request.args['<nombre de campo>']`.
+
+Tanto `request.form` como `request.args` se pueden recorrer con un `for`.
+
+Para responder a una request utilizamos `return` y generalmente devolvemos rendereando un template HTML haciendo:
+```
+return make_response(render_template(
+  '<path a html>',
+   <variable 1>: <valor 1>,
+   <variable N>: <valor 1>,
+))
+```
+Donde la variables serán pasadas al template y podrán ser leídas por Jinja2.
