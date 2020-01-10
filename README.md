@@ -1,13 +1,13 @@
 ## Corriendo el sistema
 Para el primer uso: 
-1. en la raiz creamos un virtual env `python3 -m venv /venv`
-2. activamos el venv `source venv/bin/activate`
-3. instalamos dependencias `pip install -r requirements.txt`
-4. setteamos la variable `export FLASK_APP=flask1`
+1. En la raíz del proyecto creamos un virtual env `python3 -m venv /venv`
+2. Activamos el venv `source venv/bin/activate`
+3. Instalamos dependencias `pip install -r requirements.txt`
+4. Setteamos la variable `export FLASK_APP=flask1`
 5. `flask run` para hostear la app en http://127.0.0.1:5000
-6. `flask init-db` para inicializar y cargar la db
+6. `flask init-db` para inicializar y cargar la BBDD (si es que no tienen ya una BBDD)
 
-Para usos posteriores solo hace falta activar el virtual env y hacer `flask run` para hostear o directamente `python3 run.py`
+Para usos posteriores solo hace falta activar el virtual env y hacer `flask run` para hostear, o directamente `python3 run.py`.
 
 ## Estructura de carpetas
 * `run.py` : Punto de entrada de la aplicación
