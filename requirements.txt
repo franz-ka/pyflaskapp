@@ -55,7 +55,7 @@ pyliblzma==0.5.3
 pyparsing==2.4.5
 pyScss==1.3.5
 pytz==2019.3
-pyxdg==0.25
+pyxdg==0.26
 requests==2.22.0
 requests-oauthlib==1.2.0
 requests-toolbelt==0.7.0
