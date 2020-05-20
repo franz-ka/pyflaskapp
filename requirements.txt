@@ -20,7 +20,7 @@ Flask-Login==0.4.1
 fuzzyfinder==2.1.0
 google-auth==1.6.3
 html5lib==0.999999999
-httplib2==0.13.1
+httplib2==0.18.0
 idna==2.8
 imageio==2.1.2
 imagesize==1.1.0
