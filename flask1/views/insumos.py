@@ -173,7 +173,7 @@ def menu_rolloplaabierto():
                 stockrollo.fecha = mov.fecha
 
         db.commit()
-        
+
         if not current_app.config['DEBUG_FLASK']:
             check_alarmas()
 
@@ -330,7 +330,7 @@ def menu_listadoeditable():
         db = get_db()
         insumos = db.query(Insumo).order_by(Insumo.nombre).all()
         tipoinsus = db.query(InsumoTipo).all()
-        
+
         r = make_response(render_template(
             'menu/insumos/listadoeditable.html',
             insumos=insumos,
@@ -344,7 +344,7 @@ def menu_listadoeditable():
         except Exception as e: return str(e), 400
 
         db = get_db()
-        
+
         insumo = db.query(Insumo).get(request.form['insu_id'])
         operation = request.form['operation']
         if operation == 'cambiar_tipo':
@@ -355,7 +355,63 @@ def menu_listadoeditable():
             insumo.nombre = nombre
         else:
             return 'Operación inválida', 400
-        
+
         db.commit()
 
         return ''
+
+@bp_insumos.route("/movimientosstock", methods=['GET', 'POST'])
+@login_required
+def menu_movimientosstock():
+    if request.method == "GET":
+        db = get_db()
+
+        limit = 300
+        insus = db.query(Insumo).order_by(Insumo.nombre).all()
+        if len(request.args) and request.args['insumo']:
+            insuid = int(request.args['insumo'])
+            insu = db.query(Insumo).get(insuid)
+            movstocks = db.query(MovStockInsumo) \
+                .filter(MovStockInsumo.insumo_id==insuid) \
+                .order_by(MovStockInsumo.fecha.desc()) \
+                .limit(limit).all()
+        else:
+            insu = None
+            movstocks = db.query(MovStockInsumo) \
+                .order_by(MovStockInsumo.fecha.desc()) \
+                .limit(limit).all()
+
+        r = make_response(render_template(
+            'menu/insumos/movimientosstock.html',
+            insus=insus,
+            insu=insu,
+            movstocks=movstocks,
+            truncated=len(movstocks)==limit
+        ))
+        return r
+    else:  # request.method == "POST":
+        print('post form:', request.form)
+
+        try:
+            checkparams(request.form, ('PARAM1', 'PARAMN'))
+        except Exception as e:
+            return str(e), 400
+
+        return redirect(url_for('main.menu_stockinsumos'))
+
+@bp_insumos.route("/exportar/movimientosstock.csv", methods=['GET'])
+@login_required
+def exportar_movimientosstock():
+    db = get_db()
+
+    if len(request.args) and request.args['insumo']:
+        insuid = int(request.args['insumo'])
+        movstocks = db.query(MovStockInsumo).join(Insumo).filter(MovStockInsumo.insumo_id==insuid).order_by(MovStockInsumo.fecha.desc()).all()
+    else:
+        movstocks = db.query(MovStockInsumo).join(Insumo).order_by(MovStockInsumo.fecha.desc()).all()
+
+    ex = CsvExporter('stockinsumos.csv')
+    ex.writeHeaders('Id,Nombre,Cantidad,Actualizado')
+    for m in movstocks:
+        ex.writeVals([m.insumo_id, m.insumo.nombre, m.cantidad, m.fecha])
+    return ex.send()

@@ -1,0 +1,50 @@
+{% extends '_maingui.html' %}
+
+{% block content %}
+{% call forms.card('Movimientos stock', method='GET')  %}
+<!-- Insumo -->
+<div class="form-group row">
+    {{ forms.input_select(8, "insumo", "Elija un insumo", required=1) }}
+    <div class="col-sm-4">
+        <button type="submit" class="btn btn-primary btn-block">Filtrar</button>
+    </div>
+</div>
+<a class="btn btn-primary btn-block" href="{{url_for('insumos.exportar_movimientosstock',insumo=insu.id)}}">Exportar a CSV</a>
+{% if insu %}
+<div class="alert alert-info fade show">
+    <p class="mb-0">(La lista está filtrada por "{{insu.nombre}}". Para eliminar filtro, filtrar con todos los campos vacíos)</p>
+</div>
+{% endif %}
+<table class="table table-sm table-striped table-hover">
+  <thead>
+    <tr>
+      <th>Insumo</th>
+      <th>Cantidad</th>
+      <th>Actualizado</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for sinsu in movstocks %}
+        <tr>
+            <td>{{sinsu.insumo.nombre}}</td>
+            <td>{{sinsu.cantidad}}</td>
+            <td scope="row">{{sinsu.fecha.strftime("%d/%m/%Y %H:%M")}}</td>
+        </tr>
+    {% endfor %}
+    {% if truncated %}
+      <tr style="text-align:center">
+        <td colspan="3"><strong>Mostrando solo los primeros 300 resultados</strong></td>
+      </tr>
+    {% endif %}
+</table>
+{% endcall %}
+{% endblock %}
+
+{% block js %}
+<script type="text/javascript">
+$(function() {
+  insusdata = {{ forms.dataToJsArr(insus) }};
+  sel2('.select2-single[name=insumo]', 'Insumo', insusdata);
+});
+</script>
+{% endblock %}
