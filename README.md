@@ -1,11 +1,12 @@
 ## Corriendo el sistema
-Para el primer uso: 
+Para el primer uso:
 1. En la raíz del proyecto creamos un virtual env `python3 -m venv /venv`
 2. Activamos el venv `source venv/bin/activate`
 3. Instalamos dependencias `pip install -r requirements.txt`
-4. Setteamos la variable `export FLASK_APP=flask1`
-5. `flask run` para hostear la app en http://127.0.0.1:5000
-6. `flask init-db` para inicializar y cargar la BBDD (si es que no tienen ya una BBDD)
+4. Copiamos `instance/config.example.py` como `instance/config.py` y editamos a nuestro antojo.
+5. Setteamos la variable `export FLASK_APP=flask1`
+6. `flask run` para hostear la app en http://127.0.0.1:5000. Si lo anterior no funciona probar con `python3 run.py`
+7. `flask init-db` para inicializar y cargar la BBDD (si es que no tienen ya una BBDD)
 
 Para usos posteriores solo hace falta activar el virtual env y hacer `flask run` para hostear, o directamente `python3 run.py`.
 
@@ -48,7 +49,7 @@ Algunos usos básicos de Jinja2 son:
 * `{% call forms.otra_funcion(<parámetros>) %} ... {% endcall %}` alternativa a comando anterior; en este caso el HTML que se encuentre entre los bloques `call`/`endcall` se le pasara al la función llamada, y esta podrá usar ese HTML llamando a `caller()`
 
 ## Acceso a la BBDD con SQL Alchemy
-Para acceder a la BBDD se utiliza la librería SQL Alchemy. Los modelos, como ya mencionamos, están en el archivo `models.py`. La sesión de conexión a la BBDD se invoca de `db.py`. 
+Para acceder a la BBDD se utiliza la librería SQL Alchemy. Los modelos, como ya mencionamos, están en el archivo `models.py`. La sesión de conexión a la BBDD se invoca de `db.py`.
 
 Algunos usos básicos SQL Alchemy son los siguiente:
 
