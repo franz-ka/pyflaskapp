@@ -19,15 +19,23 @@
   <thead>
     <tr>
       <th>Insumo</th>
-      <th>Cantidad</th>
+      <th>Diferencial</th>
+      <th>Stock</th>
       <th>Causa</th>
-      <th>Actualizado</th>
+      <th>Fecha</th>
     </tr>
   </thead>
   <tbody>
     {% for sinsu in movstocks %}
         <tr>
             <td>{{sinsu.insumo.nombre}}</td>
+            {% if not sinsu.diferencial %}
+              <td></td>
+            {% elif sinsu.diferencial > 0 %}
+              <td>+{{sinsu.diferencial}}</td>
+            {% else %}
+              <td>{{sinsu.diferencial}}</td>
+            {% endif %}
             <td>{{sinsu.cantidad}}</td>
             <td>{{sinsu.causa}}</td>
             <td scope="row">{{sinsu.fecha.strftime("%d/%m/%Y %H:%M")}}</td>

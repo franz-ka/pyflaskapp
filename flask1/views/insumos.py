@@ -360,13 +360,22 @@ def menu_movimientosstock():
             insu = db.query(Insumo).get(insuid)
             movstocks = db.query(MovStockInsumo) \
                 .filter(MovStockInsumo.insumo_id==insuid) \
-                .order_by(MovStockInsumo.fecha.desc()) \
+                .order_by(MovStockInsumo.fecha.asc()) \
                 .limit(limit).all()
         else:
             insu = None
             movstocks = db.query(MovStockInsumo) \
-                .order_by(MovStockInsumo.fecha.desc()) \
+                .order_by(MovStockInsumo.fecha.asc()) \
                 .limit(limit).all()
+
+        diferenciales = {}
+        for mov in movstocks:
+            if not mov.insumo_id in diferenciales:
+                mov.diferencial = ''
+            else:
+                mov.diferencial = mov.cantidad - diferenciales[mov.insumo_id]
+            diferenciales[mov.insumo_id] = mov.cantidad
+        movstocks.reverse()
 
         r = make_response(render_template(
             'menu/insumos/movimientosstock.html',
@@ -393,12 +402,21 @@ def exportar_movimientosstock():
 
     if len(request.args) and request.args['insumo']:
         insuid = int(request.args['insumo'])
-        movstocks = db.query(MovStockInsumo).join(Insumo).filter(MovStockInsumo.insumo_id==insuid).order_by(MovStockInsumo.fecha.desc()).all()
+        movstocks = db.query(MovStockInsumo).join(Insumo).filter(MovStockInsumo.insumo_id==insuid).order_by(MovStockInsumo.fecha.asc()).all()
     else:
-        movstocks = db.query(MovStockInsumo).join(Insumo).order_by(MovStockInsumo.fecha.desc()).all()
+        movstocks = db.query(MovStockInsumo).join(Insumo).order_by(MovStockInsumo.fecha.asc()).all()
+
+    diferenciales = {}
+    for mov in movstocks:
+        if not mov.insumo_id in diferenciales:
+            mov.diferencial = ''
+        else:
+            mov.diferencial = mov.cantidad - diferenciales[mov.insumo_id]
+        diferenciales[mov.insumo_id] = mov.cantidad
+    movstocks.reverse()
 
     ex = CsvExporter('stockinsumos.csv')
-    ex.writeHeaders('Id,Nombre,Cantidad,Actualizado')
+    ex.writeHeaders('Id,Nombre,Diferencial,Stock,Causa,Fecha')
     for m in movstocks:
-        ex.writeVals([m.insumo_id, m.insumo.nombre, m.cantidad, m.fecha])
+        ex.writeVals([m.insumo_id, m.insumo.nombre, m.diferencial, m.cantidad, m.causa, m.fecha])
     return ex.send()
