@@ -33,10 +33,7 @@ def menu_ingresarinsumo():
                 stockinsu = db.query(StockInsumo).get(insuid)
 
                 #sumamos stock de insumo
-                mov = MovStockInsumo(insumo=insu, cantidad=insucant, fecha=dtnow)
-                db.add(mov)
-                stockinsu.cantidad += insucant
-                stockinsu.fecha = dtnow
+                inc_stock_insumo(insu, stockinsu, insucant, dtnow, INSU_STOCK_CAUSA.INGRESO)
 
         db.commit()
 
@@ -167,10 +164,7 @@ def menu_rolloplaabierto():
                     return 'No hay suficiente stock del rollo "{}" (hay {}, requiere {})'.format(rollo.nombre, stockrollo.cantidad, rollocant), 400
 
                 #restamos stock de rollo
-                mov = MovStockInsumo(insumo=rollo, cantidad=-rollocant, fecha=dtnow)
-                db.add(mov)
-                stockrollo.cantidad -= rollocant
-                stockrollo.fecha = mov.fecha
+                inc_stock_insumo(rollo, stockrollo, -rollocant, dtnow, INSU_STOCK_CAUSA.ABIERTO)
 
         db.commit()
 
@@ -257,16 +251,12 @@ def menu_modificarstockinsu():
         db = get_db()
 
         insu = db.query(Insumo).get(request.form['insumo'])
+        stockinsu = db.query(StockInsumo).get(request.form['insumo'])
         insucant = int(request.form['cantidadnueva'])
         dtnow = datetime.datetime.now()
 
-        # modificamos stock de pika
-        mov = MovStockInsumo(insumo=insu, cantidad=insucant, fecha=dtnow)
-        db.add(mov)
-
-        stockinsu = db.query(StockInsumo).get(request.form['insumo'])
-        stockinsu.cantidad = insucant
-        stockinsu.fecha = mov.fecha
+        # modificamos stock de insumo
+        set_stock_insumo(insu, stockinsu, insucant, dtnow, INSU_STOCK_CAUSA.MANUAL)
 
         db.commit()
 
@@ -311,10 +301,7 @@ def menu_insumoabierto():
                     return 'No hay suficiente stock del insumo consumible "{}" (hay {}, requiere {})'.format(insucons.nombre, stockinsucons.cantidad, insuconscant), 400
 
                 #restamos stock de insumo consumible
-                mov = MovStockInsumo(insumo=insucons, cantidad=-insuconscant, fecha=dtnow)
-                db.add(mov)
-                stockinsucons.cantidad -= insuconscant
-                stockinsucons.fecha = mov.fecha
+                inc_stock_insumo(insucons, stockinsucons, -insuconscant, dtnow, INSU_STOCK_CAUSA.ABIERTO)
 
         db.commit()
 

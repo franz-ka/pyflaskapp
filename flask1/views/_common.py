@@ -13,6 +13,7 @@ from flask1.csvexport import CsvExporter
 from flask1.alarmas import check_alarma, check_alarmas
 
 from .pikas_logics import *
+from .insumos_logics import *
 from .ventas_logics import *
 
 def checkparams(form, musthave):
