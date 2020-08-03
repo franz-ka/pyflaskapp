@@ -20,6 +20,7 @@
     <tr>
       <th>Insumo</th>
       <th>Cantidad</th>
+      <th>Causa</th>
       <th>Actualizado</th>
     </tr>
   </thead>
@@ -28,6 +29,7 @@
         <tr>
             <td>{{sinsu.insumo.nombre}}</td>
             <td>{{sinsu.cantidad}}</td>
+            <td>{{sinsu.causa}}</td>
             <td scope="row">{{sinsu.fecha.strftime("%d/%m/%Y %H:%M")}}</td>
         </tr>
     {% endfor %}

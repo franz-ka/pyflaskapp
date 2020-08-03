@@ -72,14 +72,14 @@ class Insumo(Base):
     insumotipo_id = Column(Integer, ForeignKey('insumotipo.id'))
     insumotipo = relationship('InsumoTipo')
     nombre = Column(String(64), nullable=False)
-    
+
     def __repr__(self): return '<Insumo {} "{}">'.format(self.id, self.nombre)
 
 class InsumoTipo(Base):
     __tablename__ = 'insumotipo'
     id = Column(Integer, primary_key=True, autoincrement=True)
     nombre = Column(String(64), nullable=False)
-    
+
     def __repr__(self): return '<InsumoTipo {} "{}">'.format(self.id, self.nombre)
 
 class PikaInsumo(Base):
@@ -91,7 +91,7 @@ class PikaInsumo(Base):
     cantidad = Column(Integer, nullable=False)
 
     def __repr__(self): return '<PikaInsumo {}>'.format(self.pika_id)
-    
+
 class PrestockPika(Base):
     __tablename__ = 'prestockpika'
     pika_id = Column(Integer, ForeignKey('pika.id'), primary_key=True)
@@ -126,7 +126,7 @@ class MovPrestockPika(Base):
     cantidad = Column(Integer, nullable=False)
     fecha = Column(DateTime)
     causa = Column(String(64), nullable=False)
-    
+
     def __repr__(self): return '<MovPrestockPika {} (pika={}, fecha={})>'.format(self.id, self.pika_id, self.fecha)
 
 class MovStockPika(Base):
@@ -147,6 +147,7 @@ class MovStockInsumo(Base):
     insumo = relationship('Insumo')
     cantidad = Column(Integer, nullable=False)
     fecha = Column(DateTime)
+    causa = Column(String(64), nullable=False)
 
     def __repr__(self): return '<MovStockInsumo {}>'.format(self.id)
 
