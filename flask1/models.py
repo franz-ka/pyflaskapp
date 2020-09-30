@@ -72,6 +72,9 @@ class Insumo(Base):
     insumotipo_id = Column(Integer, ForeignKey('insumotipo.id'))
     insumotipo = relationship('InsumoTipo')
     nombre = Column(String(64), nullable=False)
+    delay_reposicion = Column(Float, nullable=False)
+    margen_seguridad = Column(Float, nullable=False)
+    ciclo_reposicion = Column(Float, nullable=False)
 
     def __repr__(self): return '<Insumo {} "{}">'.format(self.id, self.nombre)
 
@@ -149,7 +152,7 @@ class MovStockInsumo(Base):
     fecha = Column(DateTime)
     causa = Column(String(64), nullable=False)
 
-    def __repr__(self): return '<MovStockInsumo {}>'.format(self.id)
+    def __repr__(self): return '<MovStockInsumo {} (insumo={}, fecha={}, cantidad={})>'.format(self.id, self.insumo_id, self.fecha, self.cantidad)
 
 class VentaTipo(Base):
     __tablename__ = 'ventatipo'

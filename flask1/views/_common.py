@@ -4,7 +4,7 @@ from flask_login import login_required, login_user, logout_user
 from sqlalchemy import or_, not_, and_, func
 import datetime
 from pprint import pprint
-import itertools
+import itertools, collections
 
 from flask1.db import get_db
 from flask1.login import User, loginUserPass, logoutUser

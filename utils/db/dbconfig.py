@@ -17,7 +17,7 @@ def init_db_engine():
     from sqlalchemy import create_engine
     __dbconnstr = 'sqlite:///' + str(app_path / 'instance' / 'flask1.db')
     print('Usando conn str =', __dbconnstr)
-    return create_engine(__dbconnstr, echo=True)
+    return create_engine(__dbconnstr, echo=False)
 
 def get_db_session(create_new=False):
     from sqlalchemy.orm import sessionmaker, scoped_session

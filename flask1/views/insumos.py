@@ -420,3 +420,111 @@ def exportar_movimientosstock():
     for m in movstocks:
         ex.writeVals([m.insumo_id, m.insumo.nombre, m.diferencial, m.cantidad, m.causa, m.fecha])
     return ex.send()
+
+
+@bp_insumos.route("/stockextendidoinsumos", methods=['GET', 'POST'])
+@login_required
+def menu_stockextendidoinsumos():
+    if request.method == "GET":
+
+        db = get_db()
+
+        rango_tiempo_semanas = 3
+        dtnow = datetime.datetime.now()
+        dtcomienzo = dtnow - datetime.timedelta(days=rango_tiempo_semanas*7)
+        print(f'El parámetro de rango de semanas es {rango_tiempo_semanas}. Tomando como fecha de inicio {dtcomienzo}')
+
+        # Traemos movimientos históricos de stock de insumos
+        movstocks = db.query(MovStockInsumo) \
+            .filter(MovStockInsumo.fecha >= dtcomienzo) \
+            .order_by(MovStockInsumo.insumo_id, MovStockInsumo.fecha.asc()) \
+            .all()
+        print(f'Encontrados {len(movstocks)} movimientos de stock')
+
+        InsumoValores = collections.namedtuple('InsumoValores', 'consumo_total, stock_actual')
+        insumos_valores = {}
+
+        # Agrupamos movimientos por insumo
+        # itertools.groupby() in Python - https://www.geeksforgeeks.org/itertools-groupby-in-python/
+        key_func = lambda i: i.insumo_id
+        for insumo_id, insumo_movstocks in itertools.groupby(movstocks, key_func):
+
+            # Viene como enumerador así que lo convertimos a lista
+            insumo_movstocks = list(insumo_movstocks)
+            primer_stock = insumo_movstocks[0]
+            print(f'Analizando {len(insumo_movstocks)} movimientos de stock de insumo {insumo_id}')
+
+            # Traemos el movimiento justo anterior al primer movimiento de nuestra lista
+            # (si existe)
+            pre_primer_stock = db.query(MovStockInsumo) \
+                .filter(MovStockInsumo.insumo_id == insumo_id, MovStockInsumo.fecha < primer_stock.fecha) \
+                .order_by(MovStockInsumo.fecha.desc()) \
+                .first()
+
+            # Si existe usarlo para calcular el primer (posible) consumo. Si no existe
+            # el primer bucle del for va a estar de más pero no genera problemas.
+            if pre_primer_stock:
+                stock_inicial = pre_primer_stock.cantidad
+            else:
+                stock_inicial = primer_stock.cantidad
+
+            consumo_total = 0
+            last_stock = stock_inicial
+            for movstock in insumo_movstocks:
+                # Si el stock actual es menor al stock anterior, hubo consumo
+                if movstock.cantidad < last_stock:
+                    consumo_total += last_stock - movstock.cantidad
+                last_stock = movstock.cantidad
+
+            # Guardamos valores
+            insumos_valores[insumo_id] = InsumoValores(consumo_total=consumo_total, stock_actual=last_stock)
+
+        print(f'Valores de insumos:')
+        # Cargamos valores como campos "naturales" de insumos
+        insumos = db.query(Insumo).filter(Insumo.id.in_(insumos_valores.keys())).all()
+        for insumo in insumos:
+            insumo_valores = insumos_valores[insumo.id]
+            insumo.consumo_total = insumo_valores.consumo_total
+            insumo.stock_actual = insumo_valores.stock_actual
+            print(f'- {insumo.nombre}: consumo={insumo.consumo_total}, stock={insumo.stock_actual}')
+
+        r = make_response(render_template(
+            'menu/insumos/stockextendidoinsumos.html',
+            insumos=insumos,
+            rango_tiempo_semanas=rango_tiempo_semanas
+        ))
+        return r
+    else:  # request.method == "POST":
+        print('post form:', request.form)
+
+        try:
+            checkparams(request.form, ('PARAM1', 'PARAMN'))
+        except Exception as e:
+            return str(e), 400
+
+        return redirect(url_for('main.menu_stockextendidoinsumos'))
+
+@bp_insumos.route("/stockextendidoinsumos-guardar", methods=['POST'])
+@login_required
+def stockextendidoinsumos_guardar():
+    print('post form:',request.form)
+
+    try: checkparams(request.form, ('insumo_id', 'delay', 'margen', 'ciclo'))
+    except Exception as e: return str(e), 400
+
+    db = get_db()
+
+    insumo = db.query(Insumo).get(request.form['insumo_id'])
+    try: delay = int(request.form['delay'] or 0)
+    except ValueError as e: return 'Número de delay de reposición inválido', 400
+    try: margen = int(request.form['margen'] or 0)
+    except ValueError as e: return 'Número de margen de seguridad inválido', 400
+    try: ciclo = int(request.form['ciclo'] or 0)
+    except ValueError as e: return 'Número de ciclo de reposición inválido', 400
+    insumo.delay_reposicion = delay
+    insumo.margen_seguridad = margen
+    insumo.ciclo_reposicion = ciclo
+
+    db.commit()
+
+    return f'{{"delay":"{delay}", "margen":"{margen}", "ciclo":"{ciclo}"}}'

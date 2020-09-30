@@ -1,0 +1,161 @@
+{% extends '_maingui.html' %}
+
+{% block styles %}
+<style>
+
+input[type="text"]{
+  border: 1px solid #4c9bff;
+  padding: 1px 3px;
+  line-height: 0
+}
+
+button{
+  padding: 0;
+  background-color: transparent;
+  border: 1px solid #666;
+  width: 25px;
+  height: 25px;
+  border-radius: 20px;
+}
+.edit_img, .save_img{
+  width: 14px;
+  top: -2px;
+  position: relative;
+}
+
+</style>
+{% endblock %}
+
+{% block content %}
+{% call forms.card('Stock de insumos extendido')  %}
+<div class="alert alert-info fade show">
+    <p class="mb-0">El rango de tiempo es: las últimas {{rango_tiempo_semanas}} semanas</p>
+</div>
+<table class="table table-sm table-striped table-hover">
+  <thead>
+    <tr>
+      <th>Insumo</th>
+      <th>Consumo</th>
+      <th>Delay de reposición</th>
+      <th>Stock</th>
+      <th>Stock relativo</th>
+      <th>Margen de seguridad</th>
+      <th>Stock real relativo</th>
+      <th>Estado</th>
+      <th>Ciclo de reposición</th>
+      <th>Stock objetivo</th>
+      <th>Reposición</th>
+      <th> </th>
+      <th> </th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for insumo in insumos %}
+      {% set consumo_ritmo = insumo.consumo_total / rango_tiempo_semanas %}
+      {% set stock_relativo = insumo.stock_actual / consumo_ritmo %}
+      {% set stock_real_relativo = stock_relativo - insumo.delay_reposicion %}
+      {% set stock_objetivo = (insumo.ciclo_reposicion + insumo.margen_seguridad + insumo.delay_reposicion) * consumo_ritmo  %}
+      {% set reposicion = stock_objetivo - insumo.stock_actual %}
+      {% if stock_real_relativo <= 0 %}
+        {% set estado = "Crítico" %}
+        {% set css_clase = "table-danger" %}
+      {% elif stock_real_relativo > insumo.margen_seguridad %}
+        {% set estado = "Abastecido" %}
+        {% set css_clase = "" %}
+      {% else %}
+        {% set estado = "Reabastecer" %}
+        {% set css_clase = "table-warning" %}
+      {% endif %}
+      <tr id="row_insumo_{{insumo.id}}" class="{{css_clase}}">
+          <td>{{insumo.nombre}}</td>
+          <td>{{"%0.2f" | format(consumo_ritmo)}}</td>
+          <td class="col_delay">{{"%0.0f" | format(insumo.delay_reposicion)}}</td>
+          <td>{{insumo.stock_actual}}</td>
+          <td>{{"%0.2f" | format(stock_relativo)}}</td>
+          <td class="col_margen">{{"%0.0f" | format(insumo.margen_seguridad)}}</td>
+          <td>{{"%0.2f" | format(stock_real_relativo)}}</td>
+          <td>{{estado}}</td>
+          <td class="col_ciclo">{{"%0.0f" | format(insumo.ciclo_reposicion)}}</td>
+          <td>{{"%0.2f" | format(stock_objetivo)}}</td>
+          <td>{{"%0.2f" | format(reposicion)}}</td>
+          <td></td>
+          <td class="col_edit"><button type="button" class="btn_edit" data-insumo-id="{{insumo.id}}">E</button></td>
+      </tr>
+    {% endfor %}
+</table>
+<a class="btn btn-primary btn-block" href="{{url_for('insumos.exportar_stockinsumos')}}">Exportar a CSV</a>
+{% endcall %}
+{% endblock %}
+
+{% block js %}
+<script type="text/javascript">
+
+$(function() {
+  $('.btn_edit').html(editImg).click(editar_row)
+});
+
+var editing = false;
+
+function editar_row(){
+  if (editing){
+    alert('Solo se puede editar de a una fila por vez')
+    return
+  }
+
+  var btn_edit = $(this)
+  var insumo_id = btn_edit.data('insumo-id')
+  var row = $('#row_insumo_' + insumo_id)
+  console.log('Editando insumo ' + insumo_id)
+  editing = true
+
+  function col_edit(value_name, size){
+    var col = row.find('.col_' + value_name)
+    var val = col.html()
+    col.html('')
+    $('<input/>', {
+      type: 'text',
+      name: value_name,
+      value: val,
+      size: size
+    }).appendTo(col)
+  }
+  col_edit('delay', 3)
+  col_edit('margen', 3)
+  col_edit('ciclo', 3)
+
+  btn_edit.off('click').html(saveImg).click(guardar_row)
+}
+
+function guardar_row(){
+  var btn_edit = $(this)
+  var insumo_id = btn_edit.data('insumo-id')
+  var row = $('#row_insumo_' + insumo_id)
+  console.log('Guardando insumo ' + insumo_id)
+
+  $.post("stockextendidoinsumos-guardar", {
+    insumo_id: insumo_id,
+    delay: row.find('.col_' + 'delay').find('input').val(),
+    margen: row.find('.col_' + 'margen').find('input').val(),
+    ciclo: row.find('.col_' + 'ciclo').find('input').val()
+  }, null, 'json').done(function(data) {
+    function col_save(value_name, val){
+      var col = row.find('.col_' + value_name)
+      col.html(val)
+    }
+    col_save('delay', data.delay)
+    col_save('margen', data.margen)
+    col_save('ciclo', data.ciclo)
+
+    btn_edit.off('click').html(editImg).click(editar_row)
+    editing = false
+
+    location.reload();
+  }).fail(function(res) {
+    alert("Ha surgido un error:\n" + (res && res.responseText));
+  });
+}
+
+var editImg = '<img class="edit_img" src="data:image/svg+xml;base64,PHN2ZyBpZD0iQ2FwYV8xIiBlbmFibGUtYmFja2dyb3VuZD0ibmV3IDAgMCA1MTIgNTEyIiBoZWlnaHQ9IjUxMiIgdmlld0JveD0iMCAwIDUxMiA1MTIiIHdpZHRoPSI1MTIiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGc+PHBhdGggZD0ibTEyOC4yODUgMjYwLjkyNWgzMTkuMDczdjc1aC0zMTkuMDczeiIgdHJhbnNmb3JtPSJtYXRyaXgoLjcwNyAtLjcwNyAuNzA3IC43MDcgLTEyNi43MTcgMjkwLjkyOSkiLz48cGF0aCBkPSJtMjkuMDIxIDQyMi41MjEtMjkuMDIxIDg5LjQ3OSA4OS40ODEtMjkuMDJ6Ii8+PHBhdGggZD0ibTU0LjAzOSAxODYuNjc5aDMxOS4wNzN2NzVoLTMxOS4wNzN6IiB0cmFuc2Zvcm09Im1hdHJpeCguNzA3IC0uNzA3IC43MDcgLjcwNyAtOTUuOTY0IDIxNi42ODIpIi8+PHBhdGggZD0ibTM3MS41NDEgNS40Nmg5MHYxODBoLTkweiIgdHJhbnNmb3JtPSJtYXRyaXgoLjcwNyAtLjcwNyAuNzA3IC43MDcgNTQuNTAyIDMyMi40OTgpIi8+PHBhdGggZD0ibTU3LjE0OCAzMzUuNzk2LTE3LjczNyA1NC42ODkgODIuMTA2IDgyLjEwNSA1NC42ODktMTcuNzM3eiIvPjwvZz48L3N2Zz4=" />'
+var saveImg = '<img class="save_img" src="data:image/svg+xml;base64,PHN2ZyBpZD0iQ2FwYV8xIiBlbmFibGUtYmFja2dyb3VuZD0ibmV3IDAgMCA1MTIuMDA3IDUxMi4wMDciIGhlaWdodD0iNTEyIiB2aWV3Qm94PSIwIDAgNTEyLjAwNyA1MTIuMDA3IiB3aWR0aD0iNTEyIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxnPjxwYXRoIGQ9Im0xNDIgMTQzLjAwM2gxMzl2LTE0M2MtNDkuMzc5IDAtMTA3LjY3NCAwLTE1NCAwdjEyOGMwIDguMjcxIDYuNzI5IDE1IDE1IDE1eiIvPjxwYXRoIGQ9Im0zNDUgMTI4LjAwM3YtMTI4Yy05Ljk3IDAtMjEuNDYxIDAtMzQgMHYxNDNoMTljOC4yNzEgMCAxNS02LjcyOSAxNS0xNXoiLz48cGF0aCBkPSJtMTI3IDUxMi4wMDNoMjE4di0xNjFoLTIxOHoiLz48cGF0aCBkPSJtNTExLjkyNyAxMjYuNTM3Yy0uMjc5LTIuODI4LTEuMzgtNS42NjctMy4zMTUtOC4wMjctLjc0Ny0uOTEzIDYuODkzIDYuNzg2LTExNC4wMDYtMTE0LjExMy0yLjg4Mi0yLjg4Mi02Ljc5NC00LjM5Ni0xMC42MTItNC4zOTQtLjc4OSAwLTMuOTI1IDAtOC45OTUgMHYxMjhjMCAyNC44MTMtMjAuMTg3IDQ1LTQ1IDQ1LTE0LjAyOCAwLTE4Ni4wNjQgMC0xODggMC0yNC44MTMgMC00NS0yMC4xODctNDUtNDV2LTEyOGMtMjkuNTg5IDAtNDkuODIgMC01MiAwLTI0LjgxMyAwLTQ1IDIwLjE4Ny00NSA0NXY0MjJjMCAyNC44MTMgMjAuMTg3IDQ1IDQ1IDQ1aDUyYzAtMTAuODE1IDAtMjAxLjc5NyAwLTIxMCAwLTI0LjgxMyAyMC4xODctNDUgNDUtNDVoMTg4YzI0LjgxMyAwIDQ1IDIwLjE4NyA0NSA0NXYyMTBoOTJjMjQuODEzIDAgNDUtMjAuMTg3IDQ1LTQ1IC4wMDEtMzY0LjE4Ni4wNDEtMzM5LjMxNi0uMDcyLTM0MC40NjZ6Ii8+PHBhdGggZD0ibTMzMCAyODcuMDAzaC0xODhjLTguMjcxIDAtMTUgNi43MjktMTUgMTV2MTloMjE4di0xOWMwLTguMjcxLTYuNzI5LTE1LTE1LTE1eiIvPjwvZz48L3N2Zz4=" />'
+</script>
+{% endblock %}
