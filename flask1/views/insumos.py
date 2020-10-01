@@ -429,7 +429,7 @@ def menu_stockextendidoinsumos():
 
         db = get_db()
 
-        rango_tiempo_semanas = 3
+        rango_tiempo_semanas = int(request.args['rango']) if 'rango' in request.args else 10
         dtnow = datetime.datetime.now()
         dtcomienzo = dtnow - datetime.timedelta(days=rango_tiempo_semanas*7)
         print(f'El parámetro de rango de semanas es {rango_tiempo_semanas}. Tomando como fecha de inicio {dtcomienzo}')

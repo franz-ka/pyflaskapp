@@ -20,14 +20,14 @@ CREATE TABLE insumo (
     id INTEGER NOT NULL,
     insumotipo_id INTEGER,
     nombre VARCHAR(64) NOT NULL,
-    delay_reposicion FLOAT NOT NULL,
-    margen_seguridad FLOAT NOT NULL,
-    ciclo_reposicion FLOAT NOT NULL,
+    delay_reposicion FLOAT,
+    margen_seguridad FLOAT,
+    ciclo_reposicion FLOAT,
     PRIMARY KEY (id),
     FOREIGN KEY(insumotipo_id) REFERENCES "_insumo_old" (id)
 );
 
-INSERT INTO insumo SELECT id,insumotipo_id,nombre,1,1,4 FROM _insumo_old;
+INSERT INTO insumo SELECT id,insumotipo_id,nombre,null,null,null FROM _insumo_old;
 
 DROP TABLE IF EXISTS _insumo_old;
 

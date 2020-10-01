@@ -72,9 +72,9 @@ class Insumo(Base):
     insumotipo_id = Column(Integer, ForeignKey('insumotipo.id'))
     insumotipo = relationship('InsumoTipo')
     nombre = Column(String(64), nullable=False)
-    delay_reposicion = Column(Float, nullable=False)
-    margen_seguridad = Column(Float, nullable=False)
-    ciclo_reposicion = Column(Float, nullable=False)
+    delay_reposicion = Column(Float)
+    margen_seguridad = Column(Float)
+    ciclo_reposicion = Column(Float)
 
     def __repr__(self): return '<Insumo {} "{}">'.format(self.id, self.nombre)
 
