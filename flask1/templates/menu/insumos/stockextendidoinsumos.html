@@ -9,15 +9,16 @@ input[type="text"]{
   line-height: 0
 }
 
-.btn_edit{
+.btn_edit, .btn_reponer{
   padding: 0;
   background-color: transparent;
   border: 1px solid #666;
   width: 25px;
   height: 25px;
   border-radius: 20px;
+  cursor:pointer;
 }
-.edit_img, .save_img{
+.edit_img, .save_img, .reponer_img{
   width: 14px;
   top: -2px;
   position: relative;
@@ -54,6 +55,7 @@ input[type="text"]{
       <th>Reposición</th>
       <th> </th>
       <th> </th>
+      <th> </th>
     </tr>
   </thead>
   <tbody>
@@ -68,7 +70,10 @@ input[type="text"]{
         {% set stock_real_relativo = stock_relativo - insumo.delay_reposicion %}
         {% set stock_objetivo = (insumo.ciclo_reposicion + insumo.margen_seguridad + insumo.delay_reposicion) * consumo_ritmo  %}
         {% set reposicion = stock_objetivo - insumo.stock_actual %}
-        {% if stock_real_relativo <= 0 %}
+        {% if insumo.fecha_ultima_reposicion %}
+          {% set estado = "" %}
+          {% set css_clase = "table-dark" %}
+        {% elif stock_real_relativo <= 0 %}
           {% set estado = "Crítico" %}
           {% set css_clase = "table-danger" %}
         {% elif stock_real_relativo > insumo.margen_seguridad %}
@@ -98,7 +103,12 @@ input[type="text"]{
           <td>{{"%0.0f" | format(stock_objetivo) if stock_objetivo != None else ''}}</td>
           <td>{{"%0.0f" | format(reposicion) if reposicion != None else ''}}</td>
           <td></td>
-          <td class="col_edit"><button type="button" class="btn_edit" data-insumo-id="{{insumo.id}}">E</button></td>
+          <td class="col_edit">
+            <button type="button" class="btn_edit" data-insumo-id="{{insumo.id}}"></button>
+          </td>
+          <td class="col_reponer">
+            <button type="button" class="btn_reponer" data-insumo-id="{{insumo.id}}" data-fecha-reposicion="{{insumo.fecha_ultima_reposicion or ''}}"></button>
+          </td>
       </tr>
     {% endfor %}
 </table>
@@ -111,6 +121,7 @@ input[type="text"]{
 
 $(function() {
   $('.btn_edit').html(editImg).click(editar_row)
+  $('.btn_reponer').html(tickImg).click(reponer_row)
 });
 
 var editing = false;
@@ -179,7 +190,28 @@ function guardar_row(){
   });
 }
 
+function reponer_row(){
+  var btn_reponer = $(this)
+  var insumo_id = btn_reponer.data('insumo-id')
+  var fecha_reposicion = btn_reponer.data('fecha-reposicion')
+  var row = $('#row_insumo_' + insumo_id)
+  console.log('Reponiendo insumo ' + insumo_id)
+
+  var data = {
+    insumo_id: insumo_id,
+    marcar: fecha_reposicion ? 0 : 1
+  }
+
+  if (data.marcar || confirm('¿Está segurx que desea desmarcar este insumo?'))
+    $.post("stockextendidoinsumos-reponer", data, null, 'json').done(function(data) {
+      location.reload();
+    }).fail(function(res) {
+      alert("Ha surgido un error:\n" + (res && res.responseText));
+    });
+}
+
 var editImg = '<img class="edit_img" src="data:image/svg+xml;base64,PHN2ZyBpZD0iQ2FwYV8xIiBlbmFibGUtYmFja2dyb3VuZD0ibmV3IDAgMCA1MTIgNTEyIiBoZWlnaHQ9IjUxMiIgdmlld0JveD0iMCAwIDUxMiA1MTIiIHdpZHRoPSI1MTIiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGc+PHBhdGggZD0ibTEyOC4yODUgMjYwLjkyNWgzMTkuMDczdjc1aC0zMTkuMDczeiIgdHJhbnNmb3JtPSJtYXRyaXgoLjcwNyAtLjcwNyAuNzA3IC43MDcgLTEyNi43MTcgMjkwLjkyOSkiLz48cGF0aCBkPSJtMjkuMDIxIDQyMi41MjEtMjkuMDIxIDg5LjQ3OSA4OS40ODEtMjkuMDJ6Ii8+PHBhdGggZD0ibTU0LjAzOSAxODYuNjc5aDMxOS4wNzN2NzVoLTMxOS4wNzN6IiB0cmFuc2Zvcm09Im1hdHJpeCguNzA3IC0uNzA3IC43MDcgLjcwNyAtOTUuOTY0IDIxNi42ODIpIi8+PHBhdGggZD0ibTM3MS41NDEgNS40Nmg5MHYxODBoLTkweiIgdHJhbnNmb3JtPSJtYXRyaXgoLjcwNyAtLjcwNyAuNzA3IC43MDcgNTQuNTAyIDMyMi40OTgpIi8+PHBhdGggZD0ibTU3LjE0OCAzMzUuNzk2LTE3LjczNyA1NC42ODkgODIuMTA2IDgyLjEwNSA1NC42ODktMTcuNzM3eiIvPjwvZz48L3N2Zz4=" />'
 var saveImg = '<img class="save_img" src="data:image/svg+xml;base64,PHN2ZyBpZD0iQ2FwYV8xIiBlbmFibGUtYmFja2dyb3VuZD0ibmV3IDAgMCA1MTIuMDA3IDUxMi4wMDciIGhlaWdodD0iNTEyIiB2aWV3Qm94PSIwIDAgNTEyLjAwNyA1MTIuMDA3IiB3aWR0aD0iNTEyIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxnPjxwYXRoIGQ9Im0xNDIgMTQzLjAwM2gxMzl2LTE0M2MtNDkuMzc5IDAtMTA3LjY3NCAwLTE1NCAwdjEyOGMwIDguMjcxIDYuNzI5IDE1IDE1IDE1eiIvPjxwYXRoIGQ9Im0zNDUgMTI4LjAwM3YtMTI4Yy05Ljk3IDAtMjEuNDYxIDAtMzQgMHYxNDNoMTljOC4yNzEgMCAxNS02LjcyOSAxNS0xNXoiLz48cGF0aCBkPSJtMTI3IDUxMi4wMDNoMjE4di0xNjFoLTIxOHoiLz48cGF0aCBkPSJtNTExLjkyNyAxMjYuNTM3Yy0uMjc5LTIuODI4LTEuMzgtNS42NjctMy4zMTUtOC4wMjctLjc0Ny0uOTEzIDYuODkzIDYuNzg2LTExNC4wMDYtMTE0LjExMy0yLjg4Mi0yLjg4Mi02Ljc5NC00LjM5Ni0xMC42MTItNC4zOTQtLjc4OSAwLTMuOTI1IDAtOC45OTUgMHYxMjhjMCAyNC44MTMtMjAuMTg3IDQ1LTQ1IDQ1LTE0LjAyOCAwLTE4Ni4wNjQgMC0xODggMC0yNC44MTMgMC00NS0yMC4xODctNDUtNDV2LTEyOGMtMjkuNTg5IDAtNDkuODIgMC01MiAwLTI0LjgxMyAwLTQ1IDIwLjE4Ny00NSA0NXY0MjJjMCAyNC44MTMgMjAuMTg3IDQ1IDQ1IDQ1aDUyYzAtMTAuODE1IDAtMjAxLjc5NyAwLTIxMCAwLTI0LjgxMyAyMC4xODctNDUgNDUtNDVoMTg4YzI0LjgxMyAwIDQ1IDIwLjE4NyA0NSA0NXYyMTBoOTJjMjQuODEzIDAgNDUtMjAuMTg3IDQ1LTQ1IC4wMDEtMzY0LjE4Ni4wNDEtMzM5LjMxNi0uMDcyLTM0MC40NjZ6Ii8+PHBhdGggZD0ibTMzMCAyODcuMDAzaC0xODhjLTguMjcxIDAtMTUgNi43MjktMTUgMTV2MTloMjE4di0xOWMwLTguMjcxLTYuNzI5LTE1LTE1LTE1eiIvPjwvZz48L3N2Zz4=" />'
+var tickImg = '<img class="reponer_img" src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiA/PjxzdmcgZGF0YS1uYW1lPSJMYXllciAxIiBpZD0iTGF5ZXJfMSIgdmlld0JveD0iMCAwIDY0IDY0IiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjx0aXRsZS8+PHBhdGggZD0iTTIxLjMzLDU3LjgyLDAsMzYuNTNsNS44Ny01Ljg3TDIxLjMzLDQ2LjA5LDU4LjEzLDkuMzYsNjQsMTUuMjMsMjEuMzMsNTcuODIiIGRhdGEtbmFtZT0iJmx0O0NvbXBvdW5kIFBhdGgmZ3Q7IiBpZD0iX0NvbXBvdW5kX1BhdGhfIi8+PC9zdmc+" />'
 </script>
 {% endblock %}

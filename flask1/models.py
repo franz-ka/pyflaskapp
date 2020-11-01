@@ -22,7 +22,8 @@ def validate_string(value):
     return value
 
 def validate_datetime(value):
-    assert isinstance(value, datetime.datetime)
+    if value is not None:
+        assert isinstance(value, datetime.datetime)
     return value
 
 validators = {
@@ -75,6 +76,7 @@ class Insumo(Base):
     delay_reposicion = Column(Float)
     margen_seguridad = Column(Float)
     ciclo_reposicion = Column(Float)
+    fecha_ultima_reposicion = Column(DateTime)
 
     def __repr__(self): return '<Insumo {} "{}">'.format(self.id, self.nombre)
 

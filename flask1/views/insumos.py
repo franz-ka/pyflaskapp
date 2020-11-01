@@ -491,9 +491,12 @@ def menu_stockextendidoinsumos():
             insumo.stock_actual = insumo_valores.stock_actual
             print(f'- {insumo.nombre}: consumo={insumo.consumo_total}, stock={insumo.stock_actual}')
 
+        insumos_no_repuestos = [insumo for insumo in insumos if insumo.fecha_ultima_reposicion is None]
+        insumos_repuestos = [insumo for insumo in insumos if insumo.fecha_ultima_reposicion is not None]
+
         r = make_response(render_template(
             'menu/insumos/stockextendidoinsumos.html',
-            insumos=insumos,
+            insumos=insumos_no_repuestos+insumos_repuestos,
             rango_tiempo_semanas=rango_tiempo_semanas
         ))
         return r
@@ -538,3 +541,26 @@ def stockextendidoinsumos_guardar():
     db.commit()
 
     return f'{{"delay":"{delay}", "margen":"{margen}", "ciclo":"{ciclo}"}}'
+
+@bp_insumos.route("/stockextendidoinsumos-reponer", methods=['POST'])
+@login_required
+def stockextendidoinsumos_reponer():
+    print('post form:',request.form)
+
+    try: checkparams(request.form, ('insumo_id','marcar'))
+    except Exception as e: return str(e), 400
+
+    db = get_db()
+
+    marcar = int(request.form['marcar'])
+    insumo = db.query(Insumo).get(request.form['insumo_id'])
+    if marcar:
+        dtnow = datetime.datetime.now()
+        insumo.fecha_ultima_reposicion = dtnow
+    else:
+        insumo.fecha_ultima_reposicion = None
+
+
+    db.commit()
+
+    return f'{{"msg":"ok"}}'
