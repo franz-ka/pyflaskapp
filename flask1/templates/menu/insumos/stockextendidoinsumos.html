@@ -35,6 +35,9 @@ input[type="text"]{
   <div class="col-sm-3">
       <button type="submit" class="btn btn-primary btn-block">Configurar</button>
   </div>
+  <div class="offset-sm-1 col-sm-3">
+      <button type="button" class="btn btn-success btn-block btn-modo" onclick="toggleColumns()">Modo: completo</button>
+  </div>
 </div>
 <div class="alert alert-info fade show">
     <p class="mb-0">(Nota: el valor de semanas se configurará a nivel global)</p>
@@ -53,7 +56,6 @@ input[type="text"]{
       <th>Ciclo de reposición</th>
       <th>Stock objetivo</th>
       <th>Reposición</th>
-      <th> </th>
       <th> </th>
       <th> </th>
     </tr>
@@ -102,7 +104,6 @@ input[type="text"]{
           <td class="col_ciclo">{{"%0.0f" | format(insumo.ciclo_reposicion) if insumo.ciclo_reposicion != None else ''}}</td>
           <td>{{"%0.0f" | format(stock_objetivo) if stock_objetivo != None else ''}}</td>
           <td>{{"%0.0f" | format(reposicion) if reposicion != None else ''}}</td>
-          <td></td>
           <td class="col_edit">
             <button type="button" class="btn_edit" data-insumo-id="{{insumo.id}}"></button>
           </td>
@@ -119,7 +120,22 @@ input[type="text"]{
 {% block js %}
 <script type="text/javascript">
 
+var hide_indexes = [1, 2, 3, 4, 5, 6, 8, 9, 11]
+function toggleColumns(){
+  $('th').filter(function(i, e){ return hide_indexes.includes(i) }).toggle()
+  $('tr').each(function(){
+    $(this).children('td').filter(function(i, e){ return hide_indexes.includes(i) }).toggle()
+  })
+
+  var btnModo = $('.btn-modo')
+  if (btnModo.text().indexOf('completo') != -1)
+    btnModo.html('Modo: estándar')
+  else
+    btnModo.html('Modo: completo')
+}
+
 $(function() {
+  toggleColumns()
   $('.btn_edit').html(editImg).click(editar_row)
   $('.btn_reponer').html(tickImg).click(reponer_row)
 });
