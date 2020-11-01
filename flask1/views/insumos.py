@@ -429,7 +429,10 @@ def menu_stockextendidoinsumos():
 
         db = get_db()
 
-        rango_tiempo_semanas = int(request.args['rango']) if 'rango' in request.args else 10
+        try:
+            rango_tiempo_semanas = int(db.query(Valor).filter(Valor.nombre=='insumos_stock_extendido_semanas').one().valor)
+        except:
+            rango_tiempo_semanas = 10
         dtnow = datetime.datetime.now()
         dtcomienzo = dtnow - datetime.timedelta(days=rango_tiempo_semanas*7)
         print(f'El parámetro de rango de semanas es {rango_tiempo_semanas}. Tomando como fecha de inicio {dtcomienzo}')
@@ -498,11 +501,18 @@ def menu_stockextendidoinsumos():
         print('post form:', request.form)
 
         try:
-            checkparams(request.form, ('PARAM1', 'PARAMN'))
+            checkparams(request.form, ('rango_tiempo',))
         except Exception as e:
             return str(e), 400
 
-        return redirect(url_for('main.menu_stockextendidoinsumos'))
+        db = get_db()
+
+        valor = db.query(Valor).filter(Valor.nombre=='insumos_stock_extendido_semanas').one()
+        valor.valor = request.form['rango_tiempo']
+
+        db.commit()
+
+        return redirect(url_for('insumos.menu_stockextendidoinsumos'))
 
 @bp_insumos.route("/stockextendidoinsumos-guardar", methods=['POST'])
 @login_required

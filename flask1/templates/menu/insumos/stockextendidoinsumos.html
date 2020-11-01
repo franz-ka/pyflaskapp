@@ -9,7 +9,7 @@ input[type="text"]{
   line-height: 0
 }
 
-button{
+.btn_edit{
   padding: 0;
   background-color: transparent;
   border: 1px solid #666;
@@ -28,8 +28,15 @@ button{
 
 {% block content %}
 {% call forms.card('Stock de insumos extendido')  %}
+<div class="form-group row">
+  {{ forms.input_msg(2, 'Semanas:') }}
+  {{ forms.input_number(3, "rango_tiempo", min=1, required=1, value=rango_tiempo_semanas) }}
+  <div class="col-sm-3">
+      <button type="submit" class="btn btn-primary btn-block">Configurar</button>
+  </div>
+</div>
 <div class="alert alert-info fade show">
-    <p class="mb-0">El rango de tiempo es: las últimas {{rango_tiempo_semanas}} semanas</p>
+    <p class="mb-0">(Nota: el valor de semanas se configurará a nivel global)</p>
 </div>
 <table class="table table-sm table-striped table-hover">
   <thead>
