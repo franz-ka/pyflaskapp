@@ -35,6 +35,9 @@ def menu_ingresarinsumo():
                 #sumamos stock de insumo
                 inc_stock_insumo(insu, stockinsu, insucant, dtnow, INSU_STOCK_CAUSA.INGRESO)
 
+                #descamarcamos tick de reposicion (del stock extendido)
+                insu.fecha_ultima_reposicion = None
+
         db.commit()
 
         return ''
