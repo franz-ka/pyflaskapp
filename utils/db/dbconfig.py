@@ -11,7 +11,8 @@ from models import Base, \
     VentaTipo, Venta, VentaPika, \
     StockPikaColor, StockInsumoColor, \
     Maquina, Gcode, Falla, Alarma, \
-    FactorProductividad, PedidoUrgente
+    FactorProductividad, PedidoUrgente, \
+    Valor
 
 def init_db_engine():
     from sqlalchemy import create_engine

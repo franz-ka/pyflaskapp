@@ -251,3 +251,11 @@ class PedidoUrgente(Base):
     venta_id = Column(Integer, ForeignKey('venta.id'), primary_key=True)
     venta = relationship('Venta')
     def __repr__(self): return '<PedidoUrgente {}>'.format(self.venta_id)
+
+class Valor(Base):
+    __tablename__ = 'valor'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    nombre = Column(String(128), nullable=False)
+    valor = Column(String(256))
+
+    def __repr__(self): return '<Valor {} {}={}>'.format(self.id, self.nombre, self.valor)
