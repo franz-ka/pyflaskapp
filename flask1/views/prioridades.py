@@ -121,7 +121,6 @@ def menu_prioridadimpresion():
             def upd_stock(self):
                 self.stockreal = float(self.prestock + self.stock - self.pedidos)
 
-
             def __repr__(self):
                 return f'(#{self.id}) {self.nombre}, prestk={self.prestock}, stk={self.stock}, ped={self.pedidos}, stkR={self.stockreal}, facVen={self.factorventa:.3}'
 
@@ -131,7 +130,6 @@ def menu_prioridadimpresion():
             .join(FactorProductividad) \
             .order_by(Pika.nombre).all()
 
-        #print(pikasdata)
         # cargamos pikas prestocks, stocks y factor prod
         for pika, prestock, stock, factor_prod in pikasdata:
             if modo_noche and pika.nombre.lower().startswith('xl '):
@@ -148,11 +146,13 @@ def menu_prioridadimpresion():
             p.css_class = pika.nombre.replace(' ', '')
             p.img = 'img/pikas-prioridades/' + pika.nombre.replace(' ', '') + '.png'
             pikas[pika.id] = p
+        #pprint(pikas)
 
         urgentes = get_urgentes()
 
         if urgentes:
             urgentes_ids = [p.venta_id for p in urgentes]
+            print('urgentes_ids', urgentes_ids)
 
             # todos los pedidos urgentes, y datos de pikas
             ventapedidos_urgentes = db.query(
@@ -163,6 +163,7 @@ def menu_prioridadimpresion():
                 ).filter(Venta.id.in_(urgentes_ids)
                 ).group_by(VentaPika.pika_id
                 ).all()
+            print('ventapedidos_urgentes', ventapedidos_urgentes)
 
             # cargamos
             for pika_id, pedidos_totales in ventapedidos_urgentes:
@@ -186,6 +187,7 @@ def menu_prioridadimpresion():
 
             # sus ids
             ventapedidos_mayoristas_ids = [v.id for v in ventapedidos_mayoristas_slice]
+            print('ventapedidos_mayoristas_ids', ventapedidos_mayoristas_ids)
 
             # sus datos de pikas
             ventapedidos_mayorista = db.query(
@@ -195,6 +197,7 @@ def menu_prioridadimpresion():
                 ).filter(Venta.id.in_(ventapedidos_mayoristas_ids)
                 ).group_by(VentaPika.pika_id
                 ).all()
+            print('ventapedidos_mayorista', ventapedidos_mayorista)
 
             # cargamos
             for pika_id, pedidos_totales in ventapedidos_mayorista:
@@ -210,6 +213,7 @@ def menu_prioridadimpresion():
                 ).filter(Venta.ventatipo==ventatipo_tiendaonl
                 ).group_by(VentaPika.pika_id
                 ).all()
+            print('ventapedidos_tiendaonl', ventapedidos_tiendaonl)
 
             # cargamos
             for pika_id, pedidos_totales in ventapedidos_tiendaonl:
@@ -228,8 +232,8 @@ def menu_prioridadimpresion():
         ).filter(Venta.fecha >= dtventas
         ).group_by(VentaPika.pika_id
         ).all()
-        #print(ventasdiarias)
-        pikaventasdiarias = {}
+        print('ventasdiarias', ventasdiarias)
+
         for pika_id, ventas_diarias in ventasdiarias:
             if pika_id in pikas:
                 p = pikas[pika_id]
@@ -239,7 +243,6 @@ def menu_prioridadimpresion():
                     p.factorventa = float(ventas_diarias)
                 if p.factorventa == 0:
                     p.factorventa = 0.0001
-        #print(pikaventasdiarias)
 
         # imprimimos data
         print('=== Pikas Data:')
