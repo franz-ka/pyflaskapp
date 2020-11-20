@@ -78,11 +78,11 @@
 <div class="col-lg-12 mb-3">
     <div class="card card-body bg-light">
 		<h3 class="card-header">
-			<span>Prioridades de impresión</span>	
+			<span>Prioridades de impresión</span>
 			<div class="form-check">
 			    <input type="checkbox" class="form-check-input" id="modoCheck" onchange="modoCheckChange(event)">
 			    <label class="form-check-label" for="modoCheck">Modo noche</label>
-		  	</div>	
+		  	</div>
 		</h3>
 		{% if urgentes_ventapikas %}
 		<div class="alert alert-info fade show">
@@ -139,11 +139,11 @@
 $(function() {
     if (location.search.indexOf('modo_noche=si') != -1)
 		$('#modoCheck').attr('checked', true)
-		
+
 	$('.pre-card-inner').on('click', function(){
 		$(this).toggleClass('ticked')
 	})
-	
+
 	$('.btnToggleUrgentes').click(function(){
 		var inner=$(this).html()
 		if (inner == '-'){
@@ -153,7 +153,7 @@ $(function() {
 			$('.pedidos-urgentes').show()
 			$(this).html('-')
 		}
-	})
+	}).click()
 });
 
 function modoCheckChange(e){
