@@ -90,6 +90,7 @@ def menu_factoresdeimpresion():
 def menu_prioridadimpresion():
     if request.method == "GET":
         modo_noche = 'modo_noche' in request.args and request.args['modo_noche'] == 'si'
+        pantalla_completa = 'pantalla_completa' in request.args and request.args['pantalla_completa'] == 'si'
 
         db = get_db()
 
@@ -250,7 +251,7 @@ def menu_prioridadimpresion():
 
         # stock real / factor de venta
         prioridades = []
-        cant_prioris_tot = 14
+        cant_prioris_tot = 18 if pantalla_completa else 16
         cant_prioris = cant_prioris_tot
         while cant_prioris:
             print(f'-------------Iteración #{cant_prioris_tot-cant_prioris+1}')
@@ -295,7 +296,8 @@ def menu_prioridadimpresion():
             'menu/prioridades/prioridadimpresion.html',
             pikas=pikas,
             prioridades=prioridades,
-            urgentes_ventapikas=urgentes_ventapikas
+            urgentes_ventapikas=urgentes_ventapikas,
+            pantalla_completa=pantalla_completa
         ))
         return r
     else: #request.method == "POST":
