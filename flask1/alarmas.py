@@ -26,12 +26,12 @@ def _get_db_app_or_out():
 def check_alarma(insu):
     assert type(insu) == Insumo
     db = _get_db_app_or_out()
-    
+
     alarma = db.query(Alarma).filter(Alarma.insumo == insu).first()
-    
+
     if alarma:
         stock = db.query(StockInsumo).filter(StockInsumo.insumo == insu).first()
-        
+
         q = db.query(func.sum(VentaPika.cantidad*PikaInsumo.cantidad).label('cant_insu_pedidos')) \
             .join(Venta) \
             .filter(Venta.fecha_pedido != None, Venta.fecha == None) \
@@ -39,24 +39,29 @@ def check_alarma(insu):
             .filter(PikaInsumo.insumo_id == insu.id) \
             .group_by(PikaInsumo.insumo_id) \
             .all()
-            
+
         if len(q):
             pedidos_cant = q[0].cant_insu_pedidos
         else:
             pedidos_cant = 0
-        
-        mando_mail = check_insumo_stock(alarma, stock, pedidos_cant)  
+
+        mando_mail = check_insumo_stock(alarma, stock, pedidos_cant)
         if mando_mail:
             print('check_alarma mail', insu)
             alarma.fecha_avisado = datetime.now()
             db.commit()
-        
+
 
 def check_alarmas():
+    ################## TODO ERROR MAIL
+    print('ALARMAS DESACTIVADAS')
+    return
+    ##################
+
     db = _get_db_app_or_out()
 
     alarmas_stocks = db.query(Alarma, StockInsumo).filter(StockInsumo.insumo_id == Alarma.insumo_id).all()
-    
+
     for alarma, stock in alarmas_stocks:
         q = db.query(func.sum(VentaPika.cantidad*PikaInsumo.cantidad).label('cant_insu_pedidos')) \
             .join(Venta) \
@@ -65,18 +70,18 @@ def check_alarmas():
             .filter(PikaInsumo.insumo_id == stock.insumo_id) \
             .group_by(PikaInsumo.insumo_id) \
             .all()
-            
+
         if len(q):
             pedidos_cant = q[0].cant_insu_pedidos
         else:
             pedidos_cant = 0
-            
-        mando_mail = check_insumo_stock(alarma, stock, pedidos_cant)        
+
+        mando_mail = check_insumo_stock(alarma, stock, pedidos_cant)
         if mando_mail:
             print('check_alarmas mail', stock.insumo)
             alarma.fecha_avisado = datetime.now()
             db.commit()
-         
+
 
 def check_insumo_stock(alarma, stock, pedidos_cant):
     if stock.cantidad - pedidos_cant <= alarma.cantidad and (not alarma.fecha_avisado or days_between(alarma.fecha_avisado, datetime.now()) >= _alarma_dias_intervalo):
