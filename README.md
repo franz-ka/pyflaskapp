@@ -10,6 +10,9 @@ Para el primer uso:
 
 Para usos posteriores solo hace falta activar el virtual env y hacer `flask run` para hostear, o directamente `python3 run.py`.
 
+Oneliner de desarrollo directo: `FLASK_APP=flask1 && ./venv/bin/python3 run.py`
+(Si tirar error de timezone agregar variable `TZ="America/Chicago"`)
+
 ## Estructura de carpetas
 * `run.py` : Punto de entrada de la aplicación
 * `flask1/` : Contiene la aplicación principal
