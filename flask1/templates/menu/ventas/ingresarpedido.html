@@ -7,11 +7,11 @@
 	height: 30px;
 }
 .listado_pedidos td .btn-secondary:hover{
-	background-color: white;	
+	background-color: white;
 	color: black;
 }
 .listado_pedidos td .btn-danger:hover{
-	background-color: white;	
+	background-color: white;
 	color: #dc3545;
 }
 </style>
@@ -115,14 +115,14 @@ $(function() {
     $('.btnVender').click(function(){
 		if (!confirm('¿Está seguro que desea vender este pedido?'))
 			return;
-			
+
 		var table = $(this).parents('table');
 		var parent_row = $(this).parents('tr')
 		var venta_id = parent_row.children('.venta_id').val();
-		console.log(venta_id)	
+		console.log(venta_id)
         var ventaspikas = table.find('.venta_id[value='+venta_id+']')
 		var ventaspikas_rows = ventaspikas.parents('tr');
-		
+
 		lockForm(table)
         $.ajax({
              type: "POST",
@@ -130,7 +130,7 @@ $(function() {
              data: { venta_id: venta_id },
              success: function(r){
                 unlockForm(table);
-				console.log(ventaspikas, table.find('.venta_id[value='+venta_id+']'), table.find('.venta_id'))	
+				console.log(ventaspikas, table.find('.venta_id[value='+venta_id+']'), table.find('.venta_id'))
 
 				ventaspikas_rows.addClass('table-success')
 				ventaspikas_rows.fadeOut(500, function() {
@@ -149,24 +149,25 @@ $(function() {
     $('.btnUrgencia').click(function(){
 		var $this = $(this)
 		var isurgent = $this.hasClass('btn-danger')
-		
-		if (isurgent){
+
+		// Saltar validación de urgencia porque lo usan mucho
+		/*if (isurgent){
 			if (!confirm('¿Está segurx que desea sacarle la urgencia a este pedido?'))
 				return;
 		}else{
 			if (!confirm('¿Está segurx que desea marcar este pedido como urgente?'))
 				return;
-		}
-			
+		}*/
+
 		var table = $this.parents('table');
 		var parent_row = $this.parents('tr')
-		
+
 		var venta_id = parent_row.children('.venta_id').val();
-		console.log(venta_id, isurgent)	
-		
+		console.log(venta_id, isurgent)
+
         var ventaspikas = table.find('.venta_id[value='+venta_id+']')
 		var ventaspikas_rows = ventaspikas.parents('tr');
-		
+
 		lockForm(table)
         $.ajax({
              type: "POST",
@@ -174,7 +175,7 @@ $(function() {
              data: { venta_id: venta_id },
              success: function(r){
                 unlockForm(table);
-				
+
 				if (isurgent){
 					$this.removeClass('btn-danger')
 					$this.addClass('btn-secondary')
