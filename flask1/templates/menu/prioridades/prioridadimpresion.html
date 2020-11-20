@@ -70,6 +70,16 @@
 }
 
 .bold{font-weight: bold}
+
+.refresh-btn {
+  width: 42px;
+  float: right;
+  margin-left: 15px;
+  margin-top: -10px;
+  cursor: pointer;
+  position: relative;
+  top: 6px;
+}
 </style>
 {% endblock %}
 
@@ -79,6 +89,7 @@
     <div class="card card-body bg-light">
 		<h3 class="card-header">
 			<span>Prioridades de impresión</span>
+      <img onclick="refreshClick()" class="refresh-btn" src="{{ url_for('static', filename='img/refresh-icon.png') }}" />
 			<div class="form-check">
 		    <input type="checkbox" class="form-check-input" id="modoCheck" onchange="modoCheckChange(event)">
 		    <label class="form-check-label" for="modoCheck">Modo noche</label>
@@ -89,7 +100,7 @@
       </div>
 		</h3>
 		{% if urgentes_ventapikas %}
-		<div class="alert alert-info fade show">
+		<div class="alert alert-info fade show urgentes-alert">
 			<p class="mb-2">
 				Hay pedidos urgentes. Las prioridades se basan en los siguiente pedidos:
 				<button type="button" class="btnToggleUrgentes btn btn-secondary">-</button>
@@ -176,6 +187,12 @@ $(function() {
 		}
 	}).click()
 });
+
+function refreshClick(){
+  if ($('.ticked').length > 0 && !confirm('Se van a perder todos los pikas marcados como hechos/en gris'))
+    return
+  location.reload()
+}
 
 function modoCheckChange(e){
 	var chkd = $(e. target).is(':checked');
