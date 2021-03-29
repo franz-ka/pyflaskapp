@@ -141,7 +141,7 @@ def menu_prioridadimpresion():
             print(f'Dump csv creado en {CSV_DUMP_FILE}')
             csv_writer = csv.writer(csv_file)
             csv_writer.writerow(['Valores iniciales de pikas:'])
-            csv_writer.writerow('Pika,Venta diaria,Prestock,Stock,Factor prod,Pedidos,Factor venta'.split(','))
+            csv_writer.writerow('Pika,Venta diaria manual,Prestock,Stock,Factor prod,Pedidos,Factor venta'.split(','))
         for pika, prestock, stock, factor_prod in pikasdata:
             if modo_noche and pika.nombre.lower().startswith('xl '):
                 continue
@@ -184,15 +184,15 @@ def menu_prioridadimpresion():
             print('ventapedidos_urgentes', ventapedidos_urgentes)
 
             # cargamos
-            if exportar_csv:
-                csv_writer.writerow('Pika,Pedidos'.split(','))
+            #if exportar_csv:
+            #    csv_writer.writerow('Pika,Pedidos'.split(','))
             for pika_id, pedidos_totales in ventapedidos_urgentes:
                 if pika_id in pikas:
                     pikas[pika_id].pedidos += pedidos_totales
-                    if exportar_csv:
-                        csv_writer.writerow([pikas[pika_id].nombre, pedidos_totales])
-            if exportar_csv:
-                csv_writer.writerow([])
+                    #if exportar_csv:
+                    #    csv_writer.writerow([pikas[pika_id].nombre, pedidos_totales])
+            #if exportar_csv:
+            #    csv_writer.writerow([])
         else:
             # si no hay urgentes, usar mayoristas y tienda online
             # Cargamos pedidos de ventas (afecto stock real)
@@ -305,10 +305,13 @@ def menu_prioridadimpresion():
 
         if exportar_csv:
             csv_writer.writerow([])
-            csv_writer.writerow(['Valores finales de pikas:'])
-            csv_writer.writerow('Pika,Venta diaria,Prestock,Stock,Factor prod,Pedidos,Factor venta'.split(','))
+            csv_writer.writerow(['Fórmula de stock real:', 'prestock + stock - pedidos'])
+            csv_writer.writerow(['Nuevos valores calculados de pikas:'])
+            #csv_writer.writerow('Pika,Venta diaria,Prestock,Stock,Factor prod,Pedidos,Factor venta'.split(','))
+            csv_writer.writerow('Pika,Pedidos,Factor venta,Stock real'.split(','))
             for p in pikas.values():
-                csv_writer.writerow([p.nombre,p.venta_diaria_manual,p.prestock,p.stock,p.factorprod,p.pedidos,p.factorventa])
+                #csv_writer.writerow([p.nombre,p.venta_diaria_manual,p.prestock,p.stock,p.factorprod,p.pedidos,round(p.factorventa, 3)])
+                csv_writer.writerow([p.nombre,p.pedidos,round(p.factorventa, 3), p.stockreal])
 
         # stock real / factor de venta
         prioridades = []
@@ -316,7 +319,8 @@ def menu_prioridadimpresion():
         cant_prioris = cant_prioris_tot
         if exportar_csv:
             csv_writer.writerow([])
-            csv_writer.writerow(['Prioridades calculadas:', cant_prioris])
+            csv_writer.writerow(['Prioridades a calcular:', cant_prioris])
+            csv_writer.writerow(['Fórmula de stock relativo:', 'stock real / factor de venta'])
             # cada key es un pika_id; cada value su historia de stock relativos
             history_stock_relativos = {p.id: [] for p in pikas.values()}
             history_pika_min = []
@@ -347,7 +351,7 @@ def menu_prioridadimpresion():
 
             if exportar_csv:
                 for p in pikas.values():
-                    history_stock_relativos[p.id].append(stock_relativos[p.id])
+                    history_stock_relativos[p.id].append(round(stock_relativos[p.id], 2))
                 history_pika_min.append(pikas[pika_id_min].nombre)
                 history_stockreal_viejo.append(pikas[pika_id_min].stockreal - pikas[pika_id_min].factorprod * 1.0)
                 history_stockreal_nuevo.append(pikas[pika_id_min].stockreal)
@@ -362,9 +366,9 @@ def menu_prioridadimpresion():
             csv_writer.writerow(['Iteración:'] + cant_prioris_numarr)
             for p in pikas.values():
                 csv_writer.writerow([p.nombre] + history_stock_relativos[p.id])
-            csv_writer.writerow(['Pikas min:'] + history_pika_min)
-            csv_writer.writerow(['Stock real anterior:'] + history_stockreal_viejo)
-            csv_writer.writerow(['Stock real nuevo:'] + history_stockreal_nuevo)
+            csv_writer.writerow(['Pika con menor stock relativo:'] + history_pika_min)
+            csv_writer.writerow(['Stock real anterior de pika:'] + history_stockreal_viejo)
+            csv_writer.writerow(['Stock real nuevo de pika:'] + history_stockreal_nuevo)
             csv_file.close()
             print('Dump csv terminado')
 
