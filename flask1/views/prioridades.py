@@ -137,11 +137,12 @@ def menu_prioridadimpresion():
 
         # cargamos pikas prestocks, stocks y factor prod
         if exportar_csv:
-            csv_file = open(CSV_DUMP_FILE, 'w')
             print(f'Dump csv creado en {CSV_DUMP_FILE}')
-            csv_writer = csv.writer(csv_file)
-            csv_writer.writerow(['Valores iniciales de pikas:'])
-            csv_writer.writerow('Pika,Venta diaria manual,Prestock,Stock,Factor prod,Pedidos,Factor venta'.split(','))
+            csv_exporter = CsvExporter(CSV_DUMP_FILE)
+            csv_exporter.writeVals(['Valores usados (y calculados) por algoritmo de prioridades de impresión de pikas'])
+            csv_exporter.writeVals([])
+            csv_exporter.writeVals(['Valores iniciales de pikas:'])
+            csv_exporter.writeVals('Pika,Venta diaria manual,Prestock,Stock,Factor prod,Pedidos,Factor venta'.split(','))
         for pika, prestock, stock, factor_prod in pikasdata:
             if modo_noche and pika.nombre.lower().startswith('xl '):
                 continue
@@ -158,11 +159,11 @@ def menu_prioridadimpresion():
             p.img = 'img/pikas-prioridades/' + pika.nombre.replace(' ', '') + '.png'
             pikas[pika.id] = p
             if exportar_csv:
-                csv_writer.writerow([p.nombre,p.venta_diaria_manual,p.prestock,p.stock,p.factorprod,p.pedidos,p.factorventa])
+                csv_exporter.writeVals([p.nombre,p.venta_diaria_manual,p.prestock,p.stock,p.factorprod,p.pedidos,p.factorventa])
         #pprint(pikas)
         if exportar_csv:
-            csv_writer.writerow(['Pikas totales:', len(pikas)])
-            csv_writer.writerow([])
+            csv_exporter.writeVals(['Pikas totales:', len(pikas)])
+            csv_exporter.writeVals([])
 
         urgentes = get_urgentes()
 
@@ -170,7 +171,7 @@ def menu_prioridadimpresion():
             urgentes_ids = [p.venta_id for p in urgentes]
             print('urgentes_ids', urgentes_ids)
             if exportar_csv:
-                csv_writer.writerow(['Tomando pedidos urgentes, totales:', len(urgentes_ids)])
+                csv_exporter.writeVals(['Tomando pedidos urgentes, totales:', len(urgentes_ids)])
 
             # todos los pedidos urgentes, y datos de pikas
             ventapedidos_urgentes = db.query(
@@ -185,14 +186,14 @@ def menu_prioridadimpresion():
 
             # cargamos
             #if exportar_csv:
-            #    csv_writer.writerow('Pika,Pedidos'.split(','))
+            #    csv_exporter.writeVals('Pika,Pedidos'.split(','))
             for pika_id, pedidos_totales in ventapedidos_urgentes:
                 if pika_id in pikas:
                     pikas[pika_id].pedidos += pedidos_totales
                     #if exportar_csv:
-                    #    csv_writer.writerow([pikas[pika_id].nombre, pedidos_totales])
+                    #    csv_exporter.writeVals([pikas[pika_id].nombre, pedidos_totales])
             #if exportar_csv:
-            #    csv_writer.writerow([])
+            #    csv_exporter.writeVals([])
         else:
             # si no hay urgentes, usar mayoristas y tienda online
             # Cargamos pedidos de ventas (afecto stock real)
@@ -210,7 +211,7 @@ def menu_prioridadimpresion():
                 ).all()[ : cant_mayoristas ]
 
             if exportar_csv:
-                csv_writer.writerow(['Tomando pedidos mayoristas por antigüedad:', len(ventapedidos_mayoristas_slice)])
+                csv_exporter.writeVals(['Tomando pedidos mayoristas por antigüedad:', len(ventapedidos_mayoristas_slice)])
 
             # sus ids
             ventapedidos_mayoristas_ids = [v.id for v in ventapedidos_mayoristas_slice]
@@ -228,14 +229,14 @@ def menu_prioridadimpresion():
 
             # cargamos
             if exportar_csv:
-                csv_writer.writerow('Pika,Pedidos'.split(','))
+                csv_exporter.writeVals('Pika,Pedidos'.split(','))
             for pika_id, pedidos_totales in ventapedidos_mayorista:
                 if pika_id in pikas:
                     pikas[pika_id].pedidos += pedidos_totales
                     if exportar_csv:
-                        csv_writer.writerow([pikas[pika_id].nombre, pedidos_totales])
+                        csv_exporter.writeVals([pikas[pika_id].nombre, pedidos_totales])
             if exportar_csv:
-                csv_writer.writerow([])
+                csv_exporter.writeVals([])
 
             # todos los pedidos de tienda online, y datos de pikas
             ventapedidos_tiendaonl = db.query(
@@ -252,18 +253,18 @@ def menu_prioridadimpresion():
                     ).filter(Venta.fecha_pedido != None, Venta.fecha == None
                     ).filter(Venta.ventatipo==ventatipo_tiendaonl
                     ).all()
-                csv_writer.writerow(['Tomando pedidos de tienda online, totales:', len(pedidos_tiendaonl)])
+                csv_exporter.writeVals(['Tomando pedidos de tienda online, totales:', len(pedidos_tiendaonl)])
 
             # cargamos
             if exportar_csv:
-                csv_writer.writerow('Pika,Pedidos'.split(','))
+                csv_exporter.writeVals('Pika,Pedidos'.split(','))
             for pika_id, pedidos_totales in ventapedidos_tiendaonl:
                 if pika_id in pikas:
                     pikas[pika_id].pedidos += pedidos_totales
                     if exportar_csv:
-                        csv_writer.writerow([pikas[pika_id].nombre, pedidos_totales])
+                        csv_exporter.writeVals([pikas[pika_id].nombre, pedidos_totales])
             if exportar_csv:
-                csv_writer.writerow([])
+                csv_exporter.writeVals([])
 
         # Calculamos factores de venta
 
@@ -279,8 +280,8 @@ def menu_prioridadimpresion():
         ).all()
         print('ventasdiarias', ventasdiarias)
         if exportar_csv:
-            csv_writer.writerow(['Días tomados para calcular factor de venta:', dias_factor_venta])
-            csv_writer.writerow(['Factor de venta calculado desde fecha:', dtventas])
+            csv_exporter.writeVals(['Días tomados para calcular factor de venta:', dias_factor_venta])
+            csv_exporter.writeVals(['Factor de venta calculado desde fecha:', dtventas])
 
         cant_factor_manual = 0
         cant_factor_cero = 0
@@ -296,31 +297,31 @@ def menu_prioridadimpresion():
                     p.factorventa = 0.0001
                     cant_factor_cero+=1
         if exportar_csv:
-            csv_writer.writerow(['Factores de venta en manual', cant_factor_manual])
-            csv_writer.writerow(['Factores de venta en cero', cant_factor_cero])
+            csv_exporter.writeVals(['Factores de venta en manual', cant_factor_manual])
+            csv_exporter.writeVals(['Factores de venta en cero', cant_factor_cero])
 
         # imprimimos data
         print('=== Pikas Data:')
         pprint(pikas)
 
         if exportar_csv:
-            csv_writer.writerow([])
-            csv_writer.writerow(['Fórmula de stock real:', 'prestock + stock - pedidos'])
-            csv_writer.writerow(['Nuevos valores calculados de pikas:'])
-            #csv_writer.writerow('Pika,Venta diaria,Prestock,Stock,Factor prod,Pedidos,Factor venta'.split(','))
-            csv_writer.writerow('Pika,Pedidos,Factor venta,Stock real'.split(','))
+            csv_exporter.writeVals([])
+            csv_exporter.writeVals(['Fórmula de stock real:', 'prestock + stock - pedidos'])
+            csv_exporter.writeVals(['Nuevos valores calculados de pikas:'])
+            #csv_exporter.writeVals('Pika,Venta diaria,Prestock,Stock,Factor prod,Pedidos,Factor venta'.split(','))
+            csv_exporter.writeVals('Pika,Pedidos,Factor venta,Stock real'.split(','))
             for p in pikas.values():
-                #csv_writer.writerow([p.nombre,p.venta_diaria_manual,p.prestock,p.stock,p.factorprod,p.pedidos,round(p.factorventa, 3)])
-                csv_writer.writerow([p.nombre,p.pedidos,round(p.factorventa, 3), p.stockreal])
+                #csv_exporter.writeVals([p.nombre,p.venta_diaria_manual,p.prestock,p.stock,p.factorprod,p.pedidos,round(p.factorventa, 3)])
+                csv_exporter.writeVals([p.nombre,p.pedidos,round(p.factorventa, 3), p.stockreal])
 
         # stock real / factor de venta
         prioridades = []
         cant_prioris_tot = 18 if pantalla_completa else 16
         cant_prioris = cant_prioris_tot
         if exportar_csv:
-            csv_writer.writerow([])
-            csv_writer.writerow(['Prioridades a calcular:', cant_prioris])
-            csv_writer.writerow(['Fórmula de stock relativo:', 'stock real / factor de venta'])
+            csv_exporter.writeVals([])
+            csv_exporter.writeVals(['Prioridades a calcular:', cant_prioris])
+            csv_exporter.writeVals(['Fórmula de stock relativo:', 'stock real / factor de venta'])
             # cada key es un pika_id; cada value su historia de stock relativos
             history_stock_relativos = {p.id: [] for p in pikas.values()}
             history_pika_min = []
@@ -362,15 +363,13 @@ def menu_prioridadimpresion():
 
         if exportar_csv:
             cant_prioris_numarr = [f'#{i+1}' for i in range(cant_prioris_tot)]
-            csv_writer.writerow(['Stocks relativos por iteración por pika:'])
-            csv_writer.writerow(['Iteración:'] + cant_prioris_numarr)
+            csv_exporter.writeVals(['Stocks relativos por iteración por pika:'])
+            csv_exporter.writeVals(['Iteración:'] + cant_prioris_numarr)
             for p in pikas.values():
-                csv_writer.writerow([p.nombre] + history_stock_relativos[p.id])
-            csv_writer.writerow(['Pika con menor stock relativo:'] + history_pika_min)
-            csv_writer.writerow(['Stock real anterior de pika:'] + history_stockreal_viejo)
-            csv_writer.writerow(['Stock real nuevo de pika:'] + history_stockreal_nuevo)
-            csv_file.close()
-            print('Dump csv terminado')
+                csv_exporter.writeVals([p.nombre] + history_stock_relativos[p.id])
+            csv_exporter.writeVals(['Pika con menor stock relativo:'] + history_pika_min)
+            csv_exporter.writeVals(['Stock real anterior de pika:'] + history_stockreal_viejo)
+            csv_exporter.writeVals(['Stock real nuevo de pika:'] + history_stockreal_nuevo)
 
         # imprimimos data
         #print('=== Prioridades Data:')
@@ -385,13 +384,17 @@ def menu_prioridadimpresion():
         else:
             urgentes_ventapikas = None
 
-        r = make_response(render_template(
-            'menu/prioridades/prioridadimpresion.html',
-            pikas=pikas,
-            prioridades=prioridades,
-            urgentes_ventapikas=urgentes_ventapikas,
-            pantalla_completa=pantalla_completa
-        ))
+        if exportar_csv:
+            r = csv_exporter.send()
+            print('Dump csv terminado')
+        else:
+            r = make_response(render_template(
+                'menu/prioridades/prioridadimpresion.html',
+                pikas=pikas,
+                prioridades=prioridades,
+                urgentes_ventapikas=urgentes_ventapikas,
+                pantalla_completa=pantalla_completa
+            ))
         return r
     else: #request.method == "POST":
         print('post form:',request.form)

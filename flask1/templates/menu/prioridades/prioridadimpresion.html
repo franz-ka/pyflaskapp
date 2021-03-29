@@ -71,14 +71,24 @@
 
 .bold{font-weight: bold}
 
-.refresh-btn {
-  width: 42px;
+.refresh-btn, .export-btn {
   float: right;
   margin-left: 15px;
   margin-top: -10px;
   cursor: pointer;
   position: relative;
-  top: 6px;
+}
+
+.refresh-btn {
+    width: 39px;
+    left: 0;
+    top: 8px;
+}
+
+.export-btn {
+    width: 38px;
+    left: 5px;
+    top: 8px;
 }
 </style>
 {% endblock %}
@@ -89,6 +99,7 @@
     <div class="card card-body bg-light">
 		<h3 class="card-header">
 			<span>Prioridades de impresión</span>
+      <img onclick="exportCsvClick()" class="export-btn" src="{{ url_for('static', filename='img/csv-icon-color-alt.png') }}" />
       <img onclick="refreshClick()" class="refresh-btn" src="{{ url_for('static', filename='img/refresh-icon.png') }}" />
 			<div class="form-check">
 		    <input type="checkbox" class="form-check-input" id="modoCheck" onchange="modoCheckChange(event)">
@@ -192,6 +203,11 @@ function refreshClick(){
   if ($('.ticked').length > 0 && !confirm('Se van a perder todos los pikas marcados como hechos/en gris'))
     return
   location.reload()
+}
+
+function exportCsvClick(){
+  // https://www.geeksforgeeks.org/how-to-download-file-using-javascript-jquery/
+  location.href = UpdateQueryString('exportar_csv', 'si')
 }
 
 function modoCheckChange(e){
