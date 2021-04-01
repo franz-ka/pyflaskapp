@@ -171,7 +171,7 @@ class Venta(Base):
     fecha = Column(DateTime)
     fecha_pedido = Column(DateTime)
     comentario = Column(String(128))
-    ventapikas = relationship('VentaPika')
+    ventapikas = relationship('VentaPika', back_populates="venta")
 
     def __repr__(self): return '<Venta {} (fecha={}, fecha_pedido={})>'.format(self.id, self.fecha, self.fecha_pedido)
 
