@@ -26,14 +26,15 @@ str.append("------------- _menu.html")
 str.append("{{'endp': 'menu_{0}', 'tit': 'TITULO', 'admin': 1}},".format(mname))
 str.append("")
 
-str.append('''------------- routes.py
+str.append('''------------- views/{0}.py
 @bp_{0}.route("/{1}", methods = ['GET', 'POST'])
 @login_required
 def menu_{1}():
     if request.method == "GET":
         db = get_db()
-        DATA = db.query(TABLE).all()
-        
+        #DATA = db.query(TABLE).all()
+        DATA = ''
+
         r = make_response(render_template(
             'menu/{0}/{1}.html',
             DATA=DATA
@@ -46,9 +47,9 @@ def menu_{1}():
         except Exception as e: return str(e), 400
 
         db = get_db()
-        
+
         pass
-        
+
         db.commit()
 
         return \'\''''.format(bpname, mname))
@@ -66,7 +67,7 @@ with open(htmlpath, "w") as f:
 {{% block js %}}
 <script type="text/javascript">
 $(function() {{
-    
+
 }});
 </script>
 {{% endblock %}}
