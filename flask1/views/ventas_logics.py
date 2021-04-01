@@ -7,6 +7,13 @@ def get_ventatipos():
 
     return ventatipos
 
+def get_clientes():
+    db = get_db()
+
+    clientes = db.query(Cliente).order_by(Cliente.nombre).all()
+
+    return clientes
+
 def del_ventatipo(id):
     db = get_db()
 
@@ -139,7 +146,7 @@ def del_pedido(pedido_id):
 
     db.commit()
 
-def add_pedido(vendido, pikas, cants, tipo, comentario):
+def add_pedido(vendido, pikas, cants, tipo, cliente, comentario):
     warns = []
 
     dtnow = datetime.datetime.now()
@@ -151,6 +158,9 @@ def add_pedido(vendido, pikas, cants, tipo, comentario):
         fecha_pedido=dtnow,
         comentario=comentario
     )
+
+    if cliente:
+        vent.cliente = db.query(Cliente).filter(Cliente.id == cliente).one()
 
     if vendido:
         vent.fecha = dtnow

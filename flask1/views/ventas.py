@@ -115,29 +115,31 @@ def menu_ingresarpedido():
         urgentes = {}
         for u in urgentes_all:
             urgentes[u.venta_id] = True
-        
+
         return make_response(render_template(
             'menu/ventas/ingresarpedido.html',
             ventatipos = get_ventatipos(),
+            clientes = get_clientes(),
             pikas = get_pikas(),
             ventapikas = get_pedidos(),
             urgentes = urgentes
         ))
-        
+
     else:  # request.method == "POST":
         print('post form:', request.form)
 
         try:
             checkparams(request.form, ('tipo', 'pika', 'cantidad'))
-            
+
             pikas = request.form.getlist('pika')
             cants = request.form.getlist('cantidad')
             tipo = request.form['tipo']
+            cliente = request.form['cliente']
             comentario = request.form['comentario'] if 'comentario' in request.form else None
             vendido = 'vendido' in request.form
-            
-            warns = add_pedido(vendido, pikas, cants, tipo, comentario)
-    
+
+            warns = add_pedido(vendido, pikas, cants, tipo, cliente, comentario)
+
             if warns:
                 return 'La operación se realizó pero algunos pikas no van a tener stock para la venta:<br>- ' + '<br>- '.join(warns)
         except Exception as e:

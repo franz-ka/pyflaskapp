@@ -21,8 +21,9 @@
 {% call forms.card('Ingresar pedido')  %}
 <!-- Tipo y Comentario -->
 <div class="form-group row">
-    {{ forms.input_select(5, "tipo", "Elija un tipo", required=1) }}
-    <div class="col-sm-7">
+    {{ forms.input_select(4, "tipo", "Elija un tipo", required=1) }}
+    {{ forms.input_select(4, "cliente", "Elija un cliente", required=0) }}
+    <div class="col-sm-4">
         <input type="text" name="comentario" class="form-control" placeholder="Comentario">
     </div>
 </div>
@@ -52,6 +53,7 @@
     <tr>
       <th>Fecha pedido</th>
       <th>Tipo</th>
+      <th>Cliente</th>
       <th>Comentario</th>
       <th>Pika</th>
       <th>Cant.</th>
@@ -67,9 +69,11 @@
 			{% if vars.last_ventid != ventapi.venta_id %}
                 <td>{{ventapi.venta.fecha_pedido.strftime("%d/%m/%Y %H:%M")}}</td>
                 <td>{{ventapi.venta.ventatipo.nombre}}</td>
+                <td>{{ventapi.venta.cliente.nombre}}</td>
                 <td>{{ventapi.venta.comentario}}</td>
 				{# actualizamos last_ventid en el prox if #}
             {% else %}
+                <td></td>
                 <td></td>
                 <td></td>
                 <td></td>
@@ -102,6 +106,9 @@ $(function() {
 
     tiposdata = {{ forms.dataToJsArr(ventatipos) }};
     sel2('.select2-single[name=tipo]', 'Tipo', tiposdata);
+
+    clientesdata = {{ forms.dataToJsArr(clientes) }};
+    sel2('.select2-single[name=cliente]', 'Cliente', clientesdata);
 
     pikasdata = {{ forms.dataToJsArr(pikas) }};
     pikarowhtml = $('.addable.form-group.row')[0].outerHTML.replace(/ required/g, '');
