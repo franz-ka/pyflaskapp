@@ -269,6 +269,7 @@ class Cliente(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     nombre = Column(String(128), nullable=False)
     contacto = Column(String(128))
+    ventas = relationship('Venta', back_populates="cliente")
 
     def __repr__(self): return '<Cliente {} {} contacto={}>'.format(self.id, self.nombre, self.contacto)
 
