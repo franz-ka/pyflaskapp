@@ -86,6 +86,8 @@ def menu_factoresdeimpresion():
 
         return ''
 
+
+
 @bp_prioridades.route("/prioridadimpresion", methods = ['GET', 'POST'])
 @login_required
 def menu_prioridadimpresion():
@@ -94,7 +96,19 @@ def menu_prioridadimpresion():
         modo_noche = 'modo_noche' in request.args and request.args['modo_noche'] == 'si'
         pantalla_completa = 'pantalla_completa' in request.args and request.args['pantalla_completa'] == 'si'
 
-        CSV_DUMP_FILE = 'prioridades.csv'
+        if exportar_csv:
+            dtnow = datetime.datetime.now()
+            csv_file_prefix = 'Cogosys - Prioridades de impresión'
+            # https://strftime.org/
+            csv_file_name = csv_file_prefix + dtnow.strftime(' %Y-%m-%d.csv')
+            print(f'Dump csv creado en {csv_file_name}')
+            csv_exporter = CsvExporter(csv_file_name)
+            csv_exporter.writeVals([
+                '~ Valores usados por algoritmo de prioridades de impresión de pikas ~'
+            ])
+            csv_exporter.writeVals(['Fecha:', dtnow.strftime('%d/%m/%Y %H:%M:%S')])
+            csv_exporter.writeVals(['Modo noche activo:', 'sí' if modo_noche else 'no'])
+            csv_exporter.writeVals([])
 
         db = get_db()
 
@@ -137,10 +151,6 @@ def menu_prioridadimpresion():
 
         # cargamos pikas prestocks, stocks y factor prod
         if exportar_csv:
-            print(f'Dump csv creado en {CSV_DUMP_FILE}')
-            csv_exporter = CsvExporter(CSV_DUMP_FILE)
-            csv_exporter.writeVals(['Valores usados (y calculados) por algoritmo de prioridades de impresión de pikas'])
-            csv_exporter.writeVals([])
             csv_exporter.writeVals(['Valores iniciales de pikas:'])
             csv_exporter.writeVals('Pika,Venta diaria manual,Prestock,Stock,Factor prod,Pedidos,Factor venta'.split(','))
         for pika, prestock, stock, factor_prod in pikasdata:
@@ -162,6 +172,7 @@ def menu_prioridadimpresion():
                 csv_exporter.writeVals([p.nombre,p.venta_diaria_manual,p.prestock,p.stock,p.factorprod,p.pedidos,p.factorventa])
         #pprint(pikas)
         if exportar_csv:
+            csv_exporter.writeVals([])
             csv_exporter.writeVals(['Pikas totales:', len(pikas)])
             csv_exporter.writeVals([])
 
