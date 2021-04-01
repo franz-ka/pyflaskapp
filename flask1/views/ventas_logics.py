@@ -52,6 +52,7 @@ def get_ventas(*args):
             k, v = arg, filter_args[arg]
             if v:
                 if k=='tipo': query.append(Venta.ventatipo_id == v)
+                elif k=='cliente': query.append(Venta.cliente_id == v)
                 elif k=='comentario': query.append(Venta.comentario.ilike("%{}%".format(v)))
                 elif k=='fechadesde': query.append(Venta.fecha >= datetime.datetime.strptime(v,'%d/%m/%Y'))
                 elif k=='fechahasta': query.append(Venta.fecha <= datetime.datetime.strptime(v,'%d/%m/%Y') + datetime.timedelta(days=1))

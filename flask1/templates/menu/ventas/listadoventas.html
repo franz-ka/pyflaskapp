@@ -14,8 +14,9 @@
     <h5>Filtrar listado</h5>
     <!-- Tipo y Comentario-->
     <div class="form-group row">
-    {{ forms.input_select(4, "tipo", "", required=0) }}
-        <div class="col-sm-8">
+      {{ forms.input_select(4, "tipo", "", required=0) }}
+      {{ forms.input_select(4, "cliente", "", required=0) }}
+        <div class="col-sm-4">
             <input type="text" name="comentario" class="form-control" placeholder="Comentario">
         </div>
     </div>
@@ -43,6 +44,7 @@
 	      <th>Fecha venta</th>
 	      <th>Fecha pedido</th>
 	      <th>Tipo</th>
+	      <th>Cliente</th>
 	      <th>Comentario</th>
 	      <th>Pika</th>
 	      <th>Cantidad</th>
@@ -56,9 +58,11 @@
 	                <td>{{ventapi.venta.fecha.strftime("%d/%m/%Y %H:%M")}}</td>
 	                <td>{{ventapi.venta.fecha_pedido.strftime("%d/%m/%Y %H:%M") if ventapi.venta.fecha_pedido else 'Sin dato'}}</td>
 	                <td>{{ventapi.venta.ventatipo.nombre}}</td>
+	                <td>{{ventapi.venta.cliente.nombre}}</td>
 	                <td>{{ventapi.venta.comentario}}</td>
 	                {% if vars.update({'last_ventid': ventapi.venta.id}) %}{% endif %}
 	            {% else %}
+	                <td></td>
 	                <td></td>
 	                <td></td>
 	                <td></td>
@@ -84,6 +88,9 @@ $(function() {
 
     tiposdata = {{ forms.dataToJsArr(ventatipos) }};
     sel2('.select2-single[name=tipo]', 'Tipo', tiposdata);
+
+    clientesdata = {{ forms.dataToJsArr(clientes) }};
+    sel2('.select2-single[name=cliente]', 'Cliente', clientesdata);
 
     pikasdata = {{ forms.dataToJsArr(pikas) }};
     sel2('.select2-single[name=pika]', 'Pika', pikasdata);
