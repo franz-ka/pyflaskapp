@@ -168,6 +168,8 @@ class Venta(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     ventatipo_id = Column(Integer, ForeignKey('ventatipo.id'))
     ventatipo = relationship('VentaTipo')
+    cliente_id = Column(Integer, ForeignKey('cliente.id'))
+    cliente = relationship('Cliente')
     fecha = Column(DateTime)
     fecha_pedido = Column(DateTime)
     comentario = Column(String(128))
@@ -261,3 +263,20 @@ class Valor(Base):
     valor = Column(String(256))
 
     def __repr__(self): return '<Valor {} {}={}>'.format(self.id, self.nombre, self.valor)
+
+class Cliente(Base):
+    __tablename__ = 'cliente'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    nombre = Column(String(128), nullable=False)
+    contacto = Column(String(128))
+
+    def __repr__(self): return '<Cliente {} {} contacto={}>'.format(self.id, self.nombre, self.contacto)
+
+'''class ClienteVenta(Base):
+    __tablename__ = 'clienteventa'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    nombre = Column(String(128), nullable=False)
+    contacto = Column(String(128))
+
+    def __repr__(self): return '<Cliente {} {} contacto={}>'.format(self.id, self.nombre, self.contacto)
+'''
