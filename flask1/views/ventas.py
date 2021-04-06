@@ -169,10 +169,65 @@ def menu_pedido_urgente():
 
     try:
         checkparams(request.form, ('venta_id',))
-        tog_urgente(request.form['venta_id'])        
+        tog_urgente(request.form['venta_id'])
     except Exception as e:
         return str(e), 400
-    
+
     return ''
 
-    
+
+@bp_ventas.route("/clientes", methods = ['GET', 'POST'])
+@login_required
+def menu_clientes():
+    if request.method == "GET":
+        db = get_db()
+        clientes = db.query(Cliente).all()
+
+        r = make_response(render_template(
+            'menu/ventas/clientes.html',
+            clientes=clientes
+        ))
+        return r
+    else: #request.method == "POST":
+        print('post form:',request.form)
+
+        try:
+            checkparams(request.form, ('operation',))
+
+            operation = request.form['operation']
+
+            if operation == 'agregar':
+                checkparams(request.form, ('nombre',))
+            elif operation == 'editar':
+                checkparams(request.form, ('id','nombre'))
+            elif operation == 'eliminar':
+                checkparams(request.form, ('id',))
+            else:
+                return str('Operación inválida'), 400
+        except Exception as e: return str(e), 400
+
+        db = get_db()
+
+        if operation == 'agregar':
+            nombre = request.form['nombre'].strip()
+            contacto = request.form['contacto'].strip()
+            if db.query(Cliente).filter(Cliente.nombre==nombre).first():
+                return 'Ya existe una máquina con ese nombre', 400
+            cli = Cliente(nombre=nombre)
+            if contacto:
+                cli.contacto = contacto
+            db.add(cli)
+        elif operation == 'editar':
+            id = int(request.form['id'].strip())
+            nombre = request.form['nombre'].strip()
+            contacto = request.form['contacto'].strip()
+            cli = db.query(Cliente).get(id)
+            cli.nombre = nombre
+            cli.contacto = contacto
+        elif operation == 'eliminar':
+            id = int(request.form['id'].strip())
+            db.query(Cliente).filter(Cliente.id==id).delete()
+
+        db.commit()
+
+        return ''

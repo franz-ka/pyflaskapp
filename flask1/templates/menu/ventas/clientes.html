@@ -1,0 +1,142 @@
+{% extends '_maingui.html' %}
+
+{% block content %}
+
+{% call forms.card('Clientes', css_class='eliminar-form')  %}
+<input type="hidden" class="eliminar-input" name="operation" value="eliminar">
+<input type="hidden" class="eliminar-input" name="id" value="">
+<button id="btnAgregarCli" type="button" class="btn btn-primary my-2 float-right" onclick="agregarCliClick()">
+  Agregar nuevo cliente
+</button>
+<table class="table table-sm table-striped table-hover">
+  <thead>
+    <tr>
+      <th>Cliente</th>
+      <th>Contacto</th>
+      <th>Ventas</th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for cliente in clientes %}
+        <tr>
+            <td>{{cliente.nombre or ''}}</td>
+            <td>{{cliente.contacto or ''}}</td>
+            <td>{{cliente.ventas | length}}</td>
+            <td>
+              <button
+                type="button"
+                class="btnEditarCli btn btn-primary btn-block p-0"
+                data-toggle="modal"
+                data-target="#clienteModal"
+                data-id="{{cliente.id}}"
+                data-nombre="{{cliente.nombre or ''}}"
+                data-contacto="{{cliente.contacto or ''}}">
+                editar
+              </button>
+            </td>
+            <td>
+              <button
+                type="submit"
+                class="btnEliminarCli btn btn-danger btn-block p-0"
+                data-id="{{cliente.id}}"
+                data-nombre="{{cliente.nombre or ''}}"
+                onclick="eliminarCliClick(this)">
+                eliminar
+              </button>
+            </td>
+        </tr>
+    {% endfor %}
+</table>
+{% endcall %}
+
+<div id="clienteModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="clienteModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="clienteModalLabel">TITULO</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+	{% call forms.form()  %}
+      <div class="modal-body">
+		  <div class="container-fluid">
+				<input type="hidden" name="operation" value="OPERATION">
+			    <div class="row">
+	          <input type="hidden" name="id">
+            <div class="col-sm-6">
+                <input type="text" name="nombre" class="form-control" placeholder="Nombre" required>
+            </div>
+            <div class="col-sm-6">
+                <input type="text" name="contacto" class="form-control" placeholder="Contacto">
+            </div>
+			    </div>
+		  </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+        <button id="clienteButtonAction" type="submit" class="btn btn-primary">ACCIÓN</button>
+      </div>
+	{% endcall %}
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block js %}
+<script type="text/javascript">
+$(function() {
+    regFormValid(false, function(){ setTimeout('location.reload();', 1000) });
+
+    //https://getbootstrap.com/docs/4.0/components/modal/
+    $('#clienteModal').on('show.bs.modal', function (event) {
+      var thisJq = $(this)
+	  	var button = $(event.relatedTarget) // Button that triggered the modal
+      if (button && button.length){
+        //editar
+  	  	var id = button.data('id')
+  	  	var nombre = button.data('nombre')
+  	  	var contacto = button.data('contacto')
+
+  	    thisJq.find('input[name=id]').val(id)
+  	    thisJq.find('input[name=nombre]').val(nombre)
+  	    thisJq.find('input[name=contacto]').val(contacto)
+        thisJq.find('input[name=operation]').val('editar')
+        thisJq.find('#clienteButtonAction').html('Guardar')
+        thisJq.find('#clienteModalLabel').html('Editar cliente')
+      }else{
+        //agregar
+        thisJq.find('input[name=id]').val('')
+        thisJq.find('input[name=nombre]').val('')
+        thisJq.find('input[name=contacto]').val('')
+        thisJq.find('input[name=operation]').val('agregar')
+        thisJq.find('#clienteButtonAction').html('Agregar')
+        thisJq.find('#clienteModalLabel').html('Agregar cliente')
+      }
+      thisJq.find('.alert-danger').hide()
+    })
+});
+
+function agregarCliClick(){
+  //https://getbootstrap.com/docs/4.0/components/modal/
+  $('#clienteModal').modal()
+}
+
+function eliminarCliClick(ele){
+  var id = $(ele).data('id')
+  var nombre = $(ele).data('nombre')
+
+  if (!confirm('¿Está segurx de que desea borrar el cliente "'+nombre+'"?'))
+    return
+
+  //var formJq = $('#clienteModal form')
+  //formJq.find('input[name=id]').val(id)
+  //formJq.find('input[name=operation]').val('eliminar')
+  $('input.eliminar-input[name=id]').val(id)
+  $('input.eliminar-input[name=operation]').val('eliminar')
+}
+</script>
+{% endblock %}
