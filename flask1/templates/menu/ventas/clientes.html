@@ -1,21 +1,53 @@
 {% extends '_maingui.html' %}
 
+{% block styles %}
+<style>
+.btnEliminarCli, .btnEditarCli{
+  width: 30px;
+ }
+</style>
+{% endblock %}
+
 {% block content %}
 
-{% call forms.card('Clientes', css_class='eliminar-form')  %}
+{% call forms.cardNoForm('Clientes')  %}
+
+{% if filtrado %}
+<div class="alert alert-info fade show">
+    <p class="mb-0">(La lista está filtrada. Para eliminar filtro, filtrar con el campo vacío)</p>
+</div>
+{% endif %}
+<h5>Filtrar</h5>
+<!-- Tipo y Comentario-->
+<div class="form-group row">
+  {{ forms.input_msg(2, 'Texto:') }}
+  <div class="col-sm-4">
+      <input type="text" name="texto" class="form-control" placeholder="(en nombre o contacto)">
+  </div>
+  <div class="col-6 mt-2 mt-sm-0 col-sm-2">
+    <button id="btnFiltrarCli" type="button" class="btn btn-primary" onclick="filtrarCliClick()">
+      Aplicar
+    </button>
+  </div>
+  <div class="col-6 mt-2 mt-sm-0 col-sm-4">
+    <button id="btnAgregarCli" type="button" class="btn btn-success float-right" onclick="agregarCliClick()">
+      + Agregar cliente
+    </button>
+  </div>
+</div>
+<input type="hidden" name="operation" value="buscar">
+
+{% call forms.form() %}
 <input type="hidden" class="eliminar-input" name="operation" value="eliminar">
 <input type="hidden" class="eliminar-input" name="id" value="">
-<button id="btnAgregarCli" type="button" class="btn btn-primary my-2 float-right" onclick="agregarCliClick()">
-  Agregar nuevo cliente
-</button>
 <table class="table table-sm table-striped table-hover">
   <thead>
     <tr>
-      <th>Cliente</th>
+      <th>Nombre</th>
       <th>Contacto</th>
       <th>Ventas</th>
-      <th></th>
-      <th></th>
+      <th>Modificar</th>
+      <th>Eliminar</th>
     </tr>
   </thead>
   <tbody>
@@ -33,7 +65,7 @@
                 data-id="{{cliente.id}}"
                 data-nombre="{{cliente.nombre or ''}}"
                 data-contacto="{{cliente.contacto or ''}}">
-                editar
+                <
               </button>
             </td>
             <td>
@@ -43,13 +75,16 @@
                 data-id="{{cliente.id}}"
                 data-nombre="{{cliente.nombre or ''}}"
                 onclick="eliminarCliClick(this)">
-                eliminar
+                x
               </button>
             </td>
         </tr>
     {% endfor %}
 </table>
 {% endcall %}
+
+{% endcall %}
+{# /forms.cardNoForm #}
 
 <div id="clienteModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="clienteModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered" role="document">
@@ -106,7 +141,7 @@ $(function() {
   	    thisJq.find('input[name=contacto]').val(contacto)
         thisJq.find('input[name=operation]').val('editar')
         thisJq.find('#clienteButtonAction').html('Guardar')
-        thisJq.find('#clienteModalLabel').html('Editar cliente')
+        thisJq.find('#clienteModalLabel').html('Modificar cliente')
       }else{
         //agregar
         thisJq.find('input[name=id]').val('')
@@ -137,6 +172,14 @@ function eliminarCliClick(ele){
   //formJq.find('input[name=operation]').val('eliminar')
   $('input.eliminar-input[name=id]').val(id)
   $('input.eliminar-input[name=operation]').val('eliminar')
+}
+
+function filtrarCliClick() {
+  var texto = $('input[name=texto]').val()
+  var url = location.origin + location.pathname
+  if (texto)
+    url += '?filtro=' + texto
+  location.href = url
 }
 </script>
 {% endblock %}

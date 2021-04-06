@@ -180,12 +180,21 @@ def menu_pedido_urgente():
 @login_required
 def menu_clientes():
     if request.method == "GET":
+        texto_filtrado = 'filtro' in request.args and request.args['filtro']
+
         db = get_db()
-        clientes = db.query(Cliente).all()
+        if not texto_filtrado:
+            clientes = db.query(Cliente).all()
+        else:
+            clientes = db.query(Cliente).where(or_(
+                Cliente.nombre.ilike("%{}%".format(texto_filtrado)),
+                Cliente.contacto.ilike("%{}%".format(texto_filtrado)),
+            )).all()
 
         r = make_response(render_template(
             'menu/ventas/clientes.html',
-            clientes=clientes
+            clientes=clientes,
+            filtrado=texto_filtrado and True or False
         ))
         return r
     else: #request.method == "POST":
