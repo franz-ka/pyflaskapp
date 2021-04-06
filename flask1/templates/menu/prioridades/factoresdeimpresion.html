@@ -8,7 +8,7 @@
 	display: inline;
 }
 .factor_productividad td .btn:hover{
-	background-color: white;	
+	background-color: white;
 	color: black;
 }
 .factor_productividad td.has-vd{
@@ -23,8 +23,11 @@
 
 {% block content %}
 {% call forms.cardNoForm('Factores', css_class='factor_productividad')  %}
+<div class="alert alert-info fade show mb-0">
+	<p class="mb-0">Ventas de los últimos {{dias_factor|int}} días (a partir del {{dtventas.strftime("%x")}}). </p>
+</div>
 <div class="alert alert-info fade show">
-    <p class="mb-0">Ventas de los últimos {{dias_factor|int}} días ({{dtventas.strftime("%x")}}). </p>
+    <p class="mb-0">Para eliminar la venta diaria manual guardar como vacío. </p>
 </div>
 <table class="table table-sm table-striped table-hover">
   <thead>
@@ -42,16 +45,16 @@
 		{% set factor = pika_factor[1] %}
 
         <tr>
-            <td>{{pika.nombre}}</td>	
+            <td>{{pika.nombre}}</td>
 			{% if factor %}
 	            <td><button type="button" class="btnDefinirProd btn btn-secondary btn-block p-0" data-toggle="modal" data-target="#prodModal" data-pikaid="{{pika.id}}"  data-pikanombre="{{pika.nombre}}">></button> {{factor.factor}}</td>
 	            <td>{{factor.fecha_actualizado.strftime("%d/%m/%Y %H:%M")}}</td>
 			{% else %}
 	            <td><button type="button" class="btnDefinirProd btn btn-secondary btn-block p-0" data-toggle="modal" data-target="#prodModal" data-pikaid="{{pika.id}}"  data-pikanombre="{{pika.nombre}}">></button> No definido</td>
 	            <td>&nbsp;</td>
-			{% endif %}		
+			{% endif %}
       		<td class="{{'has-vd' if pika.venta_diaria_manual else ''}}">{{ventas_promedios[pika.id] if pika.id in ventas_promedios else 'Sin ventas'}}</td>
-            <td><button type="button" class="btnDefinirVD btn btn-secondary btn-block p-0" data-toggle="modal" data-target="#vdModal" data-pikaid="{{pika.id}}"  data-pikanombre="{{pika.nombre}}">></button> {{ pika.venta_diaria_manual or '-' }}</td>
+            <td><button type="button" class="btnDefinirVD btn btn-secondary btn-block p-0" data-toggle="modal" data-target="#vdModal" data-pikaid="{{pika.id}}"  data-pikanombre="{{pika.nombre}}">></button> {{ pika.venta_diaria_manual == None and '-' or pika.venta_diaria_manual }}</td>
         </tr>
     {% endfor %}
 </table>
