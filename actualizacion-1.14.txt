@@ -1,0 +1,8 @@
+~! Actualización de Cogosys a versión 1.14 !~
+
++ Nuevo botón para exportar fórmula/algoritmo de prioridades de impresión
++ Nueva pantalla de administración y búsqueda de clientes (bajo menú Ventas)
++ Agregado campo cliente a ventas/pedidos
++ Arreglado que el valor de venta diaria manual se vea bien en factores de impresión
+
+Gracias por utilizar el sistema <3
