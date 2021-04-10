@@ -186,7 +186,7 @@ def menu_clientes():
         if not texto_filtrado:
             clientes = db.query(Cliente).all()
         else:
-            clientes = db.query(Cliente).where(or_(
+            clientes = db.query(Cliente).filter(or_(
                 Cliente.nombre.ilike("%{}%".format(texto_filtrado)),
                 Cliente.contacto.ilike("%{}%".format(texto_filtrado)),
             )).all()
