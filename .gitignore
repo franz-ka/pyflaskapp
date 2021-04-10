@@ -16,3 +16,6 @@
 .project
 .pydevproject
 .settings/
+
+#otros
+Cogosys*.csv
