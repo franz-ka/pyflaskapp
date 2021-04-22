@@ -12,7 +12,8 @@ from models import Base, \
     StockPikaColor, StockInsumoColor, \
     Maquina, Gcode, Falla, Alarma, \
     FactorProductividad, PedidoUrgente, \
-    Valor, Cliente
+    Valor, Cliente, \
+    TipoCliente, TipoLocal, UbicacionOSM
 
 def init_db_engine():
     from sqlalchemy import create_engine

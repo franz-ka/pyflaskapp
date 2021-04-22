@@ -268,10 +268,47 @@ class Cliente(Base):
     __tablename__ = 'cliente'
     id = Column(Integer, primary_key=True, autoincrement=True)
     nombre = Column(String(128), nullable=False)
-    contacto = Column(String(128))
-    ventas = relationship('Venta', back_populates="cliente")
+    nombre_de_contacto = Column(String(128))
+    telefono = Column(String(64))
+    mail = Column(String(64))
+    tipo_cliente_id = Column(Integer, ForeignKey('tipocliente.id'))
+    tipo_cliente = relationship('TipoCliente')
+    tipo_local_id = Column(Integer, ForeignKey('tipolocal.id'))
+    tipo_local = relationship('TipoLocal')
+    ubicacion_osm_id = Column(Integer, ForeignKey('ubicacionosm.id'))
+    ubicacion_osm = relationship('UbicacionOSM')
+    ubicacion = Column(String(128))
 
-    def __repr__(self): return '<Cliente {} {} contacto={}>'.format(self.id, self.nombre, self.contacto)
+    def __repr__(self): return '<Cliente {} {} nombre_de_contacto={}>'.format(self.id, self.nombre, self.nombre_de_contacto)
+
+class TipoCliente(Base):
+    __tablename__ = 'tipocliente'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    nombre = Column(String(64), nullable=False)
+
+    def __repr__(self): return '<TipoCliente {} {}>'.format(self.id, self.nombre)
+
+class TipoLocal(Base):
+    __tablename__ = 'tipolocal'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    nombre = Column(String(64), nullable=False)
+
+    def __repr__(self): return '<TipoLocal {} {}>'.format(self.id, self.nombre)
+
+# https://nominatim.org/release-docs/develop/api/Search/
+class UbicacionOSM(Base):
+    __tablename__ = 'ubicacionosm'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    lat = Column(Float, nullable=False)
+    lon = Column(Float, nullable=False)
+    road = Column(String(128))
+    house_number = Column(Integer)
+    town = Column(String(128))
+    state_district = Column(String(128))
+    state = Column(String(128))
+    postcode = Column(String(64))
+
+    def __repr__(self): return '<UbicacionOSM {} ({}, {})>'.format(self.id, self.road, self.house_number)
 
 '''class ClienteVenta(Base):
     __tablename__ = 'clienteventa'
