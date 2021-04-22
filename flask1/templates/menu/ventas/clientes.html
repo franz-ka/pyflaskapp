@@ -5,6 +5,10 @@
 .btnEliminarCli, .btnEditarCli{
   width: 30px;
  }
+
+ .button-direccion {
+   cursor: pointer;
+ }
 </style>
 {% endblock %}
 
@@ -45,6 +49,8 @@
     <tr>
       <th>Nombre</th>
       <th>Contacto</th>
+      <th>Teléfono</th>
+      <th>Mail</th>
       <th>Ventas</th>
       <th>Modificar</th>
       <th>Eliminar</th>
@@ -54,7 +60,9 @@
     {% for cliente in clientes %}
         <tr>
             <td>{{cliente.nombre or ''}}</td>
-            <td>{{cliente.contacto or ''}}</td>
+            <td>{{cliente.nombre_de_contacto or ''}}</td>
+            <td>{{cliente.telefono or ''}}</td>
+            <td>{{cliente.mail or ''}}</td>
             <td>{{cliente.ventas | length}}</td>
             <td>
               <button
@@ -64,7 +72,13 @@
                 data-target="#clienteModal"
                 data-id="{{cliente.id}}"
                 data-nombre="{{cliente.nombre or ''}}"
-                data-contacto="{{cliente.contacto or ''}}">
+                data-nombre_de_contacto="{{cliente.nombre_de_contacto or ''}}"
+                data-telefono="{{cliente.telefono or ''}}"
+                data-mail="{{cliente.mail or ''}}"
+                data-tipo_cliente_id="{{cliente.tipo_cliente_id or ''}}"
+                data-tipo_local_id="{{cliente.tipo_local_id or ''}}"
+                data-ubicacion_osm_id="{{cliente.ubicacion_osm_id or ''}}"
+                data-ubicacion="{{cliente.ubicacion or ''}}">
                 <
               </button>
             </td>
@@ -86,8 +100,9 @@
 {% endcall %}
 {# /forms.cardNoForm #}
 
+<!-- modal https://getbootstrap.com/docs/4.0/components/modal/ -->
 <div id="clienteModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="clienteModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered" role="document">
+  <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="clienteModalLabel">TITULO</h5>
@@ -98,16 +113,58 @@
 	{% call forms.form()  %}
       <div class="modal-body">
 		  <div class="container-fluid">
+        <!-- forms https://getbootstrap.com/docs/4.0/components/forms/ -->
 				<input type="hidden" name="operation" value="OPERATION">
-			    <div class="row">
+          <div class="form-row">
 	          <input type="hidden" name="id">
-            <div class="col-sm-6">
-                <input type="text" name="nombre" class="form-control" placeholder="Nombre" required>
+            <div class="form-group col-md-6 col-lg-4">
+              <label for="nombre">Nombre</label>
+              <input type="text" class="form-control" id="nombre" placeholder="" required>
             </div>
-            <div class="col-sm-6">
-                <input type="text" name="contacto" class="form-control" placeholder="Contacto">
+            <div class="form-group col-md-6 col-lg-4">
+              <label for="tipo_cliente">Tipo cliente</label>
+              <select class="form-control select2-single select2-hidden-accessible" id="tipo_cliente" style="width:100%">
+                  <option></option>
+              </select>
             </div>
-			    </div>
+            <!-- md-12 -->
+            <div class="form-group col-md-6 col-lg-4">
+              <label for="tipo_local">Tipo local</label>
+              <select class="form-control select2-single select2-hidden-accessible" id="tipo_local" style="width:100%">
+                  <option></option>
+              </select>
+            </div>
+            <!-- lg-12 -->
+            <div class="form-group col-md-6 col-lg-4">
+              <label for="nombre_de_contacto">Nombre del contacto</label>
+              <input type="text" class="form-control" id="nombre_de_contacto" placeholder="">
+            </div>
+            <!-- md-12 -->
+            <div class="form-group col-md-6 col-lg-4">
+              <label for="mail">Mail</label>
+              <input type="text" class="form-control" id="mail" placeholder="">
+            </div>
+            <div class="form-group col-md-6 col-lg-4">
+              <label for="telefono">Teléfono</label>
+              <input type="text" class="form-control" id="telefono" placeholder="">
+            </div>
+            <!-- md-12 -->
+            <!-- lg-12 -->
+            <div class="form-group col-md-8 col-lg-6">
+              <label for="ubicacion">Dirección</label>
+              <input type="text" class="form-control" id="ubicacion" placeholder="">
+            </div>
+            <div class="form-group col-md-4 col-lg-2">
+              <label class="d-none d-md-block" for="" style="display:block">&nbsp;</label>
+              <button type="button" class="btn btn-primary" onclick="clienteBuscarDireccion()">Buscar</button>
+            </div>
+            <!-- md-12 -->
+            <div class="form-group col-md-6 col-lg-4">
+              <label for="telefono" style="display:block">Dirección validada</label>
+              <button id="clienteUbicacionValidada" type="button" class="btn btn-outline-danger" data-dismiss="modal">NO</button>
+            </div>
+          </div>
+          <div class="list-group" id='clienteResultadosDireccion'></div>
 		  </div>
       </div>
       <div class="modal-footer">
@@ -123,6 +180,14 @@
 
 {% block js %}
 <script type="text/javascript">
+tipoclientesdata = {{ forms.dataToJsArr(tipoclientes) }};
+sel2('.select2-single#tipo_cliente', '', tipoclientesdata);
+
+tipolocalesdata = {{ forms.dataToJsArr(tipolocales) }};
+sel2('.select2-single#tipo_local', '', tipolocalesdata);
+
+var selectedPlaceData = null
+
 $(function() {
     regFormValid(false, function(){ setTimeout('location.reload();', 1000) });
 
@@ -153,6 +218,21 @@ $(function() {
       }
       thisJq.find('.alert-danger').hide()
     })
+
+    // tab, enter, shift, alt, ctrl, caps, esc, home, end, flechitas, numlock, alt-right
+    var admitedKeys = [9, 13, 16, 17, 18, 20, 27, 35, 36, 37, 38, 39, 40, 144, 225]
+    $('#ubicacion').keydown(function(e){
+      var keyCode = e.originalEvent.keyCode
+
+      if (admitedKeys.indexOf(keyCode) != -1)
+        return
+
+      if (selectedPlaceData){
+        selectedPlaceData = null
+        $('#clienteUbicacionValidada').addClass('btn-outline-danger').removeClass('btn-outline-success').html('NO')
+        $('#clienteResultadosDireccion .active').removeClass('active')
+      }
+    })
 });
 
 function agregarCliClick(){
@@ -180,6 +260,50 @@ function filtrarCliClick() {
   if (texto)
     url += '?filtro=' + texto
   location.href = url
+}
+
+function clienteBuscarDireccion(){
+  var texto = $('#clienteModal #ubicacion').val()
+  // https://nominatim.org/release-docs/develop/api/Search/
+  var baseUrl = 'https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&countrycodes=ar&limit=10'
+  var url = baseUrl + '&q=' + texto.replace(/ /g, '+')
+  $.ajax({
+       type: "GET",
+       url: url,
+       success: function(r){
+          var resultList = $('#clienteResultadosDireccion')
+          resultList.html('')
+
+          if (!r || !r.length)
+            return
+
+          for (var i = 0; i < r.length; i++) {
+            var item = r[i]
+            // https://getbootstrap.com/docs/4.0/components/list-group/
+            var button = $('<button type="button" class="button-direccion list-group-item list-group-item-action">')
+            button.data('place-data', item)
+            button.click(function(){
+              var $this = $(this)
+              var placeData = $this.data('place-data')
+
+              $('#clienteResultadosDireccion .active').removeClass('active')
+              $this.addClass('active')
+
+              $('#ubicacion').val(placeData.display_name)
+              selectedPlaceData = placeData
+              $('#clienteUbicacionValidada').removeClass('btn-outline-danger').addClass('btn-outline-success').html('SÍ')
+            })
+            button.html(item.display_name)
+            resultList.append(button)
+          }
+       },
+       error: function(r){
+          alert('Ha ocurrido un error al intentar buscar la dirección.\n\nPor favor compruebe los parámetros y su conexión a internet y vuelva a intentar.')
+          console.log('Error:', r.state(), '|', r.statusText)
+       },
+       complete: function(){
+       }
+  });
 }
 </script>
 {% endblock %}

@@ -191,9 +191,16 @@ def menu_clientes():
                 Cliente.contacto.ilike("%{}%".format(texto_filtrado)),
             )).all()
 
+        tipoclientes = db.query(TipoCliente).all()
+        tipolocales = db.query(TipoLocal).all()
+        #ubicacionesosm = db.query(UbicacionOSM).all()
+
         r = make_response(render_template(
             'menu/ventas/clientes.html',
             clientes=clientes,
+            tipoclientes=tipoclientes,
+            tipolocales=tipolocales,
+            #ubicacionesosm=ubicacionesosm,
             filtrado=texto_filtrado and True or False
         ))
         return r
@@ -217,25 +224,46 @@ def menu_clientes():
 
         db = get_db()
 
-        if operation == 'agregar':
-            nombre = request.form['nombre'].strip()
-            contacto = request.form['contacto'].strip()
-            if db.query(Cliente).filter(Cliente.nombre==nombre).first():
-                return 'Ya existe una máquina con ese nombre', 400
-            cli = Cliente(nombre=nombre)
-            if contacto:
-                cli.contacto = contacto
-            db.add(cli)
-        elif operation == 'editar':
-            id = int(request.form['id'].strip())
-            nombre = request.form['nombre'].strip()
-            contacto = request.form['contacto'].strip()
-            cli = db.query(Cliente).get(id)
-            cli.nombre = nombre
-            cli.contacto = contacto
-        elif operation == 'eliminar':
+
+        if operation == 'eliminar':
             id = int(request.form['id'].strip())
             db.query(Cliente).filter(Cliente.id==id).delete()
+        elif operation == 'agregar' or operation == 'editar':
+            nombre = request.form['nombre'].strip()
+            nombre_de_contacto = request.form.get('nombre_de_contacto', '').strip()
+            telefono = request.form.get('telefono', '').strip()
+            mail = request.form.get('mail', '').strip()
+            tipo_cliente_id = request.form.get('tipo_cliente_id')
+            tipo_local_id = request.form.get('tipo_local_id')
+            ubicacion_osm = request.form.get('ubicacion_osm')
+            ubicacion = request.form.get('ubicacion', '').strip()
+
+            if operation == 'agregar':
+                if db.query(Cliente).filter(Cliente.nombre==nombre).first():
+                    return 'Ya existe un cliente con ese nombre', 400
+                cli = Cliente()
+                db.add(cli)
+            elif operation == 'editar':
+                id = int(request.form['id'].strip())
+                cli = db.query(Cliente).get(id)
+
+            cli.nombre = nombre
+            cli.nombre_de_contacto = nombre_de_contacto or None
+            cli.telefono = telefono or None
+            cli.mail = mail or None
+            if tipo_cliente_id:
+                cli.tipo_cliente = db.query(TipoCliente).get(tipo_cliente_id)
+            if tipo_local_id:
+                cli.tipo_local = db.query(TipoLocal).get(tipo_local_id)
+            if ubicacion_osm:
+                cli.ubicacion = None
+                # parsear ubicacion_osm
+                pass
+            else:
+                cli.ubicacion = ubicacion or None
+                cli.ubicacion_osm = None
+            #endif
+        #endif
 
         db.commit()
 
