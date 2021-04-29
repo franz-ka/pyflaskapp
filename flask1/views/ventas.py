@@ -193,14 +193,14 @@ def menu_clientes():
 
         tipoclientes = db.query(TipoCliente).all()
         tipolocales = db.query(TipoLocal).all()
-        #ubicacionesosm = db.query(UbicacionOSM).all()
+        ubicacionesosm = db.query(UbicacionOSM).all()
 
         r = make_response(render_template(
             'menu/ventas/clientes.html',
             clientes=clientes,
             tipoclientes=tipoclientes,
             tipolocales=tipolocales,
-            #ubicacionesosm=ubicacionesosm,
+            ubicacionesosm=ubicacionesosm,
             filtrado=texto_filtrado and True or False
         ))
         return r
@@ -227,15 +227,21 @@ def menu_clientes():
 
         if operation == 'eliminar':
             id = int(request.form['id'].strip())
-            db.query(Cliente).filter(Cliente.id==id).delete()
+            cli_query = db.query(Cliente).filter(Cliente.id==id)
+            cli = cli_query.first()
+
+            if cli.ubicacion_osm:
+                db.query(UbicacionOSM).filter(UbicacionOSM.id==cli.ubicacion_osm_id).delete()
+
+            cli_query.delete()
         elif operation == 'agregar' or operation == 'editar':
             nombre = request.form['nombre'].strip()
             nombre_de_contacto = request.form.get('nombre_de_contacto', '').strip()
             telefono = request.form.get('telefono', '').strip()
             mail = request.form.get('mail', '').strip()
-            tipo_cliente_id = request.form.get('tipo_cliente_id')
-            tipo_local_id = request.form.get('tipo_local_id')
-            ubicacion_osm = request.form.get('ubicacion_osm')
+            tipo_cliente_id = request.form.get('tipo_cliente')
+            tipo_local_id = request.form.get('tipo_local')
+            ubicacion_osm_data = request.form.get('ubicacion_osm_data')
             ubicacion = request.form.get('ubicacion', '').strip()
 
             if operation == 'agregar':
@@ -248,19 +254,45 @@ def menu_clientes():
                 cli = db.query(Cliente).get(id)
 
             cli.nombre = nombre
-            cli.nombre_de_contacto = nombre_de_contacto or None
-            cli.telefono = telefono or None
-            cli.mail = mail or None
+            if nombre_de_contacto: cli.nombre_de_contacto = nombre_de_contacto
+            if telefono: cli.telefono = telefono
+            if mail: cli.mail = mail
+
             if tipo_cliente_id:
                 cli.tipo_cliente = db.query(TipoCliente).get(tipo_cliente_id)
             if tipo_local_id:
                 cli.tipo_local = db.query(TipoLocal).get(tipo_local_id)
-            if ubicacion_osm:
+
+            if ubicacion_osm_data:
+                osm_data = json.loads(ubicacion_osm_data)
+
+                # el campo _id solo viene cuando se edita un cliente y no se
+                # toca el campo de ubicación osm (nunca se invalida)
+                if '_id' not in osm_data:
+                    ubicacion_osm = UbicacionOSM(
+                        lat = osm_data["lat"],
+                        lon = osm_data["lon"],
+                        display_name = osm_data["display_name"],
+                        road = osm_data["address"].get("road"),
+                        house_number = osm_data["address"].get("house_number"),
+                        postcode = osm_data["address"].get("postcode"),
+                        # datos de tipo state
+                        state = osm_data["address"].get("state"),
+                        state_district = osm_data["address"].get("state_district"),
+                        town = osm_data["address"].get("town"),
+                        # datos de tipo city
+                        city = osm_data["address"].get("city"),
+                        city_district = osm_data["address"].get("city_district"),
+                        suburb = osm_data["address"].get("suburb"),
+                    )
+                    # si había una ubicación previamente cargada borrarla
+                    if cli.ubicacion_osm:
+                        db.query(UbicacionOSM).filter(UbicacionOSM.id==cli.ubicacion_osm_id).delete()
+                    cli.ubicacion_osm = ubicacion_osm
+
                 cli.ubicacion = None
-                # parsear ubicacion_osm
-                pass
-            else:
-                cli.ubicacion = ubicacion or None
+            elif ubicacion:
+                cli.ubicacion = ubicacion
                 cli.ubicacion_osm = None
             #endif
         #endif
@@ -268,3 +300,30 @@ def menu_clientes():
         db.commit()
 
         return ''
+
+@bp_ventas.route("/ubicacionOsmData", methods = ['GET'])
+@login_required
+def get_ubicacionosm_data():
+    ubicacion_osm_id = int(request.args['id'])
+
+    db = get_db()
+
+    ubicacion_osm = db.query(UbicacionOSM).get(ubicacion_osm_id)
+
+    ubicacion_osm_json = jsonify(
+        _id = ubicacion_osm.id,
+        lat = ubicacion_osm.lat,
+        lon = ubicacion_osm.lon,
+        display_name = ubicacion_osm.display_name,
+        road = ubicacion_osm.road,
+        house_number = ubicacion_osm.house_number,
+        postcode = ubicacion_osm.postcode,
+        state = ubicacion_osm.state,
+        state_district = ubicacion_osm.state_district,
+        town = ubicacion_osm.town,
+        city = ubicacion_osm.city,
+        city_district = ubicacion_osm.city_district,
+        suburb = ubicacion_osm.suburb,
+    )
+
+    return ubicacion_osm_json

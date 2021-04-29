@@ -88,17 +88,16 @@
                 class="btnEliminarCli btn btn-danger btn-block p-0"
                 data-id="{{cliente.id}}"
                 data-nombre="{{cliente.nombre or ''}}"
-                onclick="eliminarCliClick(this)">
+                onclick="eliminarCliClick(event, this)">
                 x
               </button>
             </td>
         </tr>
     {% endfor %}
 </table>
-{% endcall %}
+{% endcall %} {# /forms.form() #}
 
-{% endcall %}
-{# /forms.cardNoForm #}
+{% endcall %} {# /forms.cardNoForm #}
 
 <!-- modal https://getbootstrap.com/docs/4.0/components/modal/ -->
 <div id="clienteModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="clienteModalLabel" aria-hidden="true">
@@ -112,47 +111,48 @@
       </div>
 	{% call forms.form()  %}
       <div class="modal-body">
-		  <div class="container-fluid">
-        <!-- forms https://getbootstrap.com/docs/4.0/components/forms/ -->
-				<input type="hidden" name="operation" value="OPERATION">
+  		  <div class="container-fluid">
+          <!-- forms https://getbootstrap.com/docs/4.0/components/forms/ -->
+  				<input type="hidden" name="operation" value="OPERATION">
           <div class="form-row">
-	          <input type="hidden" name="id">
+            <input type="hidden" name="id">
             <div class="form-group col-md-6 col-lg-4">
               <label for="nombre">Nombre</label>
-              <input type="text" class="form-control" id="nombre" placeholder="" required>
+              <input type="text" class="form-control" name="nombre" placeholder="" required>
             </div>
             <div class="form-group col-md-6 col-lg-4">
               <label for="tipo_cliente">Tipo cliente</label>
-              <select class="form-control select2-single select2-hidden-accessible" id="tipo_cliente" style="width:100%">
+              <select class="form-control select2-single select2-hidden-accessible" name="tipo_cliente" style="width:100%">
                   <option></option>
               </select>
             </div>
             <!-- md-12 -->
             <div class="form-group col-md-6 col-lg-4">
               <label for="tipo_local">Tipo local</label>
-              <select class="form-control select2-single select2-hidden-accessible" id="tipo_local" style="width:100%">
+              <select class="form-control select2-single select2-hidden-accessible" name="tipo_local" style="width:100%">
                   <option></option>
               </select>
             </div>
             <!-- lg-12 -->
             <div class="form-group col-md-6 col-lg-4">
               <label for="nombre_de_contacto">Nombre del contacto</label>
-              <input type="text" class="form-control" id="nombre_de_contacto" placeholder="">
+              <input type="text" class="form-control" name="nombre_de_contacto" placeholder="">
             </div>
             <!-- md-12 -->
             <div class="form-group col-md-6 col-lg-4">
               <label for="mail">Mail</label>
-              <input type="text" class="form-control" id="mail" placeholder="">
+              <input type="text" class="form-control" name="mail" placeholder="">
             </div>
             <div class="form-group col-md-6 col-lg-4">
               <label for="telefono">Teléfono</label>
-              <input type="text" class="form-control" id="telefono" placeholder="">
+              <input type="text" class="form-control" name="telefono" placeholder="">
             </div>
             <!-- md-12 -->
             <!-- lg-12 -->
+    				<input type="hidden" name="ubicacion_osm_data" value="">
             <div class="form-group col-md-8 col-lg-6">
               <label for="ubicacion">Dirección</label>
-              <input type="text" class="form-control" id="ubicacion" placeholder="">
+              <input type="text" class="form-control" name="ubicacion" placeholder="">
             </div>
             <div class="form-group col-md-4 col-lg-2">
               <label class="d-none d-md-block" for="" style="display:block">&nbsp;</label>
@@ -165,8 +165,8 @@
             </div>
           </div>
           <div class="list-group" id='clienteResultadosDireccion'></div>
-		  </div>
-      </div>
+  		  </div><!-- /container-fluid -->
+      </div><!-- /modal-body -->
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
         <button id="clienteButtonAction" type="submit" class="btn btn-primary">ACCIÓN</button>
@@ -180,71 +180,129 @@
 
 {% block js %}
 <script type="text/javascript">
+
+regFormValid(false, function(){ setTimeout('location.reload();', 2000) });
+
 tipoclientesdata = {{ forms.dataToJsArr(tipoclientes) }};
-sel2('.select2-single#tipo_cliente', '', tipoclientesdata);
+tipoClienteSelect2 = sel2('.select2-single[name=tipo_cliente]', '', tipoclientesdata);
 
 tipolocalesdata = {{ forms.dataToJsArr(tipolocales) }};
-sel2('.select2-single#tipo_local', '', tipolocalesdata);
+tipoLocalSelect2 = sel2('.select2-single[name=tipo_local]', '', tipolocalesdata);
 
 var selectedPlaceData = null
 
 $(function() {
-    regFormValid(false, function(){ setTimeout('location.reload();', 1000) });
+  desvalidarUbicación(true)
 
-    //https://getbootstrap.com/docs/4.0/components/modal/
-    $('#clienteModal').on('show.bs.modal', function (event) {
-      var thisJq = $(this)
-	  	var button = $(event.relatedTarget) // Button that triggered the modal
-      if (button && button.length){
-        //editar
-  	  	var id = button.data('id')
-  	  	var nombre = button.data('nombre')
-  	  	var contacto = button.data('contacto')
+  //https://getbootstrap.com/docs/4.0/components/modal/
+  $('#clienteModal').on('show.bs.modal', function (event) {
+    var thisJq = $(this)
+  	var button = $(event.relatedTarget) // Button that triggered the modal
+    if (button && button.length){
+      //editar
+      thisJq.find('input[name=operation]').val('editar')
 
-  	    thisJq.find('input[name=id]').val(id)
-  	    thisJq.find('input[name=nombre]').val(nombre)
-  	    thisJq.find('input[name=contacto]').val(contacto)
-        thisJq.find('input[name=operation]').val('editar')
-        thisJq.find('#clienteButtonAction').html('Guardar')
-        thisJq.find('#clienteModalLabel').html('Modificar cliente')
+	  	var id = button.data('id')
+	  	var nombre = button.data('nombre')
+	  	var nombre_de_contacto = button.data('nombre_de_contacto')
+	  	var telefono = button.data('telefono')
+	  	var mail = button.data('mail')
+	  	var tipo_cliente_id = button.data('tipo_cliente_id')
+	  	var tipo_local_id = button.data('tipo_local_id')
+	  	var ubicacion_osm_id = button.data('ubicacion_osm_id')
+	  	var ubicacion = button.data('ubicacion')
+
+	    thisJq.find('input[name=id]').val(id)
+	    thisJq.find('input[name=nombre]').val(nombre)
+	    thisJq.find('input[name=nombre_de_contacto]').val(nombre_de_contacto)
+	    thisJq.find('input[name=telefono]').val(telefono)
+	    thisJq.find('input[name=mail]').val(mail)
+      tipoClienteSelect2.val(tipo_cliente_id || null).trigger('change')
+	  	tipoLocalSelect2.val(tipo_local_id || null).trigger('change')
+      if (ubicacion_osm_id){
+        thisJq.find('input[name=ubicacion]').val('')
+        $.ajax({
+           type: "GET",
+           url: 'ubicacionOsmData?id=' + ubicacion_osm_id,
+           success: function(json){
+             for (var key in json) {
+               if (json.hasOwnProperty(key)) {
+                 if (json[key] === null)
+                  delete json[key]
+               }
+             }
+             validarUbicación(json)
+             thisJq.find('input[name=ubicacion]').val(json.display_name)
+           }
+         })
       }else{
-        //agregar
-        thisJq.find('input[name=id]').val('')
-        thisJq.find('input[name=nombre]').val('')
-        thisJq.find('input[name=contacto]').val('')
-        thisJq.find('input[name=operation]').val('agregar')
-        thisJq.find('#clienteButtonAction').html('Agregar')
-        thisJq.find('#clienteModalLabel').html('Agregar cliente')
+        thisJq.find('input[name=ubicacion]').val(ubicacion)
+        desvalidarUbicación()
       }
-      thisJq.find('.alert-danger').hide()
-    })
+      $('#clienteResultadosDireccion').html('')
 
-    // tab, enter, shift, alt, ctrl, caps, esc, home, end, flechitas, numlock, alt-right
-    var admitedKeys = [9, 13, 16, 17, 18, 20, 27, 35, 36, 37, 38, 39, 40, 144, 225]
-    $('#ubicacion').keydown(function(e){
-      var keyCode = e.originalEvent.keyCode
+      thisJq.find('#clienteButtonAction').html('Guardar')
+      thisJq.find('#clienteModalLabel').html('Modificar cliente')
+    }else{
+      //agregar
+      thisJq.find('input[name=operation]').val('agregar')
 
-      if (admitedKeys.indexOf(keyCode) != -1)
-        return
+      thisJq.find('input[name=id]').val('')
+      thisJq.find('input[name=nombre]').val('')
+	    thisJq.find('input[name=nombre_de_contacto]').val('')
+	    thisJq.find('input[name=telefono]').val('')
+	    thisJq.find('input[name=mail]').val('')
+      tipoClienteSelect2.val(null).trigger('change')
+	  	tipoLocalSelect2.val(null).trigger('change')
+      thisJq.find('input[name=ubicacion]').val('')
+      desvalidarUbicación()
+      $('#clienteResultadosDireccion').html('')
 
-      if (selectedPlaceData){
-        selectedPlaceData = null
-        $('#clienteUbicacionValidada').addClass('btn-outline-danger').removeClass('btn-outline-success').html('NO')
-        $('#clienteResultadosDireccion .active').removeClass('active')
-      }
-    })
+      thisJq.find('#clienteButtonAction').html('Agregar')
+      thisJq.find('#clienteModalLabel').html('Agregar cliente')
+    }
+    thisJq.find('.alert-danger').hide()
+  })
+
+  // tab, enter, shift, alt, ctrl, caps, esc, home, end, flechitas, numlock, alt-right
+  var admitedKeys = [9, 13, 16, 17, 18, 20, 27, 35, 36, 37, 38, 39, 40, 144, 225]
+  $('#clienteModal input[name=ubicacion]').keydown(function(e){
+    var keyCode = e.originalEvent.keyCode
+
+    if (admitedKeys.indexOf(keyCode) != -1)
+      return
+
+    desvalidarUbicación()
+  })
 });
+
+function desvalidarUbicación(force){
+  if (!selectedPlaceData && !force)
+    return
+
+  selectedPlaceData = null
+  $('#clienteModal input[name=ubicacion_osm_data]').val(null)
+  $('#clienteUbicacionValidada').addClass('btn-outline-danger').removeClass('btn-outline-success').html('NO')
+  $('#clienteResultadosDireccion .active').removeClass('active')
+}
+
+function validarUbicación(placeData){
+  selectedPlaceData = placeData
+  $('#clienteModal input[name=ubicacion_osm_data]').val(JSON.stringify(selectedPlaceData))
+  $('#clienteUbicacionValidada').removeClass('btn-outline-danger').addClass('btn-outline-success').html('SÍ')
+}
 
 function agregarCliClick(){
   //https://getbootstrap.com/docs/4.0/components/modal/
   $('#clienteModal').modal()
 }
 
-function eliminarCliClick(ele){
+function eliminarCliClick(event, ele){
   var id = $(ele).data('id')
   var nombre = $(ele).data('nombre')
 
   if (!confirm('¿Está segurx de que desea borrar el cliente "'+nombre+'"?'))
+    event.preventDefault()
     return
 
   //var formJq = $('#clienteModal form')
@@ -263,7 +321,7 @@ function filtrarCliClick() {
 }
 
 function clienteBuscarDireccion(){
-  var texto = $('#clienteModal #ubicacion').val()
+  var texto = $('#clienteModal input[name=ubicacion]').val()
   // https://nominatim.org/release-docs/develop/api/Search/
   var baseUrl = 'https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&countrycodes=ar&limit=10'
   var url = baseUrl + '&q=' + texto.replace(/ /g, '+')
@@ -289,9 +347,8 @@ function clienteBuscarDireccion(){
               $('#clienteResultadosDireccion .active').removeClass('active')
               $this.addClass('active')
 
-              $('#ubicacion').val(placeData.display_name)
-              selectedPlaceData = placeData
-              $('#clienteUbicacionValidada').removeClass('btn-outline-danger').addClass('btn-outline-success').html('SÍ')
+              $('#clienteModal input[name=ubicacion]').val(placeData.display_name)
+              validarUbicación(placeData)
             })
             button.html(item.display_name)
             resultList.append(button)
