@@ -148,3 +148,10 @@ Y desde ahí pueden ejecutar cualquier comando SQL válido (terminando con `;`).
 Por defecto no se muestran los nombre de las columnas. Si quieren verlos hacer `.headers on`.
 
 Finalmente, si se van a pasar mucho tiempo mirando la BBDD, pueden configurar que se vean más ordenados los registros haciendo `.mode columns`.
+
+## Select2
+Para los inputs de tipo `<select>` del sistema usamos la librería [select2](https://select2.org/).
+
+Algunas operaciones básicas son:
+* `$('#mySelect2').val('1').trigger('change')` para cambiar de opción
+* `$('#mySelect2').val(null).trigger('change')` para limpiar la opción seleccionada
