@@ -8,6 +8,9 @@ Base = declarative_base()
 #######################
 # https://stackoverflow.com/questions/8980735/how-can-i-verify-column-data-types-in-the-sqlalchemy-orm
 def validate_int(value):
+    if value is None:
+        return value
+
     if isinstance(value, str):
         value = int(value)
     else:
@@ -16,6 +19,9 @@ def validate_int(value):
 
 __ilegalchars = ['\'', '"', '\n', "<", "\\"]
 def validate_string(value):
+    if value is None:
+        return value
+
     assert isinstance(value, str)
     for c in __ilegalchars:
         assert c not in value
