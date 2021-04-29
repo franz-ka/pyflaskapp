@@ -188,7 +188,7 @@ def menu_clientes():
         else:
             clientes = db.query(Cliente).filter(or_(
                 Cliente.nombre.ilike("%{}%".format(texto_filtrado)),
-                Cliente.contacto.ilike("%{}%".format(texto_filtrado)),
+                Cliente.nombre_de_contacto.ilike("%{}%".format(texto_filtrado)),
             )).all()
 
         tipoclientes = db.query(TipoCliente).all()
