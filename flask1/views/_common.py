@@ -1,10 +1,11 @@
-from flask import current_app, Blueprint, request, make_response, render_template, redirect, url_for
+from flask import current_app, Blueprint, request, make_response, render_template, redirect, url_for, jsonify
 from flask_login import login_required, login_user, logout_user
-
 from sqlalchemy import or_, not_, and_, func
+
 import datetime
 from pprint import pprint
 import itertools, collections
+import json
 
 from flask1.db import get_db
 from flask1.login import User, loginUserPass, logoutUser
