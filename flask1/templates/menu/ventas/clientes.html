@@ -52,6 +52,8 @@
       <th>Teléfono</th>
       <th>Mail</th>
       <th>Ventas</th>
+      <th>Ventas mensuales</th>
+      <th>Última venta</th>
       <th>Modificar</th>
       <th>Eliminar</th>
     </tr>
@@ -63,7 +65,17 @@
             <td>{{cliente.nombre_de_contacto or ''}}</td>
             <td>{{cliente.telefono or ''}}</td>
             <td>{{cliente.mail or ''}}</td>
-            <td>{{cliente.ventas | length}}</td>
+            <td>{{cliente.ventas_reales_totales}}</td>
+            {% if cliente.ventas_mensuales %}
+              <td>{{"%0.0f" | format(cliente.ventas_mensuales)}}</td>
+            {% else %}
+              <td></td>
+            {% endif %}
+            {% if cliente.ultima_venta_real %}
+              <td>{{cliente.ultima_venta_real.fecha.strftime("%d/%m/%Y %H:%M")}}</td>
+            {% else %}
+              <td></td>
+            {% endif %}
             <td>
               <button
                 type="button"

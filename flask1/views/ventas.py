@@ -183,6 +183,10 @@ def menu_clientes():
         texto_filtrado = 'filtro' in request.args and request.args['filtro']
 
         db = get_db()
+
+        pikas_cogos = db.query(Pika).filter(Pika.nombre.ilike('cogo %')).all()
+        pikas_cogos_ids = [pika.id for pika in pikas_cogos]
+
         if not texto_filtrado:
             clientes = db.query(Cliente).all()
         else:
@@ -190,6 +194,37 @@ def menu_clientes():
                 Cliente.nombre.ilike("%{}%".format(texto_filtrado)),
                 Cliente.nombre_de_contacto.ilike("%{}%".format(texto_filtrado)),
             )).all()
+
+        for cli in clientes:
+            cli.ventas_reales_totales = 0
+            cli.ultima_venta_real = None
+            ventas_cantidad_cogos = 0
+            primera_fecha_venta_cogo = None
+            ultima_fecha_venta_cogo = None
+
+            # por cada venta real (no pedido) del cliente revisamos los pikas
+            # vendidos y si hay versiones "cogo" los contamos
+            for ven in cli.ventas:
+                if not ven.fecha is None:
+                    cli.ventas_reales_totales += 1
+                    cli.ultima_venta_real = ven
+                    # chequear si hay pikas "cogo" en la venta
+                    for vp in ven.ventapikas:
+                        if vp.pika_id in pikas_cogos_ids:
+                            if not primera_fecha_venta_cogo:
+                                primera_fecha_venta_cogo = ven.fecha
+                            ventas_cantidad_cogos += vp.cantidad
+                            ultima_fecha_venta_cogo = ven.fecha
+
+            if ventas_cantidad_cogos and primera_fecha_venta_cogo != ultima_fecha_venta_cogo:
+                date_diff = ultima_fecha_venta_cogo - primera_fecha_venta_cogo
+                days_diff = date_diff.days
+                if days_diff <= 30:
+                    cli.ventas_mensuales = ventas_cantidad_cogos
+                else:
+                    cli.ventas_mensuales = (ventas_cantidad_cogos / days_diff) * 30
+            else:
+                cli.ventas_mensuales = None
 
         tipoclientes = db.query(TipoCliente).all()
         tipolocales = db.query(TipoLocal).all()
