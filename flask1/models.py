@@ -284,6 +284,7 @@ class Cliente(Base):
     ubicacion_osm_id = Column(Integer, ForeignKey('ubicacionosm.id'))
     ubicacion_osm = relationship('UbicacionOSM')
     ubicacion = Column(String(128))
+    ventas = relationship('Venta', back_populates="cliente")
 
     def __repr__(self): return '<Cliente {} {} nombre_de_contacto={}>'.format(self.id, self.nombre, self.nombre_de_contacto)
 
