@@ -1,0 +1,6 @@
+~! Actualización de Cogosys a versión 1.15 !~
+
++ Agregados muchos campos en pantalla de carga/administración de clientes (bajo menú Ventas)
++ Nueva funcionalidad de buscar ubicación de dirección de cliente usando OpenStreetMap
+
+Gracias por utilizar el sistema <3
