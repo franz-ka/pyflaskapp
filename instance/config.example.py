@@ -10,5 +10,7 @@ APP_PORT = 5000
 #APP_PORT = 61220
 MAIL_SERVER="smtp.gmail.com"
 MAIL_PORT=587
+MAIL_USU="xxx@xxx"
+MAIL_PASS="xxx"
 MAIL_FROM="xxx@xxx"
 MAIL_TO="xxx@xxx"
