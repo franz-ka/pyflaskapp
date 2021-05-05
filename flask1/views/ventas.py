@@ -182,6 +182,7 @@ def menu_clientes():
     if request.method == "GET":
         texto_filtrado = 'filtro' in request.args and request.args['filtro']
         mas_datos = 'mas_datos' in request.args and request.args['mas_datos'] == 'si'
+        ordenar_por = 'ordenar_por' in request.args and request.args['ordenar_por']
 
         db = get_db()
 
@@ -189,9 +190,9 @@ def menu_clientes():
         pikas_cogos_ids = [pika.id for pika in pikas_cogos]
 
         if not texto_filtrado:
-            clientes = db.query(Cliente).all()
+            clientes = db.query(Cliente).order_by(Cliente.nombre).all()
         else:
-            clientes = db.query(Cliente).filter(or_(
+            clientes = db.query(Cliente).order_by(Cliente.nombre).filter(or_(
                 Cliente.nombre.ilike("%{}%".format(texto_filtrado)),
                 Cliente.nombre_de_contacto.ilike("%{}%".format(texto_filtrado)),
             )).all()
@@ -227,6 +228,17 @@ def menu_clientes():
                         cli.ventas_mensuales = (ventas_cantidad_cogos / days_diff) * 30
                 else:
                     cli.ventas_mensuales = None
+
+            if ordenar_por:
+                print(f'Ordenando por: {ordenar_por}')
+                # Key Functions - https://docs.python.org/3/howto/sorting.html#key-functions
+                if ordenar_por == 'ventas_totales':
+                    clientes.sort(key=lambda cli: cli.ventas_reales_totales or 0, reverse=True)
+                elif ordenar_por == 'ventas_mensuales':
+                    clientes.sort(key=lambda cli: cli.ventas_mensuales or 0, reverse=True)
+                elif ordenar_por == 'ultima_venta':
+                    fecha_min = datetime.datetime(1900,1,1)
+                    clientes.sort(key=lambda cli: cli.ultima_venta_real.fecha if cli.ultima_venta_real else fecha_min, reverse=True)
 
         tipoclientes = db.query(TipoCliente).all()
         tipolocales = db.query(TipoLocal).all()

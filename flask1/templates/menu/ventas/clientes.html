@@ -25,7 +25,9 @@
 {% endif %}
 
 <div class="form-group row mt-3">
-  {{ forms.input_msg(2, 'Filtrar por texto:') }}
+  <div class="col-sm-2">
+    <p class="my-2">Filtrar por texto:</p>
+  </div>
   <div class="col-sm-4">
       <input type="text" name="texto" class="form-control" placeholder="(en nombre o contacto)">
   </div>
@@ -42,6 +44,17 @@
 </div>
 
 <div class="row">
+  <div class="col-sm-2">
+    Ordenar por:
+  </div>
+  <div class="col-sm-4">
+    <select class="" id="ordenarPorSelect" onchange="ordenarPorChange(event, this)" {{'' if mas_datos else 'disabled=disabled'}}>
+      <option value=''></option>
+      <option value='ventas_totales'>Ventas totales</option>
+      <option value='ventas_mensuales'>Ventas mensuales</option>
+      <option value='ultima_venta'>Última venta</option>
+    </select>
+  </div>
   <div class="form-check ml-auto mb-2 mr-4">
     <input type="checkbox" class="form-check-input" id="masDatosCheck" onchange="masDatosCheckChange(event)" {{mas_datos and 'checked=checked' or ''}}>
     <label class="form-check-label" for="masDatosCheck">Más datos</label>
@@ -299,11 +312,26 @@ $(function() {
 
     desvalidarUbicación()
   })
+
+  var ordenarPorSelect = $('#ordenarPorSelect')
+  if (location.search.indexOf('ventas_totales') != -1)
+    ordenarPorSelect.val('ventas_totales')
+  else if (location.search.indexOf('ventas_mensuales') != -1)
+    ordenarPorSelect.val('ventas_mensuales')
+  else if (location.search.indexOf('ultima_venta') != -1)
+    ordenarPorSelect.val('ultima_venta')
+  else
+    ordenarPorSelect.val('')
 });// end $(function)
 
 function masDatosCheckChange(e){
 	var chkd = $(e. target).is(':checked');
 	location.href = UpdateQueryString('mas_datos', chkd?'si':'no')
+}
+
+function ordenarPorChange(ev, ele){
+  var sortBy = $(ele).val()
+	location.href = UpdateQueryString('ordenar_por', sortBy || null)
 }
 
 function desvalidarUbicación(force){
