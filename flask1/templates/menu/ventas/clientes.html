@@ -9,6 +9,8 @@
  .button-direccion {
    cursor: pointer;
  }
+
+ .results-form { overflow-x: scroll;}
 </style>
 {% endblock %}
 
@@ -21,10 +23,9 @@
     <p class="mb-0">(La lista está filtrada. Para eliminar filtro, filtrar con el campo vacío)</p>
 </div>
 {% endif %}
-<h5 class="mt-2">Filtrar</h5>
-<!-- Tipo y Comentario-->
-<div class="form-group row">
-  {{ forms.input_msg(2, 'Texto:') }}
+
+<div class="form-group row mt-3">
+  {{ forms.input_msg(2, 'Filtrar por texto:') }}
   <div class="col-sm-4">
       <input type="text" name="texto" class="form-control" placeholder="(en nombre o contacto)">
   </div>
@@ -39,9 +40,17 @@
     </button>
   </div>
 </div>
+
+<div class="row">
+  <div class="form-check ml-auto mb-2 mr-4">
+    <input type="checkbox" class="form-check-input" id="masDatosCheck" onchange="masDatosCheckChange(event)" {{mas_datos and 'checked=checked' or ''}}>
+    <label class="form-check-label" for="masDatosCheck">Más datos</label>
+  </div>
+</div>
+
 <input type="hidden" name="operation" value="buscar">
 
-{% call forms.form() %}
+{% call forms.form(class='results-form') %}
 <input type="hidden" class="eliminar-input" name="operation" value="eliminar">
 <input type="hidden" class="eliminar-input" name="id" value="">
 <table class="table table-sm table-striped table-hover">
@@ -51,9 +60,11 @@
       <th>Contacto</th>
       <th>Teléfono</th>
       <th>Mail</th>
-      <th>Ventas</th>
-      <th>Ventas mensuales</th>
-      <th>Última venta</th>
+      {% if mas_datos %}
+        <th>Ventas</th>
+        <th>Ventas mensuales</th>
+        <th>Última venta</th>
+      {% endif %}
       <th>Modificar</th>
       <th>Eliminar</th>
     </tr>
@@ -65,16 +76,18 @@
             <td>{{cliente.nombre_de_contacto or ''}}</td>
             <td>{{cliente.telefono or ''}}</td>
             <td>{{cliente.mail or ''}}</td>
-            <td>{{cliente.ventas_reales_totales}}</td>
-            {% if cliente.ventas_mensuales %}
-              <td>{{"%0.0f" | format(cliente.ventas_mensuales)}}</td>
-            {% else %}
-              <td></td>
-            {% endif %}
-            {% if cliente.ultima_venta_real %}
-              <td>{{cliente.ultima_venta_real.fecha.strftime("%d/%m/%Y %H:%M")}}</td>
-            {% else %}
-              <td></td>
+            {% if mas_datos %}
+              <td>{{cliente.ventas_reales_totales}}</td>
+              {% if cliente.ventas_mensuales %}
+                <td>{{"%0.0f" | format(cliente.ventas_mensuales)}}</td>
+              {% else %}
+                <td></td>
+              {% endif %}
+              {% if cliente.ultima_venta_real %}
+                <td>{{cliente.ultima_venta_real.fecha.strftime("%d/%m/%Y %H:%M")}}</td>
+              {% else %}
+                <td></td>
+              {% endif %}
             {% endif %}
             <td>
               <button
@@ -274,7 +287,7 @@ $(function() {
       thisJq.find('#clienteModalLabel').html('Agregar cliente')
     }
     thisJq.find('.alert-danger').hide()
-  })
+  })// end $('#clienteModal').on('show.bs.modal')
 
   // tab, enter, shift, alt, ctrl, caps, esc, home, end, flechitas, numlock, alt-right
   var admitedKeys = [9, 13, 16, 17, 18, 20, 27, 35, 36, 37, 38, 39, 40, 144, 225]
@@ -286,7 +299,12 @@ $(function() {
 
     desvalidarUbicación()
   })
-});
+});// end $(function)
+
+function masDatosCheckChange(e){
+	var chkd = $(e. target).is(':checked');
+	location.href = UpdateQueryString('mas_datos', chkd?'si':'no')
+}
 
 function desvalidarUbicación(force){
   if (!selectedPlaceData && !force)
