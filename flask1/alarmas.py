@@ -52,12 +52,7 @@ def check_alarma(insu):
             db.commit()
 
 
-def check_alarmas():
-    ################## TODO ERROR MAIL
-    print('ALARMAS DESACTIVADAS')
-    return
-    ##################
-
+def check_alarmas(app):
     db = _get_db_app_or_out()
 
     alarmas_stocks = db.query(Alarma, StockInsumo).filter(StockInsumo.insumo_id == Alarma.insumo_id).all()
@@ -76,30 +71,31 @@ def check_alarmas():
         else:
             pedidos_cant = 0
 
-        mando_mail = check_insumo_stock(alarma, stock, pedidos_cant)
+        mando_mail = check_insumo_stock(app, alarma, stock, pedidos_cant)
         if mando_mail:
             print('check_alarmas mail', stock.insumo)
             alarma.fecha_avisado = datetime.now()
             db.commit()
 
 
-def check_insumo_stock(alarma, stock, pedidos_cant):
+def check_insumo_stock(app, alarma, stock, pedidos_cant):
     if stock.cantidad - pedidos_cant <= alarma.cantidad and (not alarma.fecha_avisado or days_between(alarma.fecha_avisado, datetime.now()) >= _alarma_dias_intervalo):
-        mandar_alarma(alarma.insumo.nombre, stock.cantidad, pedidos_cant, alarma.cantidad)
+        mandar_alarma(app, alarma.insumo.nombre, stock.cantidad, pedidos_cant, alarma.cantidad)
         return True
     return False
 
 
-def mandar_alarma(nombre_insu, stock_insu, pedidos_cant, alarma_cant):
-    s = smtplib.SMTP('smtp.gmail.com', 587)
+def mandar_alarma(app, nombre_insu, stock_insu, pedidos_cant, alarma_cant):
+    s = smtplib.SMTP(app.config["MAIL_SERVER"], app.config["MAIL_PORT"])
     s.ehlo()
     s.starttls()
     s.ehlo()
-    s.login("stockcogonauts@gmail.com", "Markdijono1375$")
+    s.login(app.config["MAIL_USU"], app.config["MAIL_PASS"])
     message = (
-            'Subject: Alarma stock bajo ({3}) de {0}\n'+
-            'Hay {3} de stock para el insumo {0} ({1} stock real, {2} stock pedido).\n\n'+
-            '(alarma configurada para stock igual o menor a {4})'
+            'Subject: Cogosys - Stock bajo de {0} [{3}]\n'+
+            'Alerta, hay {3} de stock para el insumo {0} ({1} stock real, {2} stock pedido).\n\n'+
+            '(esta alarma fue configurada para un stock menor o igual a {4})'
         ).format(nombre_insu, stock_insu, pedidos_cant, stock_insu - pedidos_cant, alarma_cant)
-    s.sendmail("stockcogonauts@gmail.com", "cogonauts@gmail.com", message.encode('utf8'))
+    s.sendmail(app.config["MAIL_FROM"], app.config["MAIL_TO"], message.encode('utf8'))
+    print('Mail - Alarma de stock enviada')
     s.quit()

@@ -45,7 +45,7 @@ def menu_agregelimalarma():
             else:
                 db.add(Alarma(insumo=db.query(Insumo).get(request.form['insumo']), cantidad=alarma_cant))
             db.commit()
-            #check_alarmas()
+            #check_alarmas(current_app)
         elif request.form['operation'] == 'delete':
             db.query(Alarma).filter(Alarma.insumo_id==request.form['alarma_insumo']).delete()
             db.commit()
@@ -66,7 +66,7 @@ def menu_listadoalarmas():
             .group_by(PikaInsumo.insumo_id) \
             .join(Insumo) \
             .subquery()
-        
+
         alarmas_stocks = db \
             .query(Insumo, Alarma, StockInsumo, 'anon_1.pedidos') \
             .join(Alarma) \
@@ -74,7 +74,7 @@ def menu_listadoalarmas():
             .join(insus_pedidos, isouter=True) \
             .order_by(Insumo.nombre) \
             .all()
-            
+
         alarmas_stocks_vencidas = list(filter(
             lambda e: e[2].cantidad-(e[3] or 0) <= e[1].cantidad,
             alarmas_stocks

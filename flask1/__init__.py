@@ -40,7 +40,7 @@ def create_app(test_config=None):
         mail_handler = SMTPHandler(
             mailhost=(app.config['MAIL_SERVER'], app.config['MAIL_PORT']),
             fromaddr=app.config['MAIL_FROM'],
-            toaddrs=app.config['MAIL_TO'], subject='Cogosys error',
+            toaddrs=app.config['MAIL_TO_ERRORS'], subject='Cogosys - Error',
             credentials=auth, secure=secure)
         mail_handler.setLevel(logging.ERROR)
         app.logger.addHandler(mail_handler)

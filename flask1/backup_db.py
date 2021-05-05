@@ -20,7 +20,7 @@ instance_path = app_path + '/instance'
 def days_between(d1, d2):
     return abs((d2 - d1).days)
 
-def check_backup_db():    
+def check_backup_db(app):
     try:
         last_sent_str = open(instance_path + _bkup_fname,"r").readline().strip()
         last_sent = datetime.strptime(last_sent_str, "%Y-%m-%d %H:%M:%S.%f")
@@ -31,21 +31,21 @@ def check_backup_db():
     #print(dtnow, last_sent)
     #print(days_between(last_sent, dtnow), _backup_db_dias_intervalo)
     if days_between(last_sent, dtnow) >= _backup_db_dias_intervalo:
-        try: send_backup_db()
+        try: send_backup_db(app)
         except Exception as e:
             print('Error: Backup de la BBDD no pudo ser envíado')
             raise(e)
     else:
         print('Backup de la BBDD al día')
 
-def send_backup_db():    
+def send_backup_db(app):
     msg = MIMEMultipart()
-    msg['From'] = "stockcogonauts@gmail.com"
-    msg['To'] = "cogonauts@gmail.com"
+    msg['From'] = app.config["MAIL_FROM"]
+    msg['To'] = app.config["MAIL_TO"]
     msg['Date'] = formatdate(localtime=True)
-    msg['Subject'] = "Backup de la BBDD"
+    msg['Subject'] = "Cogosys - Backup de la BBDD"
 
-    msg.attach(MIMEText("Backup de la BBDD al día de la fecha adjunto."))
+    msg.attach(MIMEText("Se ha generado el backup del día de la BBDD."))
 
     zf = zipfile.ZipFile(instance_path + '/flask1.db.zip', mode='w')
     zf.write(instance_path + '/flask1.db', arcname='flask1.db', compress_type=_zcompression)
@@ -53,17 +53,15 @@ def send_backup_db():
     part = MIMEApplication(open(instance_path + '/flask1.db.zip', 'rb').read())
     part['Content-Disposition'] = 'attachment; filename="flask1.db.zip"'
     msg.attach(part)
-        
-    s = smtplib.SMTP('smtp.gmail.com', 587)
+
+    s = smtplib.SMTP(app.config["MAIL_SERVER"], app.config["MAIL_PORT"])
     s.ehlo()
     s.starttls()
     s.ehlo()
-    s.login("stockcogonauts@gmail.com", "Markdijono1375$")
-    s.sendmail("stockcogonauts@gmail.com", "cogonauts@gmail.com", msg.as_string())
+    s.login(app.config["MAIL_USU"], app.config["MAIL_PASS"])
+    s.sendmail(app.config["MAIL_FROM"], app.config["MAIL_TO"], msg.as_string())
+    print('Mail - Backup de la BBDD envíado')
     s.quit()
-    
-    print('Backup de la BBDD envíado')
-    
+
     dtnow = datetime.now()
     open(instance_path + _bkup_fname,"w+").write(str(dtnow))
-    

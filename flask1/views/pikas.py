@@ -51,7 +51,7 @@ def menu_ingresarprestock():
         db.commit()
 
         if not current_app.config['DEBUG_FLASK']:
-            check_alarmas()
+            check_alarmas(current_app)
 
         return ''
 
@@ -111,7 +111,7 @@ def menu_armadopika():
         db.commit()
 
         if not current_app.config['DEBUG_FLASK']:
-            check_alarmas()
+            check_alarmas(current_app)
 
         return ''
 
