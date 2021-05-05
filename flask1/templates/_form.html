@@ -1,5 +1,5 @@
-{% macro form(method='POST') -%}
-<form novalidate method="{{method}}">
+{% macro form(method='POST', class='') -%}
+<form novalidate method="{{method}}" class="{{class}}">
     <div class="alert alert-danger fade show" style="display: none;">
         <p class="mb-0"></p>
     </div>
@@ -78,7 +78,7 @@
 <div class="col-sm-{{col}}">
 	<input type="number" name="{{name}}" class="form-control" placeholder="#" min="{{min}}" max="9999"{{requiredTag}}{{readOnlyTag}}{{valueTag}}>
 </div>
-{%- endmacro %} 
+{%- endmacro %}
 
 {% macro input_select(col, name, errmsg, required=0, class='') -%}
 {% set requiredTag = 'required ' if required else '' %}
@@ -89,12 +89,10 @@
     </select>
     <div class="invalid-feedback">{{errmsg}}</div>
 </div>
-{%- endmacro %} 
+{%- endmacro %}
 
 {% macro input_msg(col, msg, css_class='') -%}
 <div class="col-sm-{{col}} {{css_class}}">
     <p class="my-2 ml-2">{{ msg }}</p>
 </div>
-{%- endmacro %} 
-
-
+{%- endmacro %}
