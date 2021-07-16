@@ -327,7 +327,8 @@ def menu_prioridadimpresion():
 
         # stock real / factor de venta
         prioridades = []
-        cant_prioris_tot = 18 if pantalla_completa else 16
+        #cant_prioris_tot = 18 if pantalla_completa else 16
+        cant_prioris_tot = 24
         cant_prioris = cant_prioris_tot
         if exportar_csv:
             csv_exporter.writeVals([])

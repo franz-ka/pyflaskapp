@@ -19,27 +19,27 @@
 	border: none;
 }
 
-.pre-card-inner {
+.pika .pre-card-inner {
 	border: solid black 1px;
 }
 
-.card-body {
-	padding: 0 1.8rem;
+.pika .card-body {
+	padding: 0 0.5rem;
 }
 
 @media (min-width: 992px) {
-	.card-body {
-		padding: 0 1.8rem;
+	.pika .card-body {
+		padding: 0 1.0rem;
 	}
 }
 
 @media (min-width: 1200px) {
-	.card-body {
-		padding: 0 2.7rem;
+	.pika .card-body {
+		padding: 0 1.7rem;
 	}
 }
 
-.card-text {
+.pika .card-text {
 	background-color: #f8f9fa !important;
 }
 
@@ -145,7 +145,8 @@
 
 {% if pantalla_completa %}
   {% set pikas_cols_class = 'col-4 col-md-3 col-lg-2' %}
-  {% set card_class = 'pr-1 pl-1' %}
+  {# set card_class = 'pr-1 pl-1' #}
+  {% set card_class = '' %}
 {% else %}
   {% set pikas_cols_class = 'col-6 col-md-4 col-lg-3' %}
   {% set card_class = '' %}
@@ -153,7 +154,7 @@
 
 {% for prio_pika_id, prio_valor in prioridades %}
 	{% set pika = pikas[prio_pika_id] %}
-	  <div class="{{pikas_cols_class}} pika-{{ pika.css_class }} mb-2 mb-md-5">
+	  <div class="pika {{pikas_cols_class}} pika-{{ pika.css_class }} mb-2 mb-md-3">
 	    <div class="card">
 	      <div class="card-body text-center {{card_class}}">
 		      <div class="pre-card-inner">
