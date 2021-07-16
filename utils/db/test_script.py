@@ -14,7 +14,30 @@ from pprint import pprint
 from sqlalchemy import or_, func
 db = get_db_session()
 
-clientes = db.query(Cliente).all()
+pikas = db.query(Pika).all()
+#[pprint(vars(pika)) for pika in pikas]
+#[pprint(pika.nombre) for pika in pikas]
+print('id,nombre original,presentación,personaje')
+for pika in pikas:
+    presentacion = ''
+    personaje = ''
+
+    snom = pika.nombre.lower().strip()
+    if snom.startswith('xl'):
+        presentacion = 'XL'
+    elif snom.startswith('cogo'):
+        presentacion = 'Cogo'
+    elif snom.startswith('mini'):
+        presentacion = 'Mini'
+    elif snom.startswith('mostrador'):
+        presentacion = 'Mostrador'
+
+    if presentacion:
+        personaje = ' '.join(pika.nombre.split(' ')[1:])
+
+    print(f'{pika.id},{pika.nombre},{presentacion},{personaje}')
+
+'''clientes = db.query(Cliente).all()
 #pprint(clientes)
 #print(clientes[0])
 #pprint(dir(clientes[0]))
@@ -22,9 +45,9 @@ clientes = db.query(Cliente).all()
 #pprint(clientes[0].ventas)
 #pprint(clientes[0].ventas[-1])
 #pprint(dir(clientes[0].ventas[-1]))
-'''pprint(clientes[0].ventas[-1].ventapikas)
-pprint(clientes[0].ventas[-1].ventapikas[0])
-pprint(vars(clientes[0].ventas[-1].ventapikas[0]))'''
+#pprint(clientes[0].ventas[-1].ventapikas)
+#pprint(clientes[0].ventas[-1].ventapikas[0])
+#pprint(vars(clientes[0].ventas[-1].ventapikas[0]))
 
 #pprint(clientes[0].ventas[-1].fecha)
 pv = clientes[0].ventas[0].fecha
@@ -41,7 +64,8 @@ pikas_cogos_ids = [pika.id for pika in pikas_cogos]
 pprint(pikas_cogos_ids)
 
 vp = db.query(VentaPika).first()
-pprint(vars(vp))
+pprint(vars(vp))'''
+
 '''ventapikas = db.query(VentaPika).join(Venta)\
     .filter(Venta.fecha != None)\
     .order_by(Venta.fecha.desc(), Venta.id.desc())
