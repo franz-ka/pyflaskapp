@@ -78,7 +78,9 @@ def get_ventas_format_select():
         ventasmodif.append({
             'id': v.id,
             'fecha': v.fecha.strftime("%d/%m/%Y %H:%M"),
-            'comentario': v.comentario
+            'comentario': v.comentario or
+                (v.cliente and v.cliente.nombre) or
+                (v.ventatipo and v.ventatipo.nombre)
         })
 
     return ventasmodif
@@ -125,10 +127,12 @@ def get_pedidos_format_select():
         pedidosmodif.append({
             'id': v.id,
             'fecha': v.fecha_pedido.strftime("%d/%m/%Y %H:%M"),
-            'comentario': v.comentario
+            'comentario': v.comentario or
+                (v.cliente and v.cliente.nombre) or
+                (v.ventatipo and v.ventatipo.nombre)
         })
 
-    return pedidospikas
+    return pedidosmodif
 
 def del_pedido(pedido_id):
     if not pedido_id:
