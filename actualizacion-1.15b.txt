@@ -1,0 +1,7 @@
+~! Mini-actualización de Cogosys a versión 1.15b !~
+
++ Agregadas columnas de datos de ventas en listado de clientes
++ Agregado posibilidad de ordenar por las columnas anteriores
++ Arreglados mails de alarmas de stock, backup de BBDD y reportes de errores al admin
+
+Gracias por utilizar el sistema \o/
