@@ -1,0 +1,5 @@
+2/11/2021
+- 30mins asistencia remota+definición feature eliminar pikas
+- Pedido eliminar pikas:
+> los oculta del sistema porqe sino ventas se va a romper (nuevo campo "inactivo")
+> para dentro de 1 sem (martes 9), estimadas 3hs de laburo
