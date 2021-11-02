@@ -137,7 +137,7 @@ def menu_listadoinsumospikas():
 def menu_rolloplaabierto():
     if request.method == "GET":
         db = get_db()
-        plas = db.query(Insumo).join(StockInsumo).filter(Insumo.nombre.ilike("pla %") & StockInsumo.cantidad > 0).order_by(Insumo.nombre).all()
+        plas = db.query(Insumo).join(StockInsumo).filter(Insumo.nombre.ilike("pla %")).order_by(Insumo.nombre).all()
 
         r = make_response(render_template(
             'menu/insumos/rolloplaabierto.html',
