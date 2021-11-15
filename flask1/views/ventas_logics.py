@@ -44,7 +44,9 @@ def add_ventatipo(nombre):
 def get_ventas(*args):
     db = get_db()
 
-    ventapikas = db.query(VentaPika).join(Venta).filter(Venta.fecha != None).order_by(Venta.fecha.desc(), Venta.id.desc())
+    ventapikas = db.query(VentaPika).join(Venta).join(Pika) \
+        .filter(Venta.fecha != None, or_(Pika.oculto == True, Pika.oculto == False)) \
+        .order_by(Venta.fecha.desc(), Venta.id.desc())
     if len(args):
         filter_args = args[0]
         query = []

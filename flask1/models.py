@@ -70,6 +70,7 @@ class Pika(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     nombre = Column(String(64), nullable=False)
     venta_diaria_manual = Column(Float, nullable=True)
+    oculto = Column(Boolean, nullable=False)
 
     def __repr__(self): return '<Pika {} "{}">'.format(self.id, self.nombre)
 

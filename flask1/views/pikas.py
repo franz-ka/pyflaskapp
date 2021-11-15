@@ -200,13 +200,13 @@ def menu_agregelimpika():
                 checkparams(request.form, ('nombrepika',))
             except Exception as e:
                 return str(e), 400
+        elif request.form['operation'] == 'hide':
+            try:
+                checkparams(request.form, ('pika',))
+            except Exception as e:
+                return str(e), 400
         else:
             return str('Operación inválida'), 400
-        '''elif request.form['operation'] == 'delete':
-        try:
-            checkparams(request.form, ('id'))
-        except Exception as e:
-            return str(e), 400'''
 
         db = get_db()
 
@@ -225,6 +225,10 @@ def menu_agregelimpika():
             db.add(stockpika)
             set_prestock_pika(pika, prestockpika, 0, dtnow, 'nuevo pika')
             set_stock_pika(pika, stockpika, 0, dtnow, 'nuevo pika')
+        elif request.form['operation'] == 'hide':
+            pika = db.query(Pika).get(request.form['pika'])
+            pika.oculto = True
+            db.commit()
 
         db.commit()
 
