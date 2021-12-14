@@ -1,5 +1,11 @@
 2/11/2021
-- 30mins asistencia remota+definición feature eliminar pikas
+- 30mins asistencia remota+definición feature eliminar pikas = 30
 - Pedido eliminar pikas:
 > los oculta del sistema porqe sino ventas se va a romper (nuevo campo "inactivo")
 > para dentro de 1 sem (martes 9), estimadas 3hs de laburo
+15/11
+6:06-7:34 dev = 30
+18/11
+install remoto 5:02-31 = 30
+14/12
+arreglo ingresar nuevo pika (oculto=None) 5mins
